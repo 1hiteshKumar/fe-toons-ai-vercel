@@ -33,6 +33,8 @@ export default function useUserUploads() {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [stories, setStories] = useState<Stories[]>([]);
   const [loading, setLoading] = useState(false);
+  const [styleId, setStyleId] = useState<number | null>(null);
+  const [showName, setShowName] = useState("");
 
   const { poll, stopPolling } = usePolling();
 
@@ -124,6 +126,8 @@ export default function useUserUploads() {
     const validation_task_id = await validateUploads({
       script_text: scriptText,
       character_description_file_url: csvUrl,
+      style_id: styleId,
+      show_name: showName,
     });
 
     setActiveTasks((prev) => [...prev, validation_task_id]);
@@ -142,6 +146,8 @@ export default function useUserUploads() {
     setScriptText("");
     setSelectedFile(null);
     setCSVurl(undefined);
+    setStyleId(null);
+    setShowName("");
   };
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
@@ -170,5 +176,9 @@ export default function useUserUploads() {
     activeTasks,
     stories,
     loading,
+    styleId,
+    setStyleId,
+    showName,
+    setShowName,
   };
 }

@@ -2,10 +2,31 @@
 
 import { Button } from "@/aural/components/ui/button";
 import TextArea from "@/aural/components/ui/textarea";
+import Input from "@/aural/components/ui/input";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
+  DropdownMenuTrigger,
+  useOpenState,
+} from "@/aural/components/ui/dropdown";
 import { PollingProvider } from "@/lib/hooks/use-polling";
 import useUserUploads from "@/lib/hooks/use-user-uploads";
 import UserStories from "./user-stories";
 import { cn } from "@/aural/lib/utils";
+import { ChevronRightIcon } from "@/aural/icons/chevron-right-icon";
+
+const STYLE_OPTIONS = [
+  {
+    name: "The Duke's Masked Bride - Flux",
+    code: 87,
+  },
+  {
+    name: "Rekindled Heartache - Flux",
+    code: 116,
+  },
+];
 
 function UserUploadsContent() {
   const {
@@ -19,7 +40,16 @@ function UserUploadsContent() {
     handleRemoveFile,
     stories,
     loading,
+    styleId,
+    setStyleId,
+    showName,
+    setShowName,
   } = useUserUploads();
+
+  const { open: isStyleDropdownOpen, onOpenChange: setStyleDropdownOpen } =
+    useOpenState();
+
+  const selectedStyle = STYLE_OPTIONS.find((style) => style.code === styleId);
 
   return (
     <div className="w-full">
@@ -32,13 +62,79 @@ function UserUploadsContent() {
           masterpiece. Every great story starts with a single idea.
         </p>
 
+        <div className="space-y-4">
+          <Input
+            id="show-name"
+            label="Show Name"
+            placeholder="Enter show name"
+            value={showName}
+            onChange={(e) => setShowName(e.target.value)}
+            decoration="outline"
+            fullWidth
+          />
+
+          <div className="w-full">
+            <label className="text-fm-sm font-fm-medium mb-1 block">
+              Style
+            </label>
+            <DropdownMenu
+              open={isStyleDropdownOpen}
+              onOpenChange={setStyleDropdownOpen}
+            >
+              <DropdownMenuTrigger asChild>
+                <button
+                  type="button"
+                  className={cn(
+                    "w-full h-12 px-3 py-4 rounded-fm-s border",
+                    "text-fm-primary font-fm-text leading-fm-md text-fm-md",
+                    "border-fm-divider-primary focus:border-fm-divider-contrast",
+                    "focus:outline-none transition-all duration-200",
+                    "flex items-center justify-between",
+                    "hover:border-fm-divider-contrast"
+                  )}
+                >
+                  <span className={cn(!selectedStyle && "text-fm-placeholder")}>
+                    {selectedStyle?.name || "Select a style"}
+                  </span>
+                  <ChevronRightIcon
+                    className={cn(
+                      "size-4 text-fm-icon-active transition-transform",
+                      isStyleDropdownOpen && "rotate-90"
+                    )}
+                  />
+                </button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="start">
+                <DropdownMenuRadioGroup
+                  value={styleId?.toString()}
+                  onValueChange={(value) => {
+                    setStyleId(value ? parseInt(value, 10) : null);
+                    setStyleDropdownOpen(false);
+                  }}
+                >
+                  {STYLE_OPTIONS.map((style) => (
+                    <DropdownMenuRadioItem
+                      key={style.code}
+                      value={style.code.toString()}
+                    >
+                      {style.name}
+                    </DropdownMenuRadioItem>
+                  ))}
+                </DropdownMenuRadioGroup>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+        </div>
+
         <TextArea
           id="script-text"
+          label="Enter story"
           minHeight={200}
           maxLength={2000}
           placeholder="Once upon a time, in a world where..."
           value={scriptText}
           onChange={(e) => setScriptText(e.target.value)}
+          className="mt-4"
         />
 
         <span className="flex justify-end text-fm-neutral-400 text-fm-sm mt-2">
