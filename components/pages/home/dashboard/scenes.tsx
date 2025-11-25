@@ -19,6 +19,7 @@ type ScenesData = {
 
 export default function Scenes() {
   const [scenes, setScenes] = useState<ScenesData>({});
+  const [placeholderText, setPlaceholderText] = useState("");
   const [loading, setLoading] = useState(true);
   const params = useParams() as { id: string };
 
@@ -28,7 +29,7 @@ export default function Scenes() {
       try {
         const res = await fetchScenes(params.id);
         setScenes(res.beats || {});
-        console.log(res.beats);
+        setPlaceholderText(res.message);
       } finally {
         setLoading(false);
       }
@@ -43,7 +44,9 @@ export default function Scenes() {
   if (Object.keys(scenes).length === 0) {
     return (
       <div className="flex items-center justify-center h-96">
-        <p className="text-fm-primary text-lg">No scenes found</p>
+        <p className="text-fm-primary text-lg">
+          {placeholderText || "No beats found."}
+        </p>
       </div>
     );
   }

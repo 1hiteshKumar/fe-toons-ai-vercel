@@ -59,20 +59,24 @@ export default function useUserUploads() {
         pollingKey,
         callback: async function (data) {
           if (data?.status === "SUCCESS" || data?.status === "FAILED") {
-            console.log("here..");
+            console.log(data);
             stopPolling(pollingKey);
             toast(data.message);
             setActiveTasks((prev) => prev.filter((id) => id !== taskId));
-            setStories((prev) =>
-              prev.map((story) =>
-                story.validation_task_id === taskId
-                  ? {
-                      ...story,
-                      status: data.result.success ? "SUCCESS" : "FAILED",
-                    }
-                  : story
-              )
-            );
+
+            if (!data.result.success) {
+              setStories((prev) =>
+                prev.map((story) =>
+                  story.validation_task_id === taskId
+                    ? {
+                        ...story,
+                        status: "FAILED",
+                      }
+                    : story
+                )
+              );
+              return;
+            }
 
             if (data.result.success) {
               const finalShowId = await addTask({
@@ -88,6 +92,7 @@ export default function useUserUploads() {
                     ? {
                         ...story,
                         finalShowId,
+                        status: "PENDING",
                       }
                     : story
                 )

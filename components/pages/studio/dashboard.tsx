@@ -8,6 +8,7 @@ import { ShotAssets } from "@/lib/types";
 import ShotVideos from "../home/dashboard/shot-videos";
 import Publish from "../home/dashboard/publish";
 import { cn } from "@/aural/lib/utils";
+import { toast } from "sonner";
 
 const Characters = dynamic(() => import("../home/dashboard/characters"));
 const Scenes = dynamic(() => import("../home/dashboard/scenes"));
@@ -101,6 +102,7 @@ export default function Dashboard({ taskId }: { taskId: string }) {
     const isSharedTabs = ["shot-images", "shot-videos", "publish"].includes(
       active
     );
+
     if (isSharedTabs && !shotAssets) {
       async function fetchData() {
         const res = await fetchShotAssets(taskId);
