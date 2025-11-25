@@ -62,7 +62,7 @@ function UserUploadsContent() {
           masterpiece. Every great story starts with a single idea.
         </p>
 
-        <div className="space-y-4">
+        <div className="space-y-4 flex items-center gap-4">
           <Input
             id="show-name"
             label="Show Name"
@@ -73,10 +73,8 @@ function UserUploadsContent() {
             fullWidth
           />
 
-          <div className="w-full">
-            <label className="text-fm-sm font-fm-medium mb-1 block">
-              Style
-            </label>
+          <div className="w-full mb-4.5">
+            <label className="text-fm-sm font-fm-medium block">Style</label>
             <DropdownMenu
               open={isStyleDropdownOpen}
               onOpenChange={setStyleDropdownOpen}
@@ -104,7 +102,10 @@ function UserUploadsContent() {
                   />
                 </button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="start">
+              <DropdownMenuContent
+                align="start"
+                className="w-(--radix-dropdown-menu-trigger-width)"
+              >
                 <DropdownMenuRadioGroup
                   value={styleId?.toString()}
                   onValueChange={(value) => {
@@ -182,7 +183,9 @@ function UserUploadsContent() {
 
         <div className="flex justify-end mt-4">
           <Button
-            isDisabled={!(scriptText && selectedFile) || loading}
+            isDisabled={
+              !(scriptText && selectedFile && showName && styleId) || loading
+            }
             onClick={onGenerate}
           >
             Generate

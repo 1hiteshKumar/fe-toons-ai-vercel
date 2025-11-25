@@ -25,16 +25,18 @@ export type Stories = {
   status: "PENDING" | "SUCCESS" | "FAILED";
   scriptText?: string;
   createdAt?: string;
+  showName: string;
+  finalShowId?: string;
 };
 
 export default function useUserUploads() {
-  const [scriptText, setScriptText] = useState("");
+  const [scriptText, setScriptText] = useState("123");
   const [csvUrl, setCSVurl] = useState<string>();
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [stories, setStories] = useState<Stories[]>([]);
   const [loading, setLoading] = useState(false);
-  const [styleId, setStyleId] = useState<number | null>(null);
-  const [showName, setShowName] = useState("");
+  const [styleId, setStyleId] = useState<number | null>(87);
+  const [showName, setShowName] = useState("test");
 
   const { poll, stopPolling } = usePolling();
 
@@ -73,17 +75,29 @@ export default function useUserUploads() {
             );
 
             if (data.result.success) {
-              const studioId = await addTask({
+              const finalShowId = await addTask({
                 validation_task_id: data.validation_task_id,
                 script_text: scriptText,
+                showName,
+                //@ts-expect-error for now
+                styleId,
               });
-              console.log("studioId: ",studioId)
+              setStories((prev) =>
+                prev.map((story) =>
+                  story.validation_task_id === taskId
+                    ? {
+                        ...story,
+                        finalShowId,
+                      }
+                    : story
+                )
+              );
             }
           }
         },
       });
     },
-    [poll, scriptText, stopPolling]
+    [poll, scriptText, showName, stopPolling, styleId]
   );
 
   useEffect(() => {
@@ -138,6 +152,7 @@ export default function useUserUploads() {
         status: "PENDING",
         scriptText: scriptText,
         createdAt: new Date().toISOString(),
+        showName,
       },
     ]);
     pollStatus(validation_task_id);
