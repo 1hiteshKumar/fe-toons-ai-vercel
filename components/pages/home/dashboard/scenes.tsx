@@ -3,6 +3,12 @@ import Loading from "@/components/loading";
 import fetchScenes from "@/server/queries/fetch-scenes";
 import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
+import { Poppins } from "next/font/google";
+
+const poppins = Poppins({
+  weight: ["400", "500", "600", "700"],
+  subsets: ["latin"],
+});
 
 interface Scene {
   beat_number: number;
@@ -84,7 +90,9 @@ export default function Scenes() {
                       <span className="font-bold text-fm-blue-500 text-sm uppercase tracking-wide">
                         Characters:
                       </span>
-                      <p className="text-fm-primary mt-1.5 font-medium">
+                      <p
+                        className={`text-fm-primary mt-1.5 font-medium ${poppins.className}`}
+                      >
                         {scene.characters}
                       </p>
                     </div>

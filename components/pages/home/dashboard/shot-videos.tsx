@@ -204,8 +204,12 @@ export default function ShotVideos({ data }: { data: ShotAssets | null }) {
               const shotDescription = shotAction?.summary || "";
 
               return (
-                <button
+                <div
                   key={shot.id}
+                  role="button"
+                  tabIndex={0}
+                  aria-pressed={isSelected}
+                  aria-label={`Select shot ${index + 1}`}
                   onClick={() => setSelectedShot(index)}
                   className={`w-full text-left p-3 rounded-lg border flex transition-all duration-200 shrink-0 ${
                     isSelected
@@ -266,7 +270,7 @@ export default function ShotVideos({ data }: { data: ShotAssets | null }) {
                       </div>
                     )}
                   </div>
-                </button>
+                </div>
               );
             })}
           </div>
