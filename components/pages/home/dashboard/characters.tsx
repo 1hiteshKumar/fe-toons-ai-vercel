@@ -7,6 +7,7 @@ import { cn } from "@/aural/lib/utils";
 import { convertGoogleDriveUrl } from "@/lib/helpers";
 import Loading from "@/components/loading";
 import Heading from "@/components/heading";
+import ArrowRightIcon from "@/aural/icons/arrow-right-icon";
 
 interface Character {
   name: string;
@@ -14,7 +15,7 @@ interface Character {
   back_view: string;
 }
 
-export default function Characters() {
+export default function Characters({ onNext }: { onNext?: () => void }) {
   const [characters, setCharacters] = useState<Character[]>([]);
   const [selectedCharacter, setSelectedCharacter] = useState<Character | null>(
     null
@@ -64,12 +65,25 @@ export default function Characters() {
       <Heading
         subHeading="Select and customize your character."
         heading="Character Editor"
+        rightElement={
+          onNext && (
+            <Button
+              onClick={onNext}
+              variant="outline"
+              leftIcon={<ArrowRightIcon className="text-white" />}
+              innerClassName="bg-linear-to-r from-purple-900 via-purple-700 to-pink-600 text-white border-none"
+              noise="none"
+            >
+              Continue to Next Step
+            </Button>
+          )
+        }
       />
 
       <div className="flex gap-6">
         {/* Left Sidebar - Character Thumbnails */}
         <div className="w-72 shrink-0 bg-fm-surface-secondary border-r border-fm-divider-primary p-4 ">
-          <h2 className="text-lg font-bold text-fm-primary-600 mb-4 sticky top-0 bg-fm-surface-secondary pb-2">
+          <h2 className="text-lg font-bold text-fm-primary mb-4 sticky top-0 bg-fm-surface-secondary pb-2">
             Characters
           </h2>
           <div className="space-y-3 h-[calc(100vh-200px)] overflow-y-auto">
@@ -134,7 +148,7 @@ export default function Characters() {
             <>
               {/* Character Header */}
               <div className="p-6 border-b border-fm-divider-primary bg-fm-surface-primary">
-                <p className="text-3xl font-bold text-fm-primary-600 mb-2">
+                <p className="text-3xl font-bold text-fm-primary mb-2">
                   {selectedCharacter.name}
                 </p>
                 <div className="flex gap-2 mt-4">
@@ -189,8 +203,8 @@ export default function Characters() {
                       className={cn(
                         "size-2 rounded-full transition-all duration-200",
                         isActive
-                          ? "w-8 bg-fm-primary-500"
-                          : "bg-fm-divider-primary hover:bg-fm-primary-400"
+                          ? "w-8 bg-fm-secondary-700"
+                          : "bg-fm-divider-primary hover:bg-fm-secondary-700"
                       )}
                       aria-label={`View ${char.name}`}
                     />

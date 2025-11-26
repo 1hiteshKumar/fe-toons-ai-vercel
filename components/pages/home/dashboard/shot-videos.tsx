@@ -10,6 +10,7 @@ import Heading from "@/components/heading";
 import { EditBigIcon } from "@/aural/icons/edit-big-icon";
 import ShotHeader from "@/components/shot-header";
 import Image from "next/image";
+import ArrowRightIcon from "@/aural/icons/arrow-right-icon";
 
 interface StartFrame {
   sfx?: string[];
@@ -26,7 +27,13 @@ interface Action {
   [key: string]: unknown;
 }
 
-export default function ShotVideos({ data }: { data: ShotAssets | null }) {
+export default function ShotVideos({
+  data,
+  onNext,
+}: {
+  data: ShotAssets | null;
+  onNext?: () => void;
+}) {
   const groupedShots = useMemo(() => getGroupedShots(data), [data]);
 
   const initialScene = useMemo(
@@ -93,6 +100,19 @@ export default function ShotVideos({ data }: { data: ShotAssets | null }) {
       <Heading
         heading="Shot Videos"
         subHeading="Review your generated shot videos and export your final production."
+        rightElement={
+          onNext && (
+            <Button
+              onClick={onNext}
+              variant="outline"
+              leftIcon={<ArrowRightIcon className="text-white" />}
+              innerClassName="bg-linear-to-r from-purple-900 via-purple-700 to-pink-600 text-white border-none"
+              noise="none"
+            >
+              Continue to Next Step
+            </Button>
+          )
+        }
       />
       <div className="flex gap-6 w-full min-h-0 h-full">
         {/* Scene Selection - Left Column */}
@@ -152,7 +172,8 @@ export default function ShotVideos({ data }: { data: ShotAssets | null }) {
                   className="absolute top-2 right-14"
                   disabled
                 >
-                  <EditBigIcon />
+                  <EditBigIcon className="size-5" />
+                  Edit Video
                 </Button>
                 {/* Play overlay indicator */}
                 {playingVideo === (selectedShotData?.id || selectedShot) && (
@@ -188,7 +209,7 @@ export default function ShotVideos({ data }: { data: ShotAssets | null }) {
         {/* Shot List - Right Column */}
         <div className="flex flex-col flex-1 min-w-0 space-y-3 max-h-[75vh]">
           <h3 className="text-sm font-semibold text-fm-secondary-800 uppercase tracking-wide shrink-0">
-            Shots ({shotsInScene.length})
+            Videos ({shotsInScene.length})
           </h3>
           <div className="flex-1 space-y-2 overflow-y-auto min-h-0">
             {shotsInScene.map((shot, index) => {
@@ -223,7 +244,7 @@ export default function ShotVideos({ data }: { data: ShotAssets | null }) {
                       {shotDescription && (
                         <div className="space-y-0.5">
                           <p className="text-fm-sm font-medium text-fm-secondary-600 uppercase tracking-wide">
-                            Description
+                            Cinematography Description
                           </p>
                           <TextArea
                             value={shotDescription}

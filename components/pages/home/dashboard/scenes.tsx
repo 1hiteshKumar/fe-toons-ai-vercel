@@ -4,6 +4,8 @@ import fetchScenes from "@/server/queries/fetch-scenes";
 import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
+import { Button } from "@/aural/components/ui/button";
+import ArrowRightIcon from "@/aural/icons/arrow-right-icon";
 
 interface Scene {
   beat_number: number;
@@ -18,7 +20,7 @@ type ScenesData = {
   [episodeName: string]: Scene[];
 };
 
-export default function Scenes() {
+export default function Scenes({ onNext }: { onNext?: () => void }) {
   const [scenes, setScenes] = useState<ScenesData>({});
   const [loading, setLoading] = useState(true);
   const params = useParams() as { id: string };
@@ -54,11 +56,24 @@ export default function Scenes() {
       <Heading
         heading="Story Scenes"
         subHeading="Review each scene and add new scenes to continue your story"
+        rightElement={
+          onNext && (
+            <Button
+              onClick={onNext}
+              variant="outline"
+              leftIcon={<ArrowRightIcon className="text-white" />}
+              innerClassName="bg-linear-to-r from-purple-900 via-purple-700 to-pink-600 text-white border-none"
+              noise="none"
+            >
+              Continue to Next Step
+            </Button>
+          )
+        }
       />
       <div className="space-y-8">
         {Object.entries(scenes).map(([episodeName, episodeScenes]) => (
           <div key={episodeName} className="space-y-5">
-            <h2 className="text-lg font-bold text-fm-primary-600 border-b-2 border-fm-primary-500 pb-2">
+            <h2 className="text-lg font-bold text-fm-primary border-b-2 border-fm-secondary-700 pb-2">
               {episodeName}
             </h2>
             <div className="grid grid-cols-3 gap-4">
@@ -68,7 +83,7 @@ export default function Scenes() {
                   className="bg-fm-surface-secondary border border-fm-divider-primary rounded-lg p-5 shadow-sm hover:shadow-md transition-shadow space-y-3"
                 >
                   <div className="flex items-center gap-3">
-                    <div className="bg-fm-primary-500 text-fm-neutral-1100 font-bold text-sm px-3 py-1 rounded-md">
+                    <div className="bg-linear-to-r from-purple-900 via-purple-700 to-pink-600 text-fm-neutral-1100 font-bold text-sm px-3 py-1 rounded-md">
                       Scene #{scene.beat_number}
                     </div>
                   </div>
@@ -77,7 +92,7 @@ export default function Scenes() {
                       <span className="font-bold text-fm-label-primary text-sm uppercase tracking-wide">
                         Description:
                       </span>
-                      <p className="text-fm-primary mt-1.5 leading-relaxed font-poppins">
+                      <p className="text-fm-primary mt-1.5 leading-relaxed font-fm-poppins italic">
                         {scene.scene_description}
                       </p>
                     </div>
@@ -88,7 +103,7 @@ export default function Scenes() {
                       <p
                         className={`text-fm-primary mt-1.5 font-medium font-poppins`}
                       >
-                        {scene.characters}
+                        {scene.characters || "N/A"}
                       </p>
                     </div>
                   </div>

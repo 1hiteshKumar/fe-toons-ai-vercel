@@ -142,7 +142,8 @@ function UserUploadsContent() {
           {scriptText.length}/2000
         </span>
 
-        <div className="mt-2">
+        <div>
+          <span className="text-xs font-fm-brand " >Character Description</span>
           <div
             {...getRootProps()}
             className={cn(

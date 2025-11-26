@@ -107,10 +107,21 @@ function DashboardContent({ taskId }: { taskId: string }) {
         })}
       </nav>
       <main className="flex-1 p-5 overflow-y-scroll">
-        {active === "scenes" && <Scenes />}
-        {active === "characters" && <Characters />}
-        {active === "shot-images" && <ShotImages data={shotAssets} />}
-        {active === "shot-videos" && <ShotVideos data={shotAssets} />}
+        {active === "scenes" && (
+          <Scenes onNext={() => setActive("characters")} />
+        )}
+        {active === "characters" && (
+          <Characters onNext={() => setActive("shot-images")} />
+        )}
+        {active === "shot-images" && (
+          <ShotImages
+            data={shotAssets}
+            onNext={() => setActive("shot-videos")}
+          />
+        )}
+        {active === "shot-videos" && (
+          <ShotVideos data={shotAssets} onNext={() => setActive("publish")} />
+        )}
         {active === "publish" && <Publish data={shotAssets} />}
       </main>
     </div>
@@ -124,3 +135,4 @@ export default function Dashboard({ taskId }: { taskId: string }) {
     </PollingProvider>
   );
 }
+
