@@ -7,6 +7,7 @@ import { cn } from "@/aural/lib/utils";
 import { convertGoogleDriveUrl } from "@/lib/helpers";
 import Loading from "@/components/loading";
 import Heading from "@/components/heading";
+import ArrowRightIcon from "@/aural/icons/arrow-right-icon";
 
 interface Character {
   name: string;
@@ -14,7 +15,7 @@ interface Character {
   back_view: string;
 }
 
-export default function Characters() {
+export default function Characters({ onNext }: { onNext?: () => void }) {
   const [characters, setCharacters] = useState<Character[]>([]);
   const [selectedCharacter, setSelectedCharacter] = useState<Character | null>(
     null
@@ -64,6 +65,19 @@ export default function Characters() {
       <Heading
         subHeading="Select and customize your character."
         heading="Character Editor"
+        rightElement={
+          onNext && (
+            <Button
+              onClick={onNext}
+              variant="outline"
+              leftIcon={<ArrowRightIcon className="text-white" />}
+              innerClassName="bg-linear-to-r from-purple-900 via-purple-700 to-pink-600 text-white border-none"
+              noise="none"
+            >
+              Continue to Next Step
+            </Button>
+          )
+        }
       />
 
       <div className="flex gap-6">

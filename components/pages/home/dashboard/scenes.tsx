@@ -3,6 +3,8 @@ import Loading from "@/components/loading";
 import fetchScenes from "@/server/queries/fetch-scenes";
 import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
+import { Button } from "@/aural/components/ui/button";
+import ArrowRightIcon from "@/aural/icons/arrow-right-icon";
 
 interface Scene {
   beat_number: number;
@@ -17,7 +19,7 @@ type ScenesData = {
   [episodeName: string]: Scene[];
 };
 
-export default function Scenes() {
+export default function Scenes({ onNext }: { onNext?: () => void }) {
   const [scenes, setScenes] = useState<ScenesData>({});
   const [loading, setLoading] = useState(true);
   const params = useParams() as { id: string };
@@ -53,6 +55,19 @@ export default function Scenes() {
       <Heading
         heading="Story Scenes"
         subHeading="Review each scene and add new scenes to continue your story"
+        rightElement={
+          onNext && (
+            <Button
+              onClick={onNext}
+              variant="outline"
+              leftIcon={<ArrowRightIcon className="text-white" />}
+              innerClassName="bg-linear-to-r from-purple-900 via-purple-700 to-pink-600 text-white border-none"
+              noise="none"
+            >
+              Continue to Next Step
+            </Button>
+          )
+        }
       />
       <div className="space-y-8">
         {Object.entries(scenes).map(([episodeName, episodeScenes]) => (

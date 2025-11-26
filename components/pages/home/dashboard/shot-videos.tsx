@@ -10,6 +10,7 @@ import Heading from "@/components/heading";
 import { EditBigIcon } from "@/aural/icons/edit-big-icon";
 import ShotHeader from "@/components/shot-header";
 import Image from "next/image";
+import ArrowRightIcon from "@/aural/icons/arrow-right-icon";
 
 interface StartFrame {
   sfx?: string[];
@@ -26,7 +27,13 @@ interface Action {
   [key: string]: unknown;
 }
 
-export default function ShotVideos({ data }: { data: ShotAssets | null }) {
+export default function ShotVideos({
+  data,
+  onNext,
+}: {
+  data: ShotAssets | null;
+  onNext?: () => void;
+}) {
   const groupedShots = useMemo(() => getGroupedShots(data), [data]);
 
   const initialScene = useMemo(
@@ -93,6 +100,19 @@ export default function ShotVideos({ data }: { data: ShotAssets | null }) {
       <Heading
         heading="Shot Videos"
         subHeading="Review your generated shot videos and export your final production."
+        rightElement={
+          onNext && (
+            <Button
+              onClick={onNext}
+              variant="outline"
+              leftIcon={<ArrowRightIcon className="text-white" />}
+              innerClassName="bg-linear-to-r from-purple-900 via-purple-700 to-pink-600 text-white border-none"
+              noise="none"
+            >
+              Continue to Next Step
+            </Button>
+          )
+        }
       />
       <div className="flex gap-6 w-full min-h-0 h-full">
         {/* Scene Selection - Left Column */}

@@ -11,8 +11,15 @@ import Heading from "@/components/heading";
 import { EditBigIcon } from "@/aural/icons/edit-big-icon";
 import ShotHeader from "@/components/shot-header";
 import { Tag } from "@/aural/components/ui/tag";
+import ArrowRightIcon from "@/aural/icons/arrow-right-icon";
 
-export default function ShotImages({ data }: { data: ShotAssets | null }) {
+export default function ShotImages({
+  data,
+  onNext,
+}: {
+  data: ShotAssets | null;
+  onNext?: () => void;
+}) {
   const groupedShots = useMemo(() => getGroupedShots(data), [data]);
 
   const initialScene = useMemo(
@@ -63,6 +70,19 @@ export default function ShotImages({ data }: { data: ShotAssets | null }) {
       <Heading
         heading="Shot Images"
         subHeading="View and edit your shot images, dialogue, actions, and narration."
+        rightElement={
+          onNext && (
+            <Button
+              onClick={onNext}
+              variant="outline"
+              leftIcon={<ArrowRightIcon className="text-white" />}
+              innerClassName="bg-linear-to-r from-purple-900 via-purple-700 to-pink-600 text-white border-none"
+              noise="none"
+            >
+              Continue to Next Step
+            </Button>
+          )
+        }
       />
       <div className="flex gap-6 w-full min-h-0 h-full">
         {/* Scene Selection - Left Column */}
