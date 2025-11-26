@@ -64,7 +64,7 @@ export default function ShotHeader({
           size="sm"
           noise="low"
           disabled
-          innerClassName="bg-fm-primary-700 border-none cursor-not-allowed"
+          innerClassName="bg-fm-primary-400 border-none cursor-not-allowed"
         >
           <TrashIcon className="size-5" />
         </Button>

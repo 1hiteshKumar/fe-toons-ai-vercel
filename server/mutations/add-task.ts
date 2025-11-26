@@ -24,7 +24,7 @@ export async function addTask({
         episode_number: 1,
         dimensions: "576x1024",
         aspect_ratio: "9:16",
-        keep_qc: "false",
+        keep_qc: false,
       },
     }),
   })) as { id: string };
