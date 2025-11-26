@@ -92,6 +92,11 @@ export type PanelItem = {
   panel_data: PanelData;
   panel_number: number;
   panel_prompt: string | null;
+  panel_prompt_data?: {
+    duration?: number;
+    [key: string]: unknown;
+  };
+  audio_url?: string;
   single_image_video_url: string;
   start_end_video_url: string;
   start_frame_status: string;

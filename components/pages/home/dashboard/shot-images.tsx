@@ -4,7 +4,7 @@ import { ShotAssets } from "@/lib/types";
 import Image from "next/image";
 import { convertGoogleDriveUrl, getGroupedShots } from "@/lib/helpers";
 import Loading from "@/components/loading";
-import { useMemo, useState } from "react";
+import { useMemo, useState, useRef, useEffect } from "react";
 import { Button } from "@/aural/components/ui/button";
 import TextArea from "@/aural/components/ui/textarea";
 import Heading from "@/components/heading";
@@ -12,6 +12,7 @@ import { EditBigIcon } from "@/aural/icons/edit-big-icon";
 import ShotHeader from "@/components/shot-header";
 import { Tag } from "@/aural/components/ui/tag";
 import ArrowRightIcon from "@/aural/icons/arrow-right-icon";
+import { PlayPauseIcon } from "@/aural/icons/play-pause-icon";
 
 export default function ShotImages({
   data,
@@ -29,6 +30,8 @@ export default function ShotImages({
 
   const [selectedScene, setSelectedScene] = useState<string>(initialScene);
   const [selectedShot, setSelectedShot] = useState(0);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const audioRef = useRef<HTMLAudioElement>(null);
 
   // Update selected scene if initial scene changes and current selection is invalid
   const effectiveSelectedScene = useMemo(() => {
@@ -42,6 +45,14 @@ export default function ShotImages({
     if (!url) return "";
     return convertGoogleDriveUrl(url);
   };
+
+  // Reset audio when shot changes
+  useEffect(() => {
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current.currentTime = 0;
+    }
+  }, [selectedShot, effectiveSelectedScene]);
 
   if (!data) {
     return <Loading text="shot images" />;
@@ -64,6 +75,18 @@ export default function ShotImages({
   const selectedShotImageUrl = selectedShotData
     ? getImageUrl(selectedShotData.start_frame_url || "")
     : "";
+
+  const toggleAudio = () => {
+    if (!audioRef.current || !selectedShotData?.audio_url) return;
+
+    if (isPlaying) {
+      audioRef.current.pause();
+      setIsPlaying(false);
+    } else {
+      audioRef.current.play();
+      setIsPlaying(true);
+    }
+  };
 
   return (
     <div>
@@ -122,6 +145,19 @@ export default function ShotImages({
         {/* Main Image Display - Middle Column */}
         <div className="w-84">
           <div className="rounded-xl  overflow-hidden h-full flex flex-col">
+            {selectedShotData?.audio_url && (
+              <audio
+                key={`${effectiveSelectedScene}-${selectedShot}`}
+                ref={audioRef}
+                src={selectedShotData.audio_url}
+                onEnded={() => setIsPlaying(false)}
+                onPause={() => setIsPlaying(false)}
+                onPlay={() => setIsPlaying(true)}
+                onLoadStart={() => setIsPlaying(false)}
+                className="hidden"
+              />
+            )}
+
             {selectedShotImageUrl ? (
               <div className="relative aspect-9/16 w-full shrink-0 max-h-[60vh] mt-7">
                 <Image
@@ -142,6 +178,16 @@ export default function ShotImages({
                   <EditBigIcon className="size-5" />
                   Edit Image
                 </Button>
+                {selectedShotData?.audio_url && (
+                  <Button
+                    variant="secondary"
+                    size="sm"
+                    className="absolute bottom-2 right-12"
+                    onClick={toggleAudio}
+                  >
+                    <PlayPauseIcon isPlaying={isPlaying} className="size-5" />
+                  </Button>
+                )}
               </div>
             ) : (
               <div className="aspect-9/16 flex items-center justify-center text-fm-secondary-800 bg-fm-surface-tertiary shrink-0 max-h-[60vh]">
@@ -185,7 +231,14 @@ export default function ShotImages({
                 >
                   <div className="flex items-start gap-3 min-w-0">
                     <div className="flex-1 min-w-0 space-y-4">
-                      <ShotHeader duration="4s" shotNumber={index + 1} />
+                      <ShotHeader
+                        duration={
+                          shot.panel_prompt_data?.duration
+                            ? shot.panel_prompt_data.duration
+                            : 4
+                        }
+                        shotNumber={index + 1}
+                      />
                       <div className="flex gap-2">
                         {shotStartFrame?.frame_description && (
                           <div className="space-y-0.5 w-full">
@@ -213,7 +266,7 @@ export default function ShotImages({
                           Object.values(shotStartFrame.dialogue).some(
                             (value) => value !== null && value !== ""
                           ) && (
-                            <div className="space-y-2 w-full">
+                            <div className="space-y-1.5 w-full">
                               <p className="text-fm-sm font-medium text-fm-secondary-600 uppercase tracking-wide">
                                 Dialogue
                               </p>
@@ -247,7 +300,7 @@ export default function ShotImages({
                           )}
                         {shotStartFrame?.thought &&
                           Object.values(shotStartFrame.thought).some(
-                           (value) => value !== null && value !== ""
+                            (value) => value !== null && value !== ""
                           ) && (
                             <div className="space-y-2 w-full">
                               <p className="text-fm-sm font-medium text-fm-secondary-600 uppercase tracking-wide">

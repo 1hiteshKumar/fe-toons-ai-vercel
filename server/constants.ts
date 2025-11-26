@@ -25,13 +25,19 @@ export const TABS = [
   { id: "publish", label: "Publish" },
 ] as const;
 
-export const PROMPT = `Ep 1 - Contract Marriage, Pt. 1
-[AMBIENT SFX: Sophisticated party in the other room, laughter, chatter]
-[SFX: FOOTSTEPS ECHOING]
-[Music Cue: Dramatic tension, building]
-"Edgar, please spend the night with my daughter, and you would see she is an excellent choice for your wife," Katrina pushed her daughter, Kate, towards Edgar as he passed by them.
-All eyes were on the three of them as Edgar was the main topic for the night.
-[VOA: SARCASTIC]
-"I wasn't aware your daughter started working in the red light district. I am not looking for a wife there," Edgar stepped to the left to pass the disappointed Katrina and Kate.
-[SFX: MURMURS AND GIGGLES FROM THE CROWD]
-He had only arrived less than three minutes ago but this was his second encounter with a mother and daughter looking to win over his favor. Ever since it was announced he was looking for a wife this was happening.`;
+export const PROMPT = `Ep 2 - Contract Marriage, Pt. 2
+
+[SFX: OUTSIDE, NIGHT TIME. THE RUSTLE OF THE WIND THROUGH THE TREES. CRICKETS CHIRPING]
+[Music Cue: Tense]
+"Did your father set this up?" It was the only plausible scenario for Edgar.
+[VOA: CONFIDENT, TO THE POINT]
+"My father has no idea that I am out here speaking to you, Duke Edgar. I have told you the party is on the inside. No one was supposed to see me passing by. My father won't be pleased to see you here with me," Alessandra replied with the honest truth.
+Not many people could say they often saw the baron's daughter since Desmond kept his daughter out of sight. Alessandra wasn't of any use to him, thanks to the mask she wore and the rumors surrounding her.
+"Everything I say right now has nothing to do with my father. I leave it up to you to believe me. I am not interested in marrying anyone for love. I only wish to leave this place and never look back."
+[VOA: DETERMINED]
+"What is it? Your father has plans to marry you off to a man far older than you, or is he just shipping you off somewhere you do not wish to go? Has to be something drastic for you to ask a man you don't know to marry you," Edgar pressed his cigar against the stone wall to end it.
+[SFX: SIZZLE]
+"It is suffocating to be here. I am forgotten by my own father. I do not care for your looks Duke Edgar, nor your money or anything else others might want. Frankly, I only see you as an escape," she explained her reasoning for choosing him.
+Their meeting was completely unexpected on her side, but Alessandra didn't want to leave without proposing what she had in mind.
+.....
+"I've heard my family speak of how the king wishes for you to get married. For a man who does not wish to have any romantic relationships with anyone, I might be a good choice. I will live quietly like a ghost, taking care of what you want of me, and I shall never love you."`;

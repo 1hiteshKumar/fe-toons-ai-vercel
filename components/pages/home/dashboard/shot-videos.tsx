@@ -240,7 +240,7 @@ export default function ShotVideos({
                 >
                   <div className="flex items-start gap-3 w-full">
                     <div className="flex-1 min-w-0 space-y-4">
-                      <ShotHeader duration="4s" shotNumber={index + 1} />
+                      <ShotHeader type="Video" duration={selectedShotData.panel_prompt_data?.duration || 5} shotNumber={index + 1} />
                       {shotDescription && (
                         <div className="space-y-0.5">
                           <p className="text-fm-sm font-medium text-fm-secondary-600 uppercase tracking-wide">
