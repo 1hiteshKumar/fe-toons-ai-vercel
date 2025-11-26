@@ -23,11 +23,6 @@ interface EndFrame {
   [key: string]: unknown;
 }
 
-interface Action {
-  summary?: string;
-  [key: string]: unknown;
-}
-
 export default function ShotVideos({
   data,
   onNext,
@@ -268,9 +263,8 @@ export default function ShotVideos({
               const shotEndFrame = shot.panel_data?.end_frame as
                 | EndFrame
                 | undefined;
-              const shotAction = shot.panel_data?.action as Action | undefined;
               const shotSfxList = getCombinedSfx(shotStartFrame, shotEndFrame);
-              const shotDescription = shotAction?.summary || "";
+              const shotDescription = shot.panel_data?.start_frame?.frame_description || "";
 
               return (
                 <div
@@ -305,7 +299,7 @@ export default function ShotVideos({
                       {shotDescription && (
                         <div className="space-y-0.5">
                           <p className="text-fm-sm font-medium text-fm-secondary-600 uppercase tracking-wide">
-                            Cinematography Description
+                            Description
                           </p>
                           <TextArea
                             value={shotDescription}
@@ -322,13 +316,13 @@ export default function ShotVideos({
                             {shotSfxList.slice(0, 2).map((sfx, sfxIndex) => (
                               <span
                                 key={sfxIndex}
-                                className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-medium bg-fm-primary-100 text-fm-primary-700 border border-fm-primary-300"
+                                className="inline-flex items-center px-2 py-0.5 rounded text-fm-xs font-medium bg-fm-primary-100 text-fm-primary-700 border border-fm-primary-300"
                               >
                                 {sfx}
                               </span>
                             ))}
                             {shotSfxList.length > 2 && (
-                              <span className="text-[10px] text-fm-secondary-600">
+                              <span className="text-fm-xs text-fm-secondary-600">
                                 +{shotSfxList.length - 2}
                               </span>
                             )}
