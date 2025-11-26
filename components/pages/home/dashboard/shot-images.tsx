@@ -162,7 +162,7 @@ export default function ShotImages({
               const shotStartFrame = shot.panel_data?.start_frame as
                 | {
                     narration?: string | null;
-                    frame_description?: string;
+                    frame_visual?: string;
                     dialogue?: Record<string, string | null>;
                     thought?: Record<string, string | null>;
                     [key: string]: unknown;
@@ -187,13 +187,13 @@ export default function ShotImages({
                     <div className="flex-1 min-w-0 space-y-4">
                       <ShotHeader duration="4s" shotNumber={index + 1} />
                       <div className="flex gap-2">
-                        {shotStartFrame?.frame_description && (
+                        {shotStartFrame?.frame_visual && (
                           <div className="space-y-0.5 w-full">
                             <p className="text-fm-sm font-medium text-fm-secondary-600 uppercase tracking-wide">
                               Shot Description
                             </p>
                             <TextArea
-                              value={shotStartFrame.frame_description}
+                              value={shotStartFrame.frame_visual}
                               className="text-xs text-fm-secondary-800 line-clamp-2 leading-relaxed wrap-break-word"
                             />
                           </div>

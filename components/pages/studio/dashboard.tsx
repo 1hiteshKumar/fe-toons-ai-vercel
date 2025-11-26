@@ -1,6 +1,9 @@
 "use client";
 import { useEffect, useState } from "react";
 import dynamic from "next/dynamic";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
+import Image from "next/image";
 import { API_URLS, TABS } from "@/server/constants";
 import ShotImages from "../home/dashboard/shot-images";
 import { ShotAssets } from "@/lib/types";
@@ -15,12 +18,14 @@ import {
   ScenesIcon,
   ShotImagesIcon,
   ShotVideosIcon,
+  UploadStoryIcon,
 } from "@/lib/icons";
 
 const Characters = dynamic(() => import("../home/dashboard/characters"));
 const Scenes = dynamic(() => import("../home/dashboard/scenes"));
 
 const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
+  "upload-story": UploadStoryIcon,
   scenes: ScenesIcon,
   characters: CharactersIcon,
   "shot-images": ShotImagesIcon,
@@ -32,6 +37,7 @@ export type TabId = (typeof TABS)[number]["id"];
 
 function DashboardContent({ taskId }: { taskId: string }) {
   const [active, setActive] = useState<TabId>("scenes");
+  const router = useRouter();
 
   const [shotAssets, setShotAssets] = useState<ShotAssets | null>(null);
 
@@ -67,46 +73,66 @@ function DashboardContent({ taskId }: { taskId: string }) {
 
   return (
     <div className="flex flex-col h-full w-full">
-      <nav className="w-full flex items-center justify-start bg-black border-b border-neutral-800">
-        {TABS.map(({ id, label }) => {
-          const Icon = iconMap[id];
-          const isActive = active === id;
-          return (
-            <button
-              key={id}
-              onClick={() => setActive(id)}
-              className={cn(
-                "flex gap-2 items-center justify-center py-4 px-6 transition-all duration-200 relative group cursor-pointer min-w-[100px] hover:text-white",
-                isActive
-                  ? "bg-linear-to-r from-purple-900 via-purple-700 to-pink-600"
-                  : "bg-black hover:bg-neutral-900"
-              )}
-            >
-              {Icon && (
-                <Icon
+      <nav className="w-full flex items-center bg-black border-b border-neutral-800">
+        <div className="shrink-0 px-6 py-4">
+          <Link href="/">
+            <Image
+              src="/images/pockettoons-logo.webp"
+              alt="PocketToons Logo"
+              width={120}
+              height={40}
+              className="h-10 w-auto"
+              priority
+            />
+          </Link>
+        </div>
+        <div className="flex-1 flex items-center justify-center">
+          {TABS.map(({ id, label }) => {
+            const Icon = iconMap[id];
+            const isActive = active === id;
+            return (
+              <button
+                key={id}
+                onClick={() => {
+                  if (id === "upload-story") {
+                    router.push("/");
+                  } else {
+                    setActive(id);
+                  }
+                }}
+                className={cn(
+                  "flex gap-2 items-center justify-center rounded-fm-6xl py-3 px-6 transition-all duration-200 relative group cursor-pointer min-w-[100px] hover:text-white",
+                  isActive
+                    ? "bg-linear-to-r from-purple-900 via-purple-700 to-pink-600"
+                    : "bg-black hover:bg-neutral-900"
+                )}
+              >
+                {Icon && (
+                  <Icon
+                    className={cn(
+                      "size-4 transition-colors",
+                      isActive
+                        ? "text-white"
+                        : "text-neutral-500 group-hover:text-white"
+                    )}
+                  />
+                )}
+                <span
                   className={cn(
-                    "size-4 transition-colors",
+                    "text-sm font-semibold uppercase tracking-wider transition-colors",
                     isActive
                       ? "text-white"
                       : "text-neutral-500 group-hover:text-white"
                   )}
-                />
-              )}
-              <span
-                className={cn(
-                  "text-sm font-semibold uppercase tracking-wider transition-colors",
-                  isActive
-                    ? "text-white"
-                    : "text-neutral-500 group-hover:text-white"
-                )}
-              >
-                {label}
-              </span>
-            </button>
-          );
-        })}
+                >
+                  {label}
+                </span>
+              </button>
+            );
+          })}
+        </div>
       </nav>
-      <main className="flex-1 p-5 overflow-y-scroll">
+      <main className="flex-1 py-5 px-10 overflow-y-scroll">
         {active === "scenes" && (
           <Scenes onNext={() => setActive("characters")} />
         )}
