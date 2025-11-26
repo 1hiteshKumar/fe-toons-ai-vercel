@@ -3,6 +3,7 @@ import Loading from "@/components/loading";
 import fetchScenes from "@/server/queries/fetch-scenes";
 import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
+import { toast } from "sonner";
 import { Button } from "@/aural/components/ui/button";
 import ArrowRightIcon from "@/aural/icons/arrow-right-icon";
 
@@ -30,7 +31,7 @@ export default function Scenes({ onNext }: { onNext?: () => void }) {
       try {
         const res = await fetchScenes(params.id);
         setScenes(res.beats || {});
-        console.log(res.beats);
+        toast.info(res.message);
       } finally {
         setLoading(false);
       }
@@ -45,7 +46,7 @@ export default function Scenes({ onNext }: { onNext?: () => void }) {
   if (Object.keys(scenes).length === 0) {
     return (
       <div className="flex items-center justify-center h-96">
-        <p className="text-fm-primary text-lg">No scenes found</p>
+        <p className="text-fm-primary text-lg">No beats found.</p>
       </div>
     );
   }

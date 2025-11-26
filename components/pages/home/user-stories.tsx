@@ -44,9 +44,16 @@ export default function UserStories({ stories }: { stories: Stories[] }) {
         subHeading="Track the status of your story submissions"
       />
 
-      <div className="space-y-3">
+      <div className="space-y-3 inline-block">
         {stories?.map(
-          ({ showName, scriptText, validation_task_id, status, createdAt, finalShowId }) => {
+          ({
+            showName,
+            scriptText,
+            validation_task_id,
+            status,
+            createdAt,
+            finalShowId,
+          }) => {
             const StoryCard = (
               <div
                 className={cn(

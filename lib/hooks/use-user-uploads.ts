@@ -3,7 +3,7 @@ import { useDropzone } from "react-dropzone";
 import { validateUploads } from "@/server/mutations/validate-uploads";
 import { uploadCSV } from "@/server/mutations/upload-csv";
 import usePolling from "./use-polling";
-import { API_URLS } from "@/server/constants";
+import { API_URLS, PROMPT } from "@/server/constants";
 import { toast } from "sonner";
 import { addTask } from "@/server/mutations/add-task";
 
@@ -30,13 +30,13 @@ export type Stories = {
 };
 
 export default function useUserUploads() {
-  const [scriptText, setScriptText] = useState("123");
+  const [scriptText, setScriptText] = useState(PROMPT);
   const [csvUrl, setCSVurl] = useState<string>();
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [stories, setStories] = useState<Stories[]>([]);
   const [loading, setLoading] = useState(false);
   const [styleId, setStyleId] = useState<number | null>(87);
-  const [showName, setShowName] = useState("test");
+  const [showName, setShowName] = useState("TDMB");
 
   const { poll, stopPolling } = usePolling();
 
@@ -46,6 +46,18 @@ export default function useUserUploads() {
     const stored = localStorage.getItem("validation_task_ids");
     if (stored) {
       setActiveTasks(JSON.parse(stored));
+    }
+  }, []);
+
+  useEffect(() => {
+    const stored = localStorage.getItem("stories");
+    if (stored) {
+      try {
+        const parsedStories = JSON.parse(stored);
+        setStories(parsedStories);
+      } catch (error) {
+        console.error("Error parsing stories from localStorage:", error);
+      }
     }
   }, []);
 
@@ -59,20 +71,24 @@ export default function useUserUploads() {
         pollingKey,
         callback: async function (data) {
           if (data?.status === "SUCCESS" || data?.status === "FAILED") {
-            console.log("here..");
+            console.log(data);
             stopPolling(pollingKey);
-            toast(data.message);
+            if (data.status === "SUCCESS") toast.success("TASK QUEUED");
             setActiveTasks((prev) => prev.filter((id) => id !== taskId));
-            setStories((prev) =>
-              prev.map((story) =>
-                story.validation_task_id === taskId
-                  ? {
-                      ...story,
-                      status: data.result.success ? "SUCCESS" : "FAILED",
-                    }
-                  : story
-              )
-            );
+
+            if (!data.result.success) {
+              setStories((prev) =>
+                prev.map((story) =>
+                  story.validation_task_id === taskId
+                    ? {
+                        ...story,
+                        status: "FAILED",
+                      }
+                    : story
+                )
+              );
+              return;
+            }
 
             if (data.result.success) {
               const finalShowId = await addTask({
@@ -88,6 +104,7 @@ export default function useUserUploads() {
                     ? {
                         ...story,
                         finalShowId,
+                        status: "PENDING",
                       }
                     : story
                 )
@@ -108,6 +125,10 @@ export default function useUserUploads() {
   useEffect(() => {
     localStorage.setItem("validation_task_ids", JSON.stringify(activeTasks));
   }, [activeTasks]);
+
+  useEffect(() => {
+    localStorage.setItem("stories", JSON.stringify(stories));
+  }, [stories]);
 
   const onDrop = async (acceptedFiles: File[], rejectedFiles: unknown[]) => {
     toast.info("Uploading file, this won't take much time.");

@@ -62,7 +62,7 @@ export type Task = {
   output_video_url_start_end: string;
   props: TaskProps;
   script_file_url: string;
-  status: string;
+  status: "COMPLETED" | "IN PROGRESS" | "FAILED";
   total_frames: number;
   video_generation_client: string;
   video_pipeline_task_id: number | null;
