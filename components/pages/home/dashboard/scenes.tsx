@@ -78,7 +78,7 @@ export default function Scenes({ onNext }: { onNext?: () => void }) {
               {episodeScenes.map((scene, index) => (
                 <div
                   key={index}
-                  className="bg-fm-neutral-0  rounded-2xl p-4 shadow-xl hover:shadow-md transition-shadow space-y-3"
+                  className="bg-fm-neutral-0  rounded-2xl p-5 shadow-xl hover:shadow-md transition-shadow space-y-3"
                 >
            
                     <p className="font-bold">Scene {scene.beat_number}</p>
@@ -88,12 +88,12 @@ export default function Scenes({ onNext }: { onNext?: () => void }) {
                       <span className="fm-secondary-purple text-sm uppercase tracking-wide">
                         Description:
                       </span>
-                      <p className=" mt-1.5 line-clamp-7 h-48 leading-relaxed italic">
-                        {scene.scene_description}
+                      <p className="mt-1.5 leading-relaxed italic h-52 overflow-hidden line-clamp-8">
+                      {scene.scene_description}
                       </p>
                     </div>
                     <div>
-                      <div className="-mx-4">
+                      <div className="-mx-5">
                         <hr className="border-t border-fm-neutral-300 w-full" />
                       </div>
                       <p className=" font-bold text-sm mt-2 py-2">
