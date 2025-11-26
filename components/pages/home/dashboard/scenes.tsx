@@ -22,28 +22,33 @@ type ScenesData = {
 
 export default function Scenes({ onNext }: { onNext?: () => void }) {
   const [scenes, setScenes] = useState<ScenesData>({});
-  const [loading, setLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(true);
   const params = useParams() as { id: string };
 
   useEffect(() => {
     const getScenes = async () => {
-      setLoading(true);
+      setIsLoading(true);
       try {
         const res = await fetchScenes(params.id);
         setScenes(res.beats || {});
-        toast.info(res.message);
+        // toast.info(res.message);
+        if(res.message==="Beats Generation Completed"){
+          setIsLoading(false)
+        } else if(res.message==="Generating Beats"){
+          setIsLoading(true)
+        }
       } finally {
-        setLoading(false);
+        // setIsLoading(false);
       }
     };
     getScenes();
   }, [params.id]);
 
-  if (loading) {
+  if (isLoading) {
     return <Loading text="scenes" />;
   }
 
-  if (Object.keys(scenes).length === 0) {
+  if (Object.keys(scenes).length === 0 && !isLoading) {
     return (
       <div className="flex items-center justify-center h-96">
         <p className="text-fm-primary text-lg">No beats found.</p>

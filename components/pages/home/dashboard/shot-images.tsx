@@ -6,11 +6,9 @@ import { convertGoogleDriveUrl, getGroupedShots } from "@/lib/helpers";
 import Loading from "@/components/loading";
 import { useMemo, useState, useRef, useEffect } from "react";
 import { Button } from "@/aural/components/ui/button";
-import TextArea from "@/aural/components/ui/textarea";
 import Heading from "@/components/heading";
 import { EditBigIcon } from "@/aural/icons/edit-big-icon";
 import ShotHeader from "@/components/shot-header";
-import { Tag } from "@/aural/components/ui/tag";
 import ArrowRightIcon from "@/aural/icons/arrow-right-icon";
 import { PlayPauseIcon } from "@/aural/icons/play-pause-icon";
 import { cn } from "@/aural/lib/utils";
@@ -172,10 +170,10 @@ export default function ShotImages({
       <div className="flex gap-6 w-full min-h-0 h-full">
         {/* Scene Selection - Left Column */}
         <div className="flex flex-col gap-3 shrink-0">
-          <h3 className="text-sm font-semibold text-fm-secondary-800 uppercase tracking-wide shrink-0">
+          {/* <h3 className="text-sm font-semibold text-fm-secondary-800 uppercase tracking-wide shrink-0">
             Scenes
-          </h3>
-          <div className="flex flex-col gap-2 max-h-[65vh] w-32 overflow-auto min-h-0 py-1">
+          </h3> */}
+          <div className="flex flex-col gap-4 max-h-[70vh] w-full overflow-auto min-h-0 py-1">
             {groupedShots.map(({ scene_beat_id, shots }) => {
               const total = shots.length;
               const completed = shots.filter(
@@ -183,30 +181,36 @@ export default function ShotImages({
               ).length;
 
               return (
-                <Button
+                <button
                   key={scene_beat_id}
-                  variant={
-                    effectiveSelectedScene === scene_beat_id
-                      ? "primary"
-                      : "secondary"
-                  }
                   onClick={() => {
                     setSelectedScene(scene_beat_id);
                     setSelectedShot(0);
                   }}
-                  size="sm"
-                  className="w-full"
+                  className={cn(
+                    "bg-black w-full p-4 flex items-center gap-2 rounded-xl text-nowrap font-fm-poppins text-fm-lg font-bold cursor-pointer ",
+                    {
+                      "bg-[#833AFF]": effectiveSelectedScene === scene_beat_id,
+                    }
+                  )}
                 >
-                  Scene {scene_beat_id} ({completed}/{total})
-                </Button>
+                  <span> Scene {scene_beat_id} </span>
+                  <span
+                    className={cn("bg-[#2A2A2A] rounded-[100px] p-2 ", {
+                      "bg-[#4207A5]": effectiveSelectedScene === scene_beat_id,
+                    })}
+                  >
+                    ({completed}/{total})
+                  </span>
+                </button>
               );
             })}
           </div>
         </div>
 
         {/* Main Image Display - Middle Column */}
-        <div className="w-84">
-          <div className="rounded-xl  overflow-hidden h-full flex flex-col">
+        <div className="w-92">
+          <div className="rounded-lg w-full overflow-hidden h-full flex flex-col">
             {selectedShotData?.audio_url && (
               <audio
                 key={`${effectiveSelectedScene}-${selectedShot}`}
@@ -225,7 +229,7 @@ export default function ShotImages({
 
             <div
               className={cn(
-                "relative aspect-9/16 w-full shrink-0 max-h-[60vh] mt-7 rounded-lg overflow-hidden",
+                "relative aspect-9/16 w-full shrink-0 max-h-[70vh] rounded-lg overflow-hidden",
                 !selectedShotImageUrl && "bg-fm-surface-tertiary animate-pulse"
               )}
             >
@@ -239,13 +243,13 @@ export default function ShotImages({
                       selectedShotData?.panel_number || selectedShot + 1
                     }`}
                     fill
-                    className="object-contain"
+                    className="object-cover"
                     unoptimized
                   />
                   <Button
                     variant="outline"
                     size="sm"
-                    className="absolute top-2 right-14"
+                    className="absolute top-2 right-6"
                   >
                     <EditBigIcon className="size-5" />
                     Edit Image
@@ -267,13 +271,13 @@ export default function ShotImages({
         </div>
 
         {/* Shot List - Right Column */}
-        <div className="flex flex-col flex-1 min-w-0 max-h-[75vh] space-y-3 shrink-0">
-          <h3 className="text-sm font-semibold text-fm-secondary-800 uppercase tracking-wide shrink-0">
+        <div className="flex flex-col flex-1 min-w-0 max-h-[70vh] space-y-3 shrink-0">
+          {/* <h3 className="text-sm font-semibold text-fm-secondary-800 uppercase tracking-wide shrink-0">
             Shots ({shotsInScene.length})
-          </h3>
+          </h3> */}
           <div
             ref={shotListRef}
-            className="flex-1 space-y-2 overflow-y-auto min-h-0"
+            className="flex-1 space-y-2 overflow-y-auto min-h-0 "
           >
             {shotsInScene.map((shot, index) => {
               const isSelected = index === selectedShot;
@@ -302,11 +306,7 @@ export default function ShotImages({
                   aria-pressed={isSelected}
                   aria-label={`Select shot ${index + 1}`}
                   onClick={() => setSelectedShot(index)}
-                  className={`w-full text-left p-3 rounded-lg border transition-all duration-200 shrink-0 ${
-                    isSelected
-                      ? "border-fm-secondary-800  shadow-sm"
-                      : "border-fm-divider-primary bg-fm-surface-secondary hover:border-fm-divider-contrast"
-                  }`}
+                  className={`w-full text-left p-5 rounded-xl bg-black transition-all duration-200 shrink-0 `}
                 >
                   <div className="flex items-start gap-3 min-w-0">
                     <div className="flex-1 min-w-0 space-y-4">
@@ -318,27 +318,26 @@ export default function ShotImages({
                         }
                         shotNumber={index + 1}
                       />
-                      <div className="flex gap-2">
+                      <div className="flex flex-col gap-2">
                         {shotStartFrame?.frame_visual && (
                           <div className="space-y-0.5 w-full">
-                            <p className="text-fm-sm font-medium text-fm-secondary-600 uppercase tracking-wide">
-                              Shot Description
+                            <p className="text-fm-sm font-medium uppercase text-[#AB79FF] tracking-wider">
+                              Description:
                             </p>
-                            <TextArea
-                              value={shotStartFrame.frame_visual}
-                              className="text-xs text-fm-secondary-800 line-clamp-2 leading-relaxed wrap-break-word"
-                            />
+                            <p className="font-fm-poppins text-fm-md">
+                              {shotStartFrame.frame_visual}
+                            </p>
                           </div>
                         )}
                         {shotStartFrame?.narration && (
                           <div className="space-y-0.5 w-full">
-                            <p className="text-fm-sm font-medium text-fm-secondary-600 uppercase tracking-wide">
+                            <p className="text-fm-sm font-medium uppercase text-[#AB79FF] tracking-wider">
                               Narration
                             </p>
-                            <TextArea
-                              value={shotStartFrame.narration}
-                              className="text-xs text-fm-secondary-800 line-clamp-2 leading-relaxed wrap-break-word rounded-md"
-                            />
+
+                            <p className="font-fm-poppins text-fm-md">
+                              {shotStartFrame.narration}
+                            </p>
                           </div>
                         )}
                         {shotStartFrame?.dialogue &&
@@ -346,31 +345,20 @@ export default function ShotImages({
                             (value) => value !== null && value !== ""
                           ) && (
                             <div className="space-y-1.5 w-full">
-                              <p className="text-fm-sm font-medium text-fm-secondary-600 uppercase tracking-wide">
-                                Dialogue
+                              <p className="text-fm-sm font-medium uppercase text-[#AB79FF] tracking-wider">
+                                Dialogue:
                               </p>
                               <div className="space-y-2">
                                 {Object.entries(shotStartFrame.dialogue).map(
                                   ([character, text]) => {
                                     if (!text) return null;
                                     return (
-                                      <div
+                                      <p
                                         key={character}
-                                        className="rounded-xs border border-fm-divider-primary bg-fm-surface-secondary py-2 px-4 space-y-1.5"
+                                        className="font-fm-poppins text-fm-md"
                                       >
-                                        <Tag
-                                          variant="system"
-                                          color="neutral"
-                                          emphasis="secondary"
-                                          size="xs"
-                                          className="bg-fm-surface-tertiary rounded-md"
-                                        >
-                                          {character}
-                                        </Tag>
-                                        <p className="text-xs text-fm-secondary-800 italic leading-relaxed wrap-break-word">
-                                          {text}
-                                        </p>
-                                      </div>
+                                        <span>{character}:</span> {text}
+                                      </p>
                                     );
                                   }
                                 )}
@@ -382,31 +370,20 @@ export default function ShotImages({
                             (value) => value !== null && value !== ""
                           ) && (
                             <div className="space-y-2 w-full">
-                              <p className="text-fm-sm font-medium text-fm-secondary-600 uppercase tracking-wide">
-                                Thought
+                              <p className="text-fm-sm font-medium uppercase text-[#AB79FF] tracking-wider">
+                                Thought:
                               </p>
                               <div className="space-y-2">
                                 {Object.entries(shotStartFrame.thought).map(
                                   ([character, text]) => {
                                     if (!text) return null;
                                     return (
-                                      <div
+                                      <p
                                         key={character}
-                                        className="rounded-xs border border-fm-divider-primary bg-fm-surface-secondary py-2 px-4 space-y-1.5"
+                                        className="font-fm-poppins text-fm-md"
                                       >
-                                        <Tag
-                                          variant="system"
-                                          color="neutral"
-                                          emphasis="secondary"
-                                          size="xs"
-                                          className="bg-fm-surface-tertiary rounded-md"
-                                        >
-                                          {character}
-                                        </Tag>
-                                        <p className="text-xs text-fm-secondary-800 italic leading-relaxed wrap-break-word">
-                                          {text}
-                                        </p>
-                                      </div>
+                                        <span>{character}:</span> {text}
+                                      </p>
                                     );
                                   }
                                 )}
@@ -418,7 +395,7 @@ export default function ShotImages({
 
                     <div
                       className={cn(
-                        "relative w-20 h-28 shrink-0 rounded-lg overflow-hidden border border-fm-divider-primary",
+                        "relative w-31 h-54 shrink-0 rounded-lg overflow-hidden border border-fm-divider-primary",
                         !shot.start_frame_url &&
                           "animate-pulse bg-fm-surface-tertiary"
                       )}

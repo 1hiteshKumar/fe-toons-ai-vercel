@@ -154,13 +154,21 @@ export default function Characters({ onNext }: { onNext?: () => void }) {
                 <div className="flex gap-2 mt-4">
                   <Button
                     onClick={() => setSelectedView("front")}
-                    variant={selectedView === "front" ? "primary" : "outline"}
+                    variant={"outline"}
+                    noise="none"
+                    innerClassName={cn("", {
+                      "bg-[#833AFF] border-none": selectedView === "front",
+                    })}
                   >
                     Front View
                   </Button>
                   <Button
-                    variant={selectedView === "back" ? "primary" : "outline"}
+                    variant={"outline"}
                     onClick={() => setSelectedView("back")}
+                    noise="none"
+                    innerClassName={cn("", {
+                      "bg-[#833AFF] border-none": selectedView === "back",
+                    })}
                   >
                     Back View
                   </Button>
@@ -203,8 +211,8 @@ export default function Characters({ onNext }: { onNext?: () => void }) {
                       className={cn(
                         "size-2 rounded-full transition-all duration-200",
                         isActive
-                          ? "w-8 bg-fm-secondary-700"
-                          : "bg-fm-divider-primary hover:bg-fm-secondary-700"
+                          ? "w-8 bg-[#833AFF]"
+                          : "bg-fm-divider-primary hover:bg-[#833AFF]"
                       )}
                       aria-label={`View ${char.name}`}
                     />
