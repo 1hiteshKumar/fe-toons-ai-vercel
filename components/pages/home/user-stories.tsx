@@ -44,7 +44,7 @@ export default function UserStories({ stories }: { stories: Stories[] }) {
         subHeading="Track the status of your story submissions"
       />
 
-      <div className="space-y-3 inline-block">
+      <div className="space-y-3 grid grid-cols-3">
         {stories?.map(
           ({
             showName,
