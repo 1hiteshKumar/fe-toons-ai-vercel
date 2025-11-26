@@ -1,87 +1,24 @@
 "use client";
 import { useEffect, useState } from "react";
 import dynamic from "next/dynamic";
-import { TABS } from "@/server/constants";
+import { API_URLS, TABS } from "@/server/constants";
 import ShotImages from "../home/dashboard/shot-images";
-import fetchShotAssets from "@/server/queries/fetch-shot-assets";
 import { ShotAssets } from "@/lib/types";
 import ShotVideos from "../home/dashboard/shot-videos";
 import Publish from "../home/dashboard/publish";
 import { cn } from "@/aural/lib/utils";
 import { toast } from "sonner";
+import usePolling, { PollingProvider } from "@/lib/hooks/use-polling";
+import {
+  CharactersIcon,
+  PublishIcon,
+  ScenesIcon,
+  ShotImagesIcon,
+  ShotVideosIcon,
+} from "@/lib/icons";
 
 const Characters = dynamic(() => import("../home/dashboard/characters"));
 const Scenes = dynamic(() => import("../home/dashboard/scenes"));
-
-// Icon components for each tab
-const ScenesIcon = ({ className }: { className?: string }) => (
-  <svg
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2"
-    className={className}
-  >
-    <rect x="3" y="3" width="18" height="18" rx="2" />
-    <line x1="9" y1="3" x2="9" y2="21" />
-    <line x1="15" y1="3" x2="15" y2="21" />
-  </svg>
-);
-
-const CharactersIcon = ({ className }: { className?: string }) => (
-  <svg
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2"
-    className={className}
-  >
-    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
-    <circle cx="9" cy="7" r="4" />
-    <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
-    <path d="M16 3.13a4 4 0 0 1 0 7.75" />
-  </svg>
-);
-
-const ShotImagesIcon = ({ className }: { className?: string }) => (
-  <svg
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2"
-    className={className}
-  >
-    <rect x="3" y="3" width="18" height="18" rx="2" />
-    <circle cx="8.5" cy="8.5" r="1.5" />
-    <path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21" />
-  </svg>
-);
-
-const ShotVideosIcon = ({ className }: { className?: string }) => (
-  <svg
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2"
-    className={className}
-  >
-    <polygon points="5 3 19 12 5 21 5 3" />
-  </svg>
-);
-
-const PublishIcon = ({ className }: { className?: string }) => (
-  <svg
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2"
-    className={className}
-  >
-    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-    <polyline points="17 8 12 3 7 8" />
-    <line x1="12" y1="3" x2="12" y2="15" />
-  </svg>
-);
 
 const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
   scenes: ScenesIcon,
@@ -93,10 +30,12 @@ const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
 
 export type TabId = (typeof TABS)[number]["id"];
 
-export default function Dashboard({ taskId }: { taskId: string }) {
+function DashboardContent({ taskId }: { taskId: string }) {
   const [active, setActive] = useState<TabId>("shot-videos");
 
   const [shotAssets, setShotAssets] = useState<ShotAssets | null>(null);
+
+  const { poll, stopPolling } = usePolling();
 
   useEffect(() => {
     const isSharedTabs = ["shot-images", "shot-videos", "publish"].includes(
@@ -104,13 +43,27 @@ export default function Dashboard({ taskId }: { taskId: string }) {
     );
 
     if (isSharedTabs && !shotAssets) {
-      async function fetchData() {
-        const res = await fetchShotAssets(taskId);
-        setShotAssets(res);
-      }
-      fetchData();
+      const pollingKey = `shot_assets_${taskId}`;
+      toast.success(
+        "We are generating best results for you. This may take some time"
+      );
+      poll({
+        url: API_URLS.FETCH_SHOT_ASSETS({ taskId }),
+        pollingKey,
+        delay: 5000,
+        callback: async (res: ShotAssets | null) => {
+          const status = res?.task?.status;
+          setShotAssets(res);
+          if (status === "COMPLETED" || status === "FAILED") {
+            stopPolling(pollingKey);
+            if (status === "COMPLETED") {
+              toast("Shot assets ready");
+            }
+          }
+        },
+      });
     }
-  }, [active, shotAssets, taskId]);
+  }, [active, poll, shotAssets, stopPolling, taskId]);
 
   return (
     <div className="flex flex-col h-full w-full">
@@ -161,5 +114,13 @@ export default function Dashboard({ taskId }: { taskId: string }) {
         {active === "publish" && <Publish data={shotAssets} />}
       </main>
     </div>
+  );
+}
+
+export default function Dashboard({ taskId }: { taskId: string }) {
+  return (
+    <PollingProvider>
+      <DashboardContent taskId={taskId} />
+    </PollingProvider>
   );
 }

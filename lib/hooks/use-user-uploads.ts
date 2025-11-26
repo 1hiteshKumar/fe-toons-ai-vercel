@@ -3,7 +3,7 @@ import { useDropzone } from "react-dropzone";
 import { validateUploads } from "@/server/mutations/validate-uploads";
 import { uploadCSV } from "@/server/mutations/upload-csv";
 import usePolling from "./use-polling";
-import { API_URLS } from "@/server/constants";
+import { API_URLS, PROMPT } from "@/server/constants";
 import { toast } from "sonner";
 import { addTask } from "@/server/mutations/add-task";
 
@@ -30,13 +30,13 @@ export type Stories = {
 };
 
 export default function useUserUploads() {
-  const [scriptText, setScriptText] = useState("123");
+  const [scriptText, setScriptText] = useState(PROMPT);
   const [csvUrl, setCSVurl] = useState<string>();
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [stories, setStories] = useState<Stories[]>([]);
   const [loading, setLoading] = useState(false);
   const [styleId, setStyleId] = useState<number | null>(87);
-  const [showName, setShowName] = useState("test");
+  const [showName, setShowName] = useState("TDMB");
 
   const { poll, stopPolling } = usePolling();
 
@@ -61,7 +61,7 @@ export default function useUserUploads() {
           if (data?.status === "SUCCESS" || data?.status === "FAILED") {
             console.log(data);
             stopPolling(pollingKey);
-            toast(data.message);
+            if (data.status === "SUCCESS") toast.success("TASK QUEUED");
             setActiveTasks((prev) => prev.filter((id) => id !== taskId));
 
             if (!data.result.success) {

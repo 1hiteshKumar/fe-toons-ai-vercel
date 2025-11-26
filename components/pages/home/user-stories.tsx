@@ -8,7 +8,6 @@ import { cn } from "@/aural/lib/utils";
 
 export default function UserStories({ stories }: { stories: Stories[] }) {
   if (stories.length === 0) return null;
-  console.log(stories);
 
   const statusColorMap: Record<string, "warning" | "positive" | "negative"> = {
     PENDING: "warning",
@@ -45,7 +44,7 @@ export default function UserStories({ stories }: { stories: Stories[] }) {
         subHeading="Track the status of your story submissions"
       />
 
-      <div className="space-y-3">
+      <div className="space-y-3 inline-block">
         {stories?.map(
           ({
             showName,
