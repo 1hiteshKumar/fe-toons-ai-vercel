@@ -211,7 +211,7 @@ export default function ShotImages({
                         )}
                         {shotStartFrame?.dialogue &&
                           Object.values(shotStartFrame.dialogue).some(
-                            (value) => value !== null
+                            (value) => value !== null && value !== ""
                           ) && (
                             <div className="space-y-2 w-full">
                               <p className="text-fm-sm font-medium text-fm-secondary-600 uppercase tracking-wide">
@@ -247,7 +247,7 @@ export default function ShotImages({
                           )}
                         {shotStartFrame?.thought &&
                           Object.values(shotStartFrame.thought).some(
-                            (value) => value !== null
+                           (value) => value !== null && value !== ""
                           ) && (
                             <div className="space-y-2 w-full">
                               <p className="text-fm-sm font-medium text-fm-secondary-600 uppercase tracking-wide">
