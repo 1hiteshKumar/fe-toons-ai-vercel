@@ -100,7 +100,7 @@ export default function ShotVideos({ data }: { data: ShotAssets | null }) {
           <h3 className="text-sm font-semibold text-fm-secondary-800 uppercase tracking-wide shrink-0">
             Scenes
           </h3>
-          <div className="flex flex-col gap-2 w-32 max-h-[70vh] overflow-y-auto min-h-0 p-1">
+          <div className="flex flex-col gap-2 w-32 max-h-[65vh] overflow-y-auto min-h-0 p-1">
             {groupedShots.map(({ scene_beat_id, shots }) => {
               const total = shots.length;
               const completed = shots.filter(
@@ -204,8 +204,12 @@ export default function ShotVideos({ data }: { data: ShotAssets | null }) {
               const shotDescription = shotAction?.summary || "";
 
               return (
-                <button
+                <div
                   key={shot.id}
+                  role="button"
+                  tabIndex={0}
+                  aria-pressed={isSelected}
+                  aria-label={`Select shot ${index + 1}`}
                   onClick={() => setSelectedShot(index)}
                   className={`w-full text-left p-3 rounded-lg border flex transition-all duration-200 shrink-0 ${
                     isSelected
@@ -266,7 +270,7 @@ export default function ShotVideos({ data }: { data: ShotAssets | null }) {
                       </div>
                     )}
                   </div>
-                </button>
+                </div>
               );
             })}
           </div>

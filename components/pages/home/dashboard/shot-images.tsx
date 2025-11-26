@@ -10,6 +10,7 @@ import TextArea from "@/aural/components/ui/textarea";
 import Heading from "@/components/heading";
 import { EditBigIcon } from "@/aural/icons/edit-big-icon";
 import ShotHeader from "@/components/shot-header";
+import { Tag } from "@/aural/components/ui/tag";
 
 export default function ShotImages({ data }: { data: ShotAssets | null }) {
   const groupedShots = useMemo(() => getGroupedShots(data), [data]);
@@ -69,7 +70,7 @@ export default function ShotImages({ data }: { data: ShotAssets | null }) {
           <h3 className="text-sm font-semibold text-fm-secondary-800 uppercase tracking-wide shrink-0">
             Scenes
           </h3>
-          <div className="flex flex-col gap-2 max-h-[70vh] w-32 overflow-auto min-h-0 py-1">
+          <div className="flex flex-col gap-2 max-h-[65vh] w-32 overflow-auto min-h-0 py-1">
             {groupedShots.map(({ scene_beat_id, shots }) => {
               const total = shots.length;
               const completed = shots.filter(
@@ -139,15 +140,21 @@ export default function ShotImages({ data }: { data: ShotAssets | null }) {
               const isSelected = index === selectedShot;
               const shotStartFrame = shot.panel_data?.start_frame as
                 | {
-                    narration?: string;
+                    narration?: string | null;
                     frame_description?: string;
+                    dialogue?: Record<string, string | null>;
+                    thought?: Record<string, string | null>;
                     [key: string]: unknown;
                   }
                 | undefined;
 
               return (
-                <button
+                <div
                   key={shot.id}
+                  role="button"
+                  tabIndex={0}
+                  aria-pressed={isSelected}
+                  aria-label={`Select shot ${index + 1}`}
                   onClick={() => setSelectedShot(index)}
                   className={`w-full text-left p-3 rounded-lg border transition-all duration-200 shrink-0 ${
                     isSelected
@@ -158,28 +165,101 @@ export default function ShotImages({ data }: { data: ShotAssets | null }) {
                   <div className="flex items-start gap-3 min-w-0">
                     <div className="flex-1 min-w-0 space-y-4">
                       <ShotHeader duration="4s" shotNumber={index + 1} />
-                      {shotStartFrame?.frame_description && (
-                        <div className="space-y-0.5">
-                          <p className="text-fm-sm font-medium text-fm-secondary-600 uppercase tracking-wide">
-                            Description
-                          </p>
-                          <TextArea
-                            value={shotStartFrame.frame_description}
-                            className="text-xs text-fm-secondary-800 line-clamp-2 leading-relaxed wrap-break-word"
-                          />
-                        </div>
-                      )}
-                      {shotStartFrame?.narration && (
-                        <div className="space-y-0.5">
-                          <p className="text-fm-sm font-medium text-fm-secondary-600 uppercase tracking-wide">
-                            Narration
-                          </p>
-                          <TextArea
-                            value={shotStartFrame.narration}
-                            className="text-xs text-fm-secondary-800 line-clamp-2 leading-relaxed wrap-break-word"
-                          />
-                        </div>
-                      )}
+                      <div className="flex gap-2">
+                        {shotStartFrame?.frame_description && (
+                          <div className="space-y-0.5 w-full">
+                            <p className="text-fm-sm font-medium text-fm-secondary-600 uppercase tracking-wide">
+                              Description
+                            </p>
+                            <TextArea
+                              value={shotStartFrame.frame_description}
+                              className="text-xs text-fm-secondary-800 line-clamp-2 leading-relaxed wrap-break-word"
+                            />
+                          </div>
+                        )}
+                        {shotStartFrame?.narration && (
+                          <div className="space-y-0.5 w-full">
+                            <p className="text-fm-sm font-medium text-fm-secondary-600 uppercase tracking-wide">
+                              Narration
+                            </p>
+                            <TextArea
+                              value={shotStartFrame.narration}
+                              className="text-xs text-fm-secondary-800 line-clamp-2 leading-relaxed wrap-break-word rounded-md"
+                            />
+                          </div>
+                        )}
+                        {shotStartFrame?.dialogue &&
+                          Object.values(shotStartFrame.dialogue).some(
+                            (value) => value !== null
+                          ) && (
+                            <div className="space-y-2 w-full">
+                              <p className="text-fm-sm font-medium text-fm-secondary-600 uppercase tracking-wide">
+                                Dialogue
+                              </p>
+                              <div className="space-y-2">
+                                {Object.entries(shotStartFrame.dialogue).map(
+                                  ([character, text]) => {
+                                    if (!text) return null;
+                                    return (
+                                      <div
+                                        key={character}
+                                        className="rounded-xs border border-fm-divider-primary bg-fm-surface-secondary py-2 px-4 space-y-1.5"
+                                      >
+                                        <Tag
+                                          variant="system"
+                                          color="neutral"
+                                          emphasis="secondary"
+                                          size="xs"
+                                          className="bg-fm-surface-tertiary rounded-md"
+                                        >
+                                          {character}
+                                        </Tag>
+                                        <p className="text-xs text-fm-secondary-800 italic leading-relaxed wrap-break-word">
+                                          {text}
+                                        </p>
+                                      </div>
+                                    );
+                                  }
+                                )}
+                              </div>
+                            </div>
+                          )}
+                        {shotStartFrame?.thought &&
+                          Object.values(shotStartFrame.thought).some(
+                            (value) => value !== null
+                          ) && (
+                            <div className="space-y-2 w-full">
+                              <p className="text-fm-sm font-medium text-fm-secondary-600 uppercase tracking-wide">
+                                Thought
+                              </p>
+                              <div className="space-y-2">
+                                {Object.entries(shotStartFrame.thought).map(
+                                  ([character, text]) => {
+                                    if (!text) return null;
+                                    return (
+                                      <div
+                                        key={character}
+                                        className="rounded-xs border border-fm-divider-primary bg-fm-surface-secondary py-2 px-4 space-y-1.5"
+                                      >
+                                        <Tag
+                                          variant="system"
+                                          color="neutral"
+                                          emphasis="secondary"
+                                          size="xs"
+                                        >
+                                          {character}
+                                        </Tag>
+                                        <p className="text-xs text-fm-secondary-800 italic leading-relaxed wrap-break-word">
+                                          {text}
+                                        </p>
+                                      </div>
+                                    );
+                                  }
+                                )}
+                              </div>
+                            </div>
+                          )}
+                      </div>
                     </div>
                     {shot.start_frame_url ? (
                       <div className="relative w-20 h-28 shrink-0 rounded-lg overflow-hidden border border-fm-divider-primary">
@@ -197,7 +277,7 @@ export default function ShotImages({ data }: { data: ShotAssets | null }) {
                       </div>
                     )}
                   </div>
-                </button>
+                </div>
               );
             })}
           </div>

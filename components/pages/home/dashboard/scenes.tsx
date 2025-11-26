@@ -77,7 +77,7 @@ export default function Scenes() {
                       <span className="font-bold text-fm-label-primary text-sm uppercase tracking-wide">
                         Description:
                       </span>
-                      <p className="text-fm-primary mt-1.5 leading-relaxed">
+                      <p className="text-fm-primary mt-1.5 leading-relaxed font-poppins">
                         {scene.scene_description}
                       </p>
                     </div>
@@ -85,7 +85,9 @@ export default function Scenes() {
                       <span className="font-bold text-fm-blue-500 text-sm uppercase tracking-wide">
                         Characters:
                       </span>
-                      <p className="text-fm-primary mt-1.5 font-medium">
+                      <p
+                        className={`text-fm-primary mt-1.5 font-medium font-poppins`}
+                      >
                         {scene.characters}
                       </p>
                     </div>
