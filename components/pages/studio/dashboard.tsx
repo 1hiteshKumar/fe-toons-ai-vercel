@@ -31,7 +31,7 @@ const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
 export type TabId = (typeof TABS)[number]["id"];
 
 function DashboardContent({ taskId }: { taskId: string }) {
-  const [active, setActive] = useState<TabId>("shot-videos");
+  const [active, setActive] = useState<TabId>("scenes");
 
   const [shotAssets, setShotAssets] = useState<ShotAssets | null>(null);
 
@@ -57,7 +57,7 @@ function DashboardContent({ taskId }: { taskId: string }) {
           if (status === "COMPLETED" || status === "FAILED") {
             stopPolling(pollingKey);
             if (status === "COMPLETED") {
-              toast("Shot assets ready");
+              toast.success("Shot assets ready");
             }
           }
         },

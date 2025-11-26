@@ -49,6 +49,18 @@ export default function useUserUploads() {
     }
   }, []);
 
+  useEffect(() => {
+    const stored = localStorage.getItem("stories");
+    if (stored) {
+      try {
+        const parsedStories = JSON.parse(stored);
+        setStories(parsedStories);
+      } catch (error) {
+        console.error("Error parsing stories from localStorage:", error);
+      }
+    }
+  }, []);
+
   const pollStatus = useCallback(
     async (taskId: string) => {
       if (!taskId) return;
@@ -113,6 +125,10 @@ export default function useUserUploads() {
   useEffect(() => {
     localStorage.setItem("validation_task_ids", JSON.stringify(activeTasks));
   }, [activeTasks]);
+
+  useEffect(() => {
+    localStorage.setItem("stories", JSON.stringify(stories));
+  }, [stories]);
 
   const onDrop = async (acceptedFiles: File[], rejectedFiles: unknown[]) => {
     toast.info("Uploading file, this won't take much time.");
