@@ -167,7 +167,6 @@ export default function useUserUploads() {
 
     setActiveTasks((prev) => [...prev, validation_task_id]);
     setStories((prev) => [
-      ...prev,
       {
         validation_task_id,
         status: "PENDING",
@@ -175,6 +174,7 @@ export default function useUserUploads() {
         createdAt: new Date().toISOString(),
         showName,
       },
+      ...prev,
     ]);
     pollStatus(validation_task_id);
 
