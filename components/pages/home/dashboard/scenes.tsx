@@ -54,55 +54,49 @@ export default function Scenes({ onNext }: { onNext?: () => void }) {
   return (
     <div>
       <Heading
-        heading="Story Scenes"
-        subHeading="Review each scene and add new scenes to continue your story"
+        heading="Scenes"
+        subHeading="Review each scene, characters and pacing of the story"
         rightElement={
           onNext && (
             <Button
               onClick={onNext}
               variant="outline"
-              leftIcon={<ArrowRightIcon className="text-white" />}
-              innerClassName="bg-linear-to-r from-purple-900 via-purple-700 to-pink-600 text-white border-none"
+              rightIcon={<ArrowRightIcon className="text-white" />}
               noise="none"
+              className="font-fm-poppins"
             >
-              Continue to Next Step
+              Continue
             </Button>
           )
         }
       />
       <div className="space-y-8">
         {Object.entries(scenes).map(([episodeName, episodeScenes]) => (
-          <div key={episodeName} className="space-y-5">
-            <h2 className="text-lg font-bold text-fm-primary border-b-2 border-fm-secondary-700 pb-2">
-              {episodeName}
-            </h2>
-            <div className="grid grid-cols-3 gap-4">
+          <div key={episodeName} className="space-y-12">
+            <h2 className="text-xl font-bold">{episodeName}</h2>
+            <div className="grid grid-cols-3 gap-7">
               {episodeScenes.map((scene, index) => (
                 <div
                   key={index}
-                  className="bg-fm-surface-secondary border border-fm-divider-primary rounded-lg p-5 shadow-sm hover:shadow-md transition-shadow space-y-3"
+                  className="bg-fm-neutral-0  rounded-2xl p-4 shadow-xl hover:shadow-md transition-shadow space-y-3"
                 >
-                  <div className="flex items-center gap-3">
-                    <div className="bg-linear-to-r from-purple-900 via-purple-700 to-pink-600 text-fm-neutral-1100 font-bold text-sm px-3 py-1 rounded-md">
-                      Scene #{scene.beat_number}
-                    </div>
-                  </div>
+           
+                    <p className="font-bold">Scene {scene.beat_number}</p>
+                
                   <div className="space-y-2.5">
                     <div>
-                      <span className="font-bold text-fm-label-primary text-sm uppercase tracking-wide">
+                      <span className="fm-secondary-purple text-sm uppercase tracking-wide">
                         Description:
                       </span>
-                      <p className="text-fm-primary mt-1.5 leading-relaxed font-fm-poppins italic">
+                      <p className=" mt-1.5 line-clamp-7 h-48 leading-relaxed italic">
                         {scene.scene_description}
                       </p>
                     </div>
                     <div>
-                      <span className="font-bold text-fm-blue-500 text-sm uppercase tracking-wide">
-                        Characters:
-                      </span>
-                      <p
-                        className={`text-fm-primary mt-1.5 font-medium font-poppins`}
-                      >
+                      <div className="-mx-4">
+                        <hr className="border-t border-fm-neutral-300 w-full" />
+                      </div>
+                      <p className=" font-bold text-sm mt-2 py-2">
                         {scene.characters || "N/A"}
                       </p>
                     </div>

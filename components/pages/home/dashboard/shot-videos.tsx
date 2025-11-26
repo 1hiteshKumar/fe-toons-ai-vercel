@@ -165,11 +165,11 @@ export default function ShotVideos({
             <Button
               onClick={onNext}
               variant="outline"
-              leftIcon={<ArrowRightIcon className="text-white" />}
-              innerClassName="bg-linear-to-r from-purple-900 via-purple-700 to-pink-600 text-white border-none"
+              rightIcon={<ArrowRightIcon className="text-white" />}
               noise="none"
+              className="font-fm-poppins"
             >
-              Continue to Next Step
+              Continue
             </Button>
           )
         }

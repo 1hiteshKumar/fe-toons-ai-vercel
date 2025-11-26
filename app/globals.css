@@ -2,7 +2,7 @@
 @import "tailwindcss";
 
 :root {
-  --background: #0a0a0a;
+  --background: #0E0E0E;
   --foreground: #ededed;
 }
 
@@ -11,8 +11,8 @@
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
-  --font-poppins: var(--font-poppins, 'Poppins', sans-serif);
-  --font-fm-poppins: var(--font-poppins, 'Poppins', sans-serif);
+  --font-poppins: var(--font-poppins, "Poppins", sans-serif);
+  --font-fm-poppins: var(--font-poppins, "Poppins", sans-serif);
 }
 
 body {
@@ -23,7 +23,7 @@ body {
 
 /* Font utility classes */
 .font-fm-poppins {
-  font-family: var(--font-poppins, 'Poppins', sans-serif);
+  font-family: var(--font-poppins, "Poppins", sans-serif);
 }
 
 /* Hide scrollbar for Chrome, Safari and Opera */
@@ -33,6 +33,13 @@ body {
 
 /* Hide scrollbar for IE, Edge and Firefox */
 html {
-  -ms-overflow-style: none;  /* IE and Edge */
-  scrollbar-width: none;     /* Firefox */
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none; /* Firefox */
+}
+
+.fm-primary-purple {
+  color: #833aff;
+}
+.fm-secondary-purple {
+  color: #ab79ff;
 }
