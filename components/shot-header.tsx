@@ -3,16 +3,17 @@ import { ClockIcon } from "../aural/icons/clock-icon";
 import { cn } from "../aural/lib/utils";
 import { Button } from "@/aural/components/ui/button";
 import { EditBigIcon } from "@/aural/icons/edit-big-icon";
-import { WarningIcon } from "@/aural/icons/warning-icon";
 import { TrashIcon } from "@/aural/icons/trash-icon";
 
 export interface ShotHeaderProps {
+  type?: string;
   shotNumber: number | string;
-  duration?: string;
+  duration?: number;
   className?: string;
 }
 
 export default function ShotHeader({
+  type = "Image",
   shotNumber,
   duration,
   className,
@@ -42,7 +43,7 @@ export default function ShotHeader({
             {/* Duration Indicator Section */}
             <div className="flex items-center justify-center gap-1.5 px-4 py-3">
               <ClockIcon className="h-4 w-4 text-fm-neutral-600" />
-              <span className="text-fm-neutral-600 text-sm">{duration}</span>
+              <span className="text-fm-neutral-600 text-sm">{duration}s</span>
             </div>
           </>
         )}
@@ -56,14 +57,14 @@ export default function ShotHeader({
         >
           {" "}
           <EditBigIcon className="size-5" />
-          Edit Image
+          Edit {type || "Image"}
         </Button>
         <Button
           variant="outline"
           size="sm"
           noise="low"
           disabled
-          innerClassName="bg-fm-primary-700 border-none cursor-not-allowed"
+          innerClassName="bg-fm-primary-400 border-none cursor-not-allowed"
         >
           <TrashIcon className="size-5" />
         </Button>

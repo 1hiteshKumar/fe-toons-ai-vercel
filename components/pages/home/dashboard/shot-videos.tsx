@@ -3,7 +3,7 @@
 import { ShotAssets } from "@/lib/types";
 import { convertGoogleDriveUrl, getGroupedShots } from "@/lib/helpers";
 import Loading from "@/components/loading";
-import { useMemo, useState } from "react";
+import { useMemo, useState, useRef, useEffect } from "react";
 import { Button } from "@/aural/components/ui/button";
 import TextArea from "@/aural/components/ui/textarea";
 import Heading from "@/components/heading";
@@ -11,6 +11,7 @@ import { EditBigIcon } from "@/aural/icons/edit-big-icon";
 import ShotHeader from "@/components/shot-header";
 import Image from "next/image";
 import ArrowRightIcon from "@/aural/icons/arrow-right-icon";
+import { cn } from "@/aural/lib/utils";
 
 interface StartFrame {
   sfx?: string[];
@@ -38,7 +39,10 @@ export default function ShotVideos({
 
   const [selectedScene, setSelectedScene] = useState<string>(initialScene);
   const [selectedShot, setSelectedShot] = useState(0);
-  const [playingVideo, setPlayingVideo] = useState<number | null>(null);
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const shouldAutoPlayRef = useRef(false);
+  const shotListRef = useRef<HTMLDivElement>(null);
+  const shotRefs = useRef<Map<number, HTMLDivElement>>(new Map());
 
   // Update selected scene if initial scene changes and current selection is invalid
   const effectiveSelectedScene = useMemo(() => {
@@ -67,6 +71,67 @@ export default function ShotVideos({
     const endSfx = endFrame && Array.isArray(endFrame.sfx) ? endFrame.sfx : [];
     return [...startSfx, ...endSfx].filter(Boolean);
   };
+
+  const moveToNextShot = () => {
+    const selectedSceneGroup = groupedShots.find(
+      (group) => group.scene_beat_id === effectiveSelectedScene
+    );
+    const shotsInScene = selectedSceneGroup?.shots || [];
+
+    // Set flag to auto-play next shot
+    shouldAutoPlayRef.current = true;
+
+    // Check if there's a next shot in the current scene
+    if (selectedShot < shotsInScene.length - 1) {
+      setSelectedShot(selectedShot + 1);
+    } else {
+      // Move to the next scene
+      const currentSceneIndex = groupedShots.findIndex(
+        (group) => group.scene_beat_id === effectiveSelectedScene
+      );
+      if (currentSceneIndex < groupedShots.length - 1) {
+        const nextScene = groupedShots[currentSceneIndex + 1];
+        setSelectedScene(nextScene.scene_beat_id);
+        setSelectedShot(0);
+      }
+    }
+  };
+
+  // Auto-play video when moving to next shot
+  useEffect(() => {
+    if (shouldAutoPlayRef.current && videoRef.current && data) {
+      const selectedSceneGroup = groupedShots.find(
+        (group) => group.scene_beat_id === effectiveSelectedScene
+      );
+      const shotsInScene = selectedSceneGroup?.shots || [];
+      const currentShotData = shotsInScene[selectedShot];
+      const videoUrl = currentShotData
+        ? getVideoUrl(currentShotData.single_image_video_url || "")
+        : "";
+
+      if (videoUrl) {
+        // Small delay to ensure video element is ready
+        const timer = setTimeout(() => {
+          videoRef.current?.play().catch(() => {
+            // Ignore autoplay errors
+          });
+        }, 150);
+        return () => clearTimeout(timer);
+      }
+    }
+    shouldAutoPlayRef.current = false;
+  }, [selectedShot, effectiveSelectedScene, groupedShots, data]);
+
+  // Scroll selected shot into view
+  useEffect(() => {
+    const shotElement = shotRefs.current.get(selectedShot);
+    if (shotElement) {
+      shotElement.scrollIntoView({
+        behavior: "smooth",
+        block: "nearest",
+      });
+    }
+  }, [selectedShot, effectiveSelectedScene]);
 
   if (!data) {
     return <Loading text="shot videos" />;
@@ -100,11 +165,11 @@ export default function ShotVideos({
             <Button
               onClick={onNext}
               variant="outline"
-              leftIcon={<ArrowRightIcon className="text-white" />}
-              innerClassName="bg-linear-to-r from-purple-900 via-purple-700 to-pink-600 text-white border-none"
+              rightIcon={<ArrowRightIcon className="text-white" />}
               noise="none"
+              className="font-fm-poppins"
             >
-              Continue to Next Step
+              Continue
             </Button>
           )
         }
@@ -137,7 +202,7 @@ export default function ShotVideos({
                   size="sm"
                 >
                   Scene {scene_beat_id}{" "}
-                  <span className="bg-">
+                  <span>
                     ({completed}/{total})
                   </span>
                 </Button>
@@ -149,55 +214,35 @@ export default function ShotVideos({
         {/* Main Video Display - Middle Column */}
         <div className="w-84">
           <div>
-            {selectedShotVideoUrl ? (
-              <div className="relative aspect-9/16 w-full shrink-0 max-h-[60vh] mt-7 flex justify-center">
-                <video
-                  src={selectedShotVideoUrl}
-                  controls
-                  className="h-full object-contain"
-                  onPlay={() =>
-                    setPlayingVideo(selectedShotData?.id || selectedShot)
-                  }
-                  onPause={() => setPlayingVideo(null)}
-                  onEnded={() => setPlayingVideo(null)}
-                />
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="absolute top-2 right-14"
-                  disabled
-                >
-                  <EditBigIcon className="size-5" />
-                  Edit Video
-                </Button>
-                {/* Play overlay indicator */}
-                {playingVideo === (selectedShotData?.id || selectedShot) && (
-                  <div className="absolute top-2 right-2 bg-fm-primary-600 text-white px-2 py-1 rounded text-xs font-semibold flex items-center gap-1 z-10">
-                    <span className="w-2 h-2 bg-white rounded-full animate-pulse" />
-                    Playing
-                  </div>
-                )}
-              </div>
-            ) : (
-              <div className="aspect-9/16 flex items-center justify-center text-fm-secondary-800 bg-fm-surface-tertiary shrink-0">
-                <div className="text-center">
-                  <svg
-                    className="w-12 h-12 mx-auto mb-2 opacity-50"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
+            <div
+              className={cn(
+                "relative aspect-9/16 w-full shrink-0 max-h-[60vh] mt-7 rounded-lg overflow-hidden",
+                !selectedShotVideoUrl && "bg-fm-surface-tertiary animate-pulse"
+              )}
+            >
+              {selectedShotVideoUrl && (
+                <>
+                  <video
+                    ref={videoRef}
+                    src={selectedShotVideoUrl}
+                    controls
+                    className="h-full object-contain"
+                    onEnded={() => {
+                      moveToNextShot();
+                    }}
+                  />
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="absolute top-2 right-14"
+                    disabled
                   >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"
-                    />
-                  </svg>
-                  <p className="text-sm">No video available</p>
-                </div>
-              </div>
-            )}
+                    <EditBigIcon className="size-5" />
+                    Edit Video
+                  </Button>
+                </>
+              )}
+            </div>
           </div>
         </div>
 
@@ -206,7 +251,10 @@ export default function ShotVideos({
           <h3 className="text-sm font-semibold text-fm-secondary-800 uppercase tracking-wide shrink-0">
             Videos ({shotsInScene.length})
           </h3>
-          <div className="flex-1 space-y-2 overflow-y-auto min-h-0">
+          <div
+            ref={shotListRef}
+            className="flex-1 space-y-2 overflow-y-auto min-h-0"
+          >
             {shotsInScene.map((shot, index) => {
               const isSelected = index === selectedShot;
               const shotStartFrame = shot.panel_data?.start_frame as
@@ -221,6 +269,13 @@ export default function ShotVideos({
               return (
                 <div
                   key={shot.id}
+                  ref={(el) => {
+                    if (el) {
+                      shotRefs.current.set(index, el);
+                    } else {
+                      shotRefs.current.delete(index);
+                    }
+                  }}
                   role="button"
                   tabIndex={0}
                   aria-pressed={isSelected}
@@ -228,13 +283,19 @@ export default function ShotVideos({
                   onClick={() => setSelectedShot(index)}
                   className={`w-full text-left p-3 rounded-lg border flex transition-all duration-200 shrink-0 ${
                     isSelected
-                      ? "border-fm-primary  shadow-sm"
+                      ? "border-fm-secondary-800  shadow-sm"
                       : "border-fm-divider-primary bg-fm-surface-secondary hover:border-fm-divider-contrast"
                   }`}
                 >
                   <div className="flex items-start gap-3 w-full">
                     <div className="flex-1 min-w-0 space-y-4">
-                      <ShotHeader duration="4s" shotNumber={index + 1} />
+                      <ShotHeader
+                        type="Video"
+                        duration={
+                          selectedShotData.panel_prompt_data?.duration || 5
+                        }
+                        shotNumber={index + 1}
+                      />
                       {shotDescription && (
                         <div className="space-y-0.5">
                           <p className="text-fm-sm font-medium text-fm-secondary-600 uppercase tracking-wide">
@@ -269,8 +330,14 @@ export default function ShotVideos({
                         </div>
                       )}
                     </div>
-                    {shot.start_frame_url ? (
-                      <div className="relative w-20 h-28 shrink-0 rounded-lg overflow-hidden border border-fm-divider-primary">
+                    <div
+                      className={cn(
+                        "relative w-20 h-28 shrink-0 rounded-lg overflow-hidden border border-fm-divider-primary",
+                        !shot.start_frame_url &&
+                          "animate-pulse bg-fm-surface-tertiary"
+                      )}
+                    >
+                      {shot.start_frame_url && (
                         <Image
                           src={getImageUrl(shot.start_frame_url)}
                           alt={`Shot ${index + 1} preview`}
@@ -278,12 +345,8 @@ export default function ShotVideos({
                           className="object-cover"
                           unoptimized
                         />
-                      </div>
-                    ) : (
-                      <div className="w-20 h-28 shrink-0 rounded-lg bg-fm-surface-tertiary border border-fm-divider-primary flex items-center justify-center">
-                        <p className="text-fm-sm text-center px-1">No image</p>
-                      </div>
-                    )}
+                      )}
+                    </div>
                   </div>
                 </div>
               );

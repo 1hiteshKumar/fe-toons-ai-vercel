@@ -47,7 +47,7 @@ export default function Publish({ data }: { data: ShotAssets | null }) {
 
   return (
     <div className="flex flex-col items-center justify-center min-h-[calc(100vh-200px)] ">
-      <div className="max-w-4xl w-full space-y-12">
+      <div className="max-w-5xl w-full space-y-12">
         {/* Header Section */}
         <div className="text-center space-y-4 animate-fadeIn">
           <div className="flex items-center justify-center gap-4 mb-2">
@@ -57,20 +57,24 @@ export default function Publish({ data }: { data: ShotAssets | null }) {
                 <AiAvatarIcon />
               </div>
             </div>
-            <h1 className="text-4xl md:text-6xl font-bold bg-gradient-to-r from-fm-primary-500 to-fm-secondary-500 bg-clip-text text-transparent">
-              Your Story is Complete!
+            <h1 className="text-4xl md:text-6xl font-bold bg-linear-to-r from-fm-primary-500 to-fm-secondary-500 bg-clip-text text-transparent">
+              Your Story is {!videoUrl && "Almost"} Complete!
             </h1>
           </div>
           <p className="text-xl md:text-2xl text-fm-secondary-700 font-light">
-            &quot;{showName}&quot; is ready to share with the world
+            &quot;{showName}&quot; is {!videoUrl && "getting"} ready to share
+            with the world
           </p>
         </div>
 
         {/* Video Container */}
-        <div className="flex justify-center animate-fadeIn" style={{ animationDelay: "0.1s" }}>
+        <div
+          className="flex justify-center animate-fadeIn"
+          style={{ animationDelay: "0.1s" }}
+        >
           {videoUrl ? (
             <div className="relative w-full max-w-xl group">
-              <div className="absolute -inset-1 bg-gradient-to-r from-fm-primary-500/50 via-fm-secondary-500/50 to-fm-primary-500/50 rounded-2xl blur-lg opacity-75 group-hover:opacity-100 transition-opacity duration-300" />
+              <div className="absolute -inset-1 bg-linear-to-r from-fm-primary-500/50 via-fm-secondary-500/50 to-fm-primary-500/50 rounded-2xl blur-lg opacity-75 group-hover:opacity-100 transition-opacity duration-300" />
               <div className="relative bg-fm-surface-secondary rounded-2xl p-2 overflow-hidden">
                 <video
                   src={videoUrl}
@@ -84,7 +88,7 @@ export default function Publish({ data }: { data: ShotAssets | null }) {
           ) : (
             <div className="relative">
               <div className="absolute inset-0 bg-fm-primary-500/20 blur-3xl rounded-full" />
-              <div className="relative w-40 h-40 bg-gradient-to-br from-fm-primary-500 to-fm-primary-700 rounded-full flex items-center justify-center shadow-2xl border-4 border-fm-primary-300">
+              <div className="relative w-40 h-40 bg-linear-to-br from-fm-primary-500 to-fm-primary-700 rounded-full flex items-center justify-center shadow-2xl border-4 border-fm-primary-300">
                 <span className="text-7xl font-bold text-white">!</span>
               </div>
             </div>
@@ -93,18 +97,24 @@ export default function Publish({ data }: { data: ShotAssets | null }) {
 
         {/* Status Message */}
         {!hasVideo && (
-          <div className="text-center space-y-2 animate-fadeIn" style={{ animationDelay: "0.2s" }}>
+          <div
+            className="text-center space-y-2 animate-fadeIn"
+            style={{ animationDelay: "0.2s" }}
+          >
             <h2 className="text-2xl md:text-3xl font-semibold text-fm-primary-500">
               Video Not Available
             </h2>
-            <p className="text-fm-secondary-600 text-lg max-w-xl mx-auto">
+            <p className="text-fm-neutral-300 text-sm max-w-xl mx-auto">
               The final video is still being processed or is not available.
             </p>
           </div>
         )}
 
         {/* Action Buttons */}
-        <div className="flex flex-col sm:flex-row gap-4 justify-center items-center animate-fadeIn" style={{ animationDelay: "0.3s" }}>
+        <div
+          className="flex flex-col sm:flex-row gap-4 justify-center items-center animate-fadeIn"
+          style={{ animationDelay: "0.3s" }}
+        >
           <Button
             onClick={handleDownload}
             variant="primary"
@@ -115,10 +125,11 @@ export default function Publish({ data }: { data: ShotAssets | null }) {
             Download Video
           </Button>
 
-          <Button 
-            onClick={handleCopyLink} 
+          <Button
+            onClick={handleCopyLink}
             variant="secondary"
             className="min-w-[200px]"
+            isDisabled={!hasVideo}
           >
             <CopyIcon className="size-5" />
             {copied ? "Link Copied!" : "Copy Share Link"}

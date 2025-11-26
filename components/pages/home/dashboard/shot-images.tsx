@@ -4,7 +4,7 @@ import { ShotAssets } from "@/lib/types";
 import Image from "next/image";
 import { convertGoogleDriveUrl, getGroupedShots } from "@/lib/helpers";
 import Loading from "@/components/loading";
-import { useMemo, useState } from "react";
+import { useMemo, useState, useRef, useEffect } from "react";
 import { Button } from "@/aural/components/ui/button";
 import TextArea from "@/aural/components/ui/textarea";
 import Heading from "@/components/heading";
@@ -12,6 +12,8 @@ import { EditBigIcon } from "@/aural/icons/edit-big-icon";
 import ShotHeader from "@/components/shot-header";
 import { Tag } from "@/aural/components/ui/tag";
 import ArrowRightIcon from "@/aural/icons/arrow-right-icon";
+import { PlayPauseIcon } from "@/aural/icons/play-pause-icon";
+import { cn } from "@/aural/lib/utils";
 
 export default function ShotImages({
   data,
@@ -29,6 +31,11 @@ export default function ShotImages({
 
   const [selectedScene, setSelectedScene] = useState<string>(initialScene);
   const [selectedShot, setSelectedShot] = useState(0);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const audioRef = useRef<HTMLAudioElement>(null);
+  const shouldAutoPlayRef = useRef(false);
+  const shotListRef = useRef<HTMLDivElement>(null);
+  const shotRefs = useRef<Map<number, HTMLDivElement>>(new Map());
 
   // Update selected scene if initial scene changes and current selection is invalid
   const effectiveSelectedScene = useMemo(() => {
@@ -42,6 +49,47 @@ export default function ShotImages({
     if (!url) return "";
     return convertGoogleDriveUrl(url);
   };
+
+  // Reset audio when shot changes
+  useEffect(() => {
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current.currentTime = 0;
+    }
+  }, [selectedShot, effectiveSelectedScene]);
+
+  // Auto-play audio when moving to next shot
+  useEffect(() => {
+    if (shouldAutoPlayRef.current) {
+      const selectedSceneGroup = groupedShots.find(
+        (group) => group.scene_beat_id === effectiveSelectedScene
+      );
+      const shotsInScene = selectedSceneGroup?.shots || [];
+      const currentShotData = shotsInScene[selectedShot];
+
+      if (currentShotData?.audio_url && audioRef.current) {
+        // Small delay to ensure audio element is ready
+        const timer = setTimeout(() => {
+          audioRef.current?.play().catch(() => {
+            // Ignore autoplay errors
+          });
+        }, 150);
+        return () => clearTimeout(timer);
+      }
+      shouldAutoPlayRef.current = false;
+    }
+  }, [selectedShot, effectiveSelectedScene, groupedShots]);
+
+  // Scroll selected shot into view
+  useEffect(() => {
+    const shotElement = shotRefs.current.get(selectedShot);
+    if (shotElement) {
+      shotElement.scrollIntoView({
+        behavior: "smooth",
+        block: "nearest",
+      });
+    }
+  }, [selectedShot, effectiveSelectedScene]);
 
   if (!data) {
     return <Loading text="shot images" />;
@@ -65,6 +113,43 @@ export default function ShotImages({
     ? getImageUrl(selectedShotData.start_frame_url || "")
     : "";
 
+  const toggleAudio = () => {
+    if (!audioRef.current || !selectedShotData?.audio_url) return;
+
+    if (isPlaying) {
+      audioRef.current.pause();
+      setIsPlaying(false);
+    } else {
+      audioRef.current.play();
+      setIsPlaying(true);
+    }
+  };
+
+  const moveToNextShot = () => {
+    const selectedSceneGroup = groupedShots.find(
+      (group) => group.scene_beat_id === effectiveSelectedScene
+    );
+    const shotsInScene = selectedSceneGroup?.shots || [];
+
+    // Set flag to auto-play next shot
+    shouldAutoPlayRef.current = true;
+
+    // Check if there's a next shot in the current scene
+    if (selectedShot < shotsInScene.length - 1) {
+      setSelectedShot(selectedShot + 1);
+    } else {
+      // Move to the next scene
+      const currentSceneIndex = groupedShots.findIndex(
+        (group) => group.scene_beat_id === effectiveSelectedScene
+      );
+      if (currentSceneIndex < groupedShots.length - 1) {
+        const nextScene = groupedShots[currentSceneIndex + 1];
+        setSelectedScene(nextScene.scene_beat_id);
+        setSelectedShot(0);
+      }
+    }
+  };
+
   return (
     <div>
       <Heading
@@ -75,11 +160,11 @@ export default function ShotImages({
             <Button
               onClick={onNext}
               variant="outline"
-              leftIcon={<ArrowRightIcon className="text-white" />}
-              innerClassName="bg-linear-to-r from-purple-900 via-purple-700 to-pink-600 text-white border-none"
+              rightIcon={<ArrowRightIcon className="text-white" />}
               noise="none"
+              className="font-fm-poppins"
             >
-              Continue to Next Step
+              Continue
             </Button>
           )
         }
@@ -122,32 +207,62 @@ export default function ShotImages({
         {/* Main Image Display - Middle Column */}
         <div className="w-84">
           <div className="rounded-xl  overflow-hidden h-full flex flex-col">
-            {selectedShotImageUrl ? (
-              <div className="relative aspect-9/16 w-full shrink-0 max-h-[60vh] mt-7">
-                <Image
-                  src={selectedShotImageUrl}
-                  alt={`Shot ${
-                    selectedShotData?.panel_number || selectedShot + 1
-                  }`}
-                  fill
-                  className="object-contain"
-                  unoptimized
-                />
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="absolute top-2 right-14"
-                  disabled
-                >
-                  <EditBigIcon className="size-5" />
-                  Edit Image
-                </Button>
-              </div>
-            ) : (
-              <div className="aspect-9/16 flex items-center justify-center text-fm-secondary-800 bg-fm-surface-tertiary shrink-0 max-h-[60vh]">
-                <p className="text-sm">No image available</p>
-              </div>
+            {selectedShotData?.audio_url && (
+              <audio
+                key={`${effectiveSelectedScene}-${selectedShot}`}
+                ref={audioRef}
+                src={selectedShotData.audio_url}
+                onEnded={() => {
+                  setIsPlaying(false);
+                  moveToNextShot();
+                }}
+                onPause={() => setIsPlaying(false)}
+                onPlay={() => setIsPlaying(true)}
+                onLoadStart={() => setIsPlaying(false)}
+                className="hidden"
+              />
             )}
+
+            <div
+              className={cn(
+                "relative aspect-9/16 w-full shrink-0 max-h-[60vh] mt-7 rounded-lg overflow-hidden",
+                !selectedShotImageUrl && "bg-fm-surface-tertiary animate-pulse"
+              )}
+            >
+              {" "}
+              {selectedShotImageUrl && (
+                <>
+                  {" "}
+                  <Image
+                    src={selectedShotImageUrl}
+                    alt={`Shot ${
+                      selectedShotData?.panel_number || selectedShot + 1
+                    }`}
+                    fill
+                    className="object-contain"
+                    unoptimized
+                  />
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="absolute top-2 right-14"
+                  >
+                    <EditBigIcon className="size-5" />
+                    Edit Image
+                  </Button>
+                  {selectedShotData?.audio_url && (
+                    <Button
+                      variant="secondary"
+                      size="sm"
+                      className="absolute bottom-2 right-12"
+                      onClick={toggleAudio}
+                    >
+                      <PlayPauseIcon isPlaying={isPlaying} className="size-5" />
+                    </Button>
+                  )}
+                </>
+              )}
+            </div>
           </div>
         </div>
 
@@ -156,7 +271,10 @@ export default function ShotImages({
           <h3 className="text-sm font-semibold text-fm-secondary-800 uppercase tracking-wide shrink-0">
             Shots ({shotsInScene.length})
           </h3>
-          <div className="flex-1 space-y-2 overflow-y-auto min-h-0">
+          <div
+            ref={shotListRef}
+            className="flex-1 space-y-2 overflow-y-auto min-h-0"
+          >
             {shotsInScene.map((shot, index) => {
               const isSelected = index === selectedShot;
               const shotStartFrame = shot.panel_data?.start_frame as
@@ -172,6 +290,13 @@ export default function ShotImages({
               return (
                 <div
                   key={shot.id}
+                  ref={(el) => {
+                    if (el) {
+                      shotRefs.current.set(index, el);
+                    } else {
+                      shotRefs.current.delete(index);
+                    }
+                  }}
                   role="button"
                   tabIndex={0}
                   aria-pressed={isSelected}
@@ -179,13 +304,20 @@ export default function ShotImages({
                   onClick={() => setSelectedShot(index)}
                   className={`w-full text-left p-3 rounded-lg border transition-all duration-200 shrink-0 ${
                     isSelected
-                      ? "border-fm-primary  shadow-sm"
+                      ? "border-fm-secondary-800  shadow-sm"
                       : "border-fm-divider-primary bg-fm-surface-secondary hover:border-fm-divider-contrast"
                   }`}
                 >
                   <div className="flex items-start gap-3 min-w-0">
                     <div className="flex-1 min-w-0 space-y-4">
-                      <ShotHeader duration="4s" shotNumber={index + 1} />
+                      <ShotHeader
+                        duration={
+                          shot.panel_prompt_data?.duration
+                            ? shot.panel_prompt_data.duration
+                            : 4
+                        }
+                        shotNumber={index + 1}
+                      />
                       <div className="flex gap-2">
                         {shotStartFrame?.frame_visual && (
                           <div className="space-y-0.5 w-full">
@@ -213,7 +345,7 @@ export default function ShotImages({
                           Object.values(shotStartFrame.dialogue).some(
                             (value) => value !== null && value !== ""
                           ) && (
-                            <div className="space-y-2 w-full">
+                            <div className="space-y-1.5 w-full">
                               <p className="text-fm-sm font-medium text-fm-secondary-600 uppercase tracking-wide">
                                 Dialogue
                               </p>
@@ -247,7 +379,7 @@ export default function ShotImages({
                           )}
                         {shotStartFrame?.thought &&
                           Object.values(shotStartFrame.thought).some(
-                           (value) => value !== null && value !== ""
+                            (value) => value !== null && value !== ""
                           ) && (
                             <div className="space-y-2 w-full">
                               <p className="text-fm-sm font-medium text-fm-secondary-600 uppercase tracking-wide">
@@ -283,8 +415,15 @@ export default function ShotImages({
                           )}
                       </div>
                     </div>
-                    {shot.start_frame_url ? (
-                      <div className="relative w-20 h-28 shrink-0 rounded-lg overflow-hidden border border-fm-divider-primary">
+
+                    <div
+                      className={cn(
+                        "relative w-20 h-28 shrink-0 rounded-lg overflow-hidden border border-fm-divider-primary",
+                        !shot.start_frame_url &&
+                          "animate-pulse bg-fm-surface-tertiary"
+                      )}
+                    >
+                      {shot.start_frame_url && (
                         <Image
                           src={getImageUrl(shot.start_frame_url)}
                           alt={`Shot ${index + 1} preview`}
@@ -292,12 +431,8 @@ export default function ShotImages({
                           className="object-cover"
                           unoptimized
                         />
-                      </div>
-                    ) : (
-                      <div className="w-20 h-28 shrink-0 rounded-lg bg-fm-surface-tertiary border border-fm-divider-primary flex items-center justify-center">
-                        <p className="text-fm-sm text-center px-1">No image</p>
-                      </div>
-                    )}
+                      )}
+                    </div>
                   </div>
                 </div>
               );
