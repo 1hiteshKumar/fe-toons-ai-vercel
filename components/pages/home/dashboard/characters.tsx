@@ -72,7 +72,8 @@ export default function Characters({ onNext }: { onNext?: () => void }) {
               variant="outline"
               rightIcon={<ArrowRightIcon className="text-white" />}
               noise="none"
-              className="font-fm-poppins"
+              className="font-fm-poppins rounded-lg"
+              innerClassName="rounded-lg"
             >
               Continue
             </Button>
@@ -156,7 +157,7 @@ export default function Characters({ onNext }: { onNext?: () => void }) {
                     onClick={() => setSelectedView("front")}
                     variant={"outline"}
                     noise="none"
-                    innerClassName={cn("", {
+                    innerClassName={cn("rounded-xl!", {
                       "bg-[#833AFF] border-none": selectedView === "front",
                     })}
                   >
@@ -166,7 +167,7 @@ export default function Characters({ onNext }: { onNext?: () => void }) {
                     variant={"outline"}
                     onClick={() => setSelectedView("back")}
                     noise="none"
-                    innerClassName={cn("", {
+                    innerClassName={cn("rounded-xl!", {
                       "bg-[#833AFF] border-none": selectedView === "back",
                     })}
                   >

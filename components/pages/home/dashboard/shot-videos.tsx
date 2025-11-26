@@ -172,7 +172,8 @@ export default function ShotVideos({
               variant="outline"
               rightIcon={<ArrowRightIcon className="text-white" />}
               noise="none"
-              className="font-fm-poppins"
+              className="font-fm-poppins rounded-lg"
+              innerClassName="rounded-lg"
             >
               Continue
             </Button>
