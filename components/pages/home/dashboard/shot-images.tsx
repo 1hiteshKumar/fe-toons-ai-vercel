@@ -70,7 +70,7 @@ export default function ShotImages({ data }: { data: ShotAssets | null }) {
           <h3 className="text-sm font-semibold text-fm-secondary-800 uppercase tracking-wide shrink-0">
             Scenes
           </h3>
-          <div className="flex flex-col gap-2 max-h-[70vh] w-32 overflow-auto min-h-0 py-1">
+          <div className="flex flex-col gap-2 max-h-[65vh] w-32 overflow-auto min-h-0 py-1">
             {groupedShots.map(({ scene_beat_id, shots }) => {
               const total = shots.length;
               const completed = shots.filter(
