@@ -48,14 +48,23 @@ export default function ShotHeader({
         )}
       </div>
       <div className="flex gap-2">
-        <Button variant="outline" size="sm" noise="none" className="" disabled>
+        <Button
+          variant="outline"
+          size="sm"
+          className="cursor-not-allowed"
+          disabled
+        >
           {" "}
           <EditBigIcon className="size-5" />
+          Edit Image
         </Button>
-        <Button variant="outline" size="sm" noise="none" className="" disabled>
-          <WarningIcon className="size-5" />
-        </Button>
-        <Button variant="outline" size="sm" noise="none" className="" disabled>
+        <Button
+          variant="outline"
+          size="sm"
+          noise="low"
+          disabled
+          innerClassName="bg-fm-primary-700 border-none cursor-not-allowed"
+        >
           <TrashIcon className="size-5" />
         </Button>
       </div>

@@ -152,7 +152,8 @@ export default function ShotVideos({ data }: { data: ShotAssets | null }) {
                   className="absolute top-2 right-14"
                   disabled
                 >
-                  <EditBigIcon />
+                  <EditBigIcon className="size-5" />
+                  Edit Video
                 </Button>
                 {/* Play overlay indicator */}
                 {playingVideo === (selectedShotData?.id || selectedShot) && (
@@ -188,7 +189,7 @@ export default function ShotVideos({ data }: { data: ShotAssets | null }) {
         {/* Shot List - Right Column */}
         <div className="flex flex-col flex-1 min-w-0 space-y-3 max-h-[75vh]">
           <h3 className="text-sm font-semibold text-fm-secondary-800 uppercase tracking-wide shrink-0">
-            Shots ({shotsInScene.length})
+            Videos ({shotsInScene.length})
           </h3>
           <div className="flex-1 space-y-2 overflow-y-auto min-h-0">
             {shotsInScene.map((shot, index) => {
@@ -223,7 +224,7 @@ export default function ShotVideos({ data }: { data: ShotAssets | null }) {
                       {shotDescription && (
                         <div className="space-y-0.5">
                           <p className="text-fm-sm font-medium text-fm-secondary-600 uppercase tracking-wide">
-                            Description
+                            Cinematography Description
                           </p>
                           <TextArea
                             value={shotDescription}

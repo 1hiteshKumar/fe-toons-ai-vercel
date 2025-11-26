@@ -61,7 +61,7 @@ export default function ShotImages({ data }: { data: ShotAssets | null }) {
   return (
     <div>
       <Heading
-        heading="Shot Storyboard"
+        heading="Shot Images"
         subHeading="View and edit your shot images, dialogue, actions, and narration."
       />
       <div className="flex gap-6 w-full min-h-0 h-full">
@@ -119,7 +119,8 @@ export default function ShotImages({ data }: { data: ShotAssets | null }) {
                   className="absolute top-2 right-14"
                   disabled
                 >
-                  <EditBigIcon />
+                  <EditBigIcon className="size-5" />
+                  Edit Image
                 </Button>
               </div>
             ) : (
@@ -169,7 +170,7 @@ export default function ShotImages({ data }: { data: ShotAssets | null }) {
                         {shotStartFrame?.frame_description && (
                           <div className="space-y-0.5 w-full">
                             <p className="text-fm-sm font-medium text-fm-secondary-600 uppercase tracking-wide">
-                              Description
+                              Shot Description
                             </p>
                             <TextArea
                               value={shotStartFrame.frame_description}
@@ -246,6 +247,7 @@ export default function ShotImages({ data }: { data: ShotAssets | null }) {
                                           color="neutral"
                                           emphasis="secondary"
                                           size="xs"
+                                          className="bg-fm-surface-tertiary rounded-md"
                                         >
                                           {character}
                                         </Tag>
