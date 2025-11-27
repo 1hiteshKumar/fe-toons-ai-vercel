@@ -53,223 +53,340 @@ function UserUploadsContent() {
   const selectedStyle = STYLE_OPTIONS.find((style) => style.code === styleId);
 
   return (
-    <div className="w-full min-h-screen pb-8">
-      {/* Logo at top center */}
-      <div className="flex justify-center items-center py-8 mb-8">
+    <div className="w-full space-y-12">
+      <nav className="flex items-center justify-center text-2xl gap-2 font-bold">
         <Image
-          src="/images/toons.png"
-          alt="Pocket Toons Logo"
-          width={200}
-          height={60}
-          className="h-auto w-auto max-w-[200px]"
+          src="/images/pockettoons-logo.webp"
+          alt="PocketToons Logo"
+          width={120}
+          height={40}
+          className="h-10 w-auto"
           priority
         />
-      </div>
+        Pocket Toons
+      </nav>
+      <div className="flex">
+        <section className="flex-1 space-y-7 mt-8">
+          <div>
+            <p className="font-bold text-2xl">Tell your story</p>
+            <p className="max-w-lg text-fm-neutral-1100/80 text-fm-md mt-4">
+              Share your imagination and watch it transform into an anime. Every
+              great story starts with a single idea!
+            </p>
+          </div>
+          <div className="mt-12 space-y-4">
+            <div className="space-y-4 flex items-center gap-4">
+              <Input
+                id="show-name"
+                label="Show Name"
+                placeholder="Enter show name"
+                value={showName}
+                onChange={(e) => setShowName(e.target.value)}
+                decoration="outline"
+                fullWidth
+                classes={{
+                  label: "font-poppins mb-2",
+                  input: "bg-black text-fm-md rounded-xl border-0",
+                }}
+              />
 
-      {/* Main content: Two column layout */}
-      <div className="container mx-auto px-4 lg:px-8">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 max-w-7xl mx-auto">
-          {/* Left Column: Story Creation Form */}
-          <div className="w-full">
-            <div className="space-y-6">
-              <div>
-                <h1 className="text-2xl font-bold mb-3 text-white">
-                  Tell your story
-                </h1>
-                <p className="text-fm-md text-[#FFFFFFCC] leading-relaxed">
-                  Share your imagination and watch it transform into an anime.
-                  Every great story starts with a single idea!
+              <div className="w-full mb-4.5">
+                <p className="font-fm-poppins text-fm-sm mb-2 text-fm-neutral-1100/80">
+                  STYLE
                 </p>
-              </div>
-
-              <div className="space-y-2 flex gap-4 items-baseline">
-                <div>
-                  <Input
-                    id="show-name"
-                    label="Show Name"
-                    placeholder="Enter show name"
-                    value={showName}
-                    onChange={(e) => setShowName(e.target.value)}
-                    decoration="outline"
-                    fullWidth
-                    className="[&_input]:bg-black [&_input]:border-none [&_input]:rounded-[12px] [&_input]:text-white [&_input]:placeholder:text-fm-neutral-500 [&_input]:focus:outline-none [&_input]:focus:ring-0"
-                    classes={{
-                      label:
-                        "text-[#FFFFFFCC] font-fm-poppins text-sm normal-case mb-1",
-                    }}
-                  />
-                </div>
-
-                <div className="w-full">
-                  <label className="text-fm-sm font-fm-medium block mb-1 text-[#FFFFFFCC]">
-                    Style
-                  </label>
-                  <DropdownMenu
-                    open={isStyleDropdownOpen}
-                    onOpenChange={setStyleDropdownOpen}
+                <DropdownMenu
+                  open={isStyleDropdownOpen}
+                  onOpenChange={setStyleDropdownOpen}
+                >
+                  <DropdownMenuTrigger
+                    asChild
+                    className="border-0 bg-black rounded-xl"
                   >
-                    <DropdownMenuTrigger asChild>
-                      <button
-                        type="button"
-                        className={cn(
-                          "w-full h-12 px-3 py-4 rounded-[12px]",
-                          "text-white font-fm-text leading-fm-md text-fm-md",
-                          "bg-black border-none",
-                          "focus:outline-none focus:ring-0",
-                          "transition-all duration-200",
-                          "flex items-center justify-between"
-                        )}
+                    <button
+                      type="button"
+                      className={cn(
+                        "w-full h-12 px-3 py-4 rounded-fm-s border",
+                        "text-fm-primary font-fm-text leading-fm-md text-fm-md",
+                        "border-fm-divider-primary focus:border-fm-divider-contrast",
+                        "focus:outline-none transition-all duration-200",
+                        "flex items-center justify-between",
+                        "hover:border-fm-divider-contrast"
+                      )}
+                    >
+                      <span
+                        className={cn(!selectedStyle && "text-fm-placeholder")}
                       >
-                        <span
-                          className={cn(
-                            !selectedStyle && "text-fm-neutral-500",
-                            selectedStyle && "text-white"
-                          )}
-                        >
-                          {selectedStyle?.name || "Select a style"}
-                        </span>
-                        <ChevronRightIcon
-                          className={cn(
-                            "size-5 text-white transition-transform border border-white rounded-[100%] ",
-                            isStyleDropdownOpen && "rotate-90"
-                          )}
-                        />
-                      </button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent
-                      align="start"
-                      className="w-(--radix-dropdown-menu-trigger-width) bg-black rounded-[12px] border-none shadow-lg"
-                      classes={{
-                        root: "bg-black rounded-[12px] border-none",
-                        border: "hidden",
+                        {selectedStyle?.name || "Select a style"}
+                      </span>
+                      <ChevronRightIcon
+                        className={cn(
+                          "size-5 text-fm-icon-active transition-transform border rounded-full",
+                          isStyleDropdownOpen ? "-rotate-90" : "rotate-90"
+                        )}
+                      />
+                    </button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent
+                    align="start"
+                    className="w-(--radix-dropdown-menu-trigger-width) bg-black"
+                  >
+                    <DropdownMenuRadioGroup
+                      value={styleId?.toString()}
+                      onValueChange={(value) => {
+                        setStyleId(value ? parseInt(value, 10) : null);
+                        setStyleDropdownOpen(false);
                       }}
                     >
-                      <DropdownMenuRadioGroup
-                        value={styleId?.toString()}
-                        onValueChange={(value) => {
-                          setStyleId(value ? parseInt(value, 10) : null);
-                          setStyleDropdownOpen(false);
-                        }}
-                      >
-                        {STYLE_OPTIONS.map((style) => (
-                          <DropdownMenuRadioItem
-                            key={style.code}
-                            value={style.code.toString()}
-                            className="text-white hover:bg-fm-neutral-200/10 focus:bg-fm-neutral-200/10"
-                          >
-                            {style.name}
-                          </DropdownMenuRadioItem>
-                        ))}
-                      </DropdownMenuRadioGroup>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </div>
+                      {STYLE_OPTIONS.map((style) => (
+                        <DropdownMenuRadioItem
+                          key={style.code}
+                          value={style.code.toString()}
+                        >
+                          {style.name}
+                        </DropdownMenuRadioItem>
+                      ))}
+                    </DropdownMenuRadioGroup>
+                  </DropdownMenuContent>
+                </DropdownMenu>
               </div>
+            </div>
+            <TextArea
+              id="script-text"
+              minHeight={200}
+              maxHeight={400}
+              maxLength={2000}
+              placeholder="Once upon a time, in a world where..."
+              value={scriptText}
+              autoGrow
+              onChange={(e) => setScriptText(e.target.value)}
+              classes={{
+                textarea: "border-0 rounded-xl bg-fm-neutral-0! font-fm-poppins p-4!",
+              }}
+            />
 
-              <div>
-                <TextArea
-                  id="script-text"
-                  minHeight={200}
-                  maxLength={2000}
-                  placeholder="Once upon a time, in a world where..."
-                  value={scriptText}
-                  onChange={(e) => setScriptText(e.target.value)}
-                  decoration="outline"
-                  className="[&_textarea]:bg-black [&_textarea]:rounded-[12px]  [&_textarea]:p-4 [&_textarea]:border-none [&_textarea]:text-white [&_textarea]:placeholder:text-fm-neutral-500 "
-                />
-              </div>
+            <div className="mt-8">
+              <p className="text-fm-md font-fm-poppins mb-2 text-fm-neutral-1100/80">
+                Character Description
+              </p>
+              <div
+                {...getRootProps()}
+                className={cn(
+                  "border-2 border-dashed bg-fm-neutral-0 rounded-fm-xl p-8 text-center cursor-pointer transition-all",
+                  isDragActive
+                    ? "border-fm-neutral-800"
+                    : "border-fm-neutral-500",
+                  selectedFile && "border-fm-primary bg-fm-neutral-0",
+                  loading && "cursor-wait pointer-events-none"
+                )}
+              >
+                <input {...getInputProps()} />
 
-              {/* <span className="flex justify-end text-fm-neutral-400 text-fm-sm">
-                {scriptText.length}/2000
-              </span> */}
-
-              <div>
-                <span className="text-fm-md font-fm-medium block mb-2 text-[#FFFFFFCC]">
-                  Character Description
-                </span>
-                <div
-                  {...getRootProps()}
-                  className={cn(
-                    "border border-dashed rounded-lg p-8 text-center cursor-pointer transition-all bg-black!",
-                    "border-fm-neutral-500 bg-transparent",
-                    isDragActive && "border-fm-neutral-400 bg-black",
-                    selectedFile && "border-fm-primary bg-black",
-                    loading && "cursor-wait pointer-events-none opacity-50"
-                  )}
-                >
-                  <input {...getInputProps()} />
-
-                  {selectedFile ? (
-                    <div className="space-y-2">
-                      <p className="text-sm text-white">{selectedFile.name}</p>
-                      <Button
-                        variant="text"
-                        size="sm"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleRemoveFile();
-                        }}
-                      >
-                        Remove file
-                      </Button>
-                    </div>
-                  ) : (
-                    <div className="space-y-3">
-                      <p className="text-fm-md text-white">
-                        Drag and drop your character description sheet here or
-                        click to select
-                      </p>
-                      <p className="text-fm-sm text-[#FFFFFFCC]">
-                        Only .csv files are supported
-                      </p>
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              <div className="flex justify-center pt-2">
-                <Button
-                  isDisabled={
-                    !(scriptText && selectedFile && showName && styleId) ||
-                    loading
-                  }
-                  onClick={onGenerate}
-                  className="min-w-44"
-                  variant="outline"
-                  noise="none"
-                  innerClassName="border-none bg-[#833AFF] rounded-lg font-fm-poppins text-fm-lg text-white"
-                >
-                  Generate Anime
-                </Button>
+                {selectedFile ? (
+                  <div className="space-y-14">
+                    <p className="text-sm">{selectedFile.name}</p>
+                    <Button
+                      variant="text"
+                      size="sm"
+                      noise="none"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleRemoveFile();
+                      }}
+                    >
+                      Remove file
+                    </Button>
+                  </div>
+                ) : (
+                  <div className="space-y-4 p-4">
+                    <p className="text-fm-base max-w-sm mx-auto">
+                      Drag and drop your character description sheet here or
+                      click to select
+                    </p>
+                    <p className="text-fm-sm text-fm-neutral-1100/80">
+                      Only .CSV files are accepted
+                    </p>
+                  </div>
+                )}
               </div>
             </div>
           </div>
-
-          {/* Right Column: Character Illustration + Stories */}
-          <div className="w-full flex flex-col gap-8">
-            {/* Character Illustration */}
-            <div className="w-full flex justify-center items-center lg:justify-end">
-              <div className="relative w-full max-w-md lg:max-w-lg">
-                <Image
-                  src="/images/characters.webp"
-                  alt="Anime Characters"
-                  width={500}
-                  height={600}
-                  className="w-full h-auto object-contain"
-                  priority
-                />
-              </div>
-            </div>
-
-            {/* Your Stories Section */}
-            <div className="w-full">
-              <UserStories stories={stories} />
-            </div>
+          <div className="flex justify-center mt-4">
+            <Button
+              isDisabled={
+                !(scriptText && selectedFile && showName && styleId) || loading
+              }
+              variant="outline"
+              noise="none"
+              className="font-fm-poppins rounded-sm"
+              onClick={onGenerate}
+                innerClassName="border-none bg-[#833AFF] rounded-lg font-fm-poppins text-fm-lg text-white"
+            >
+              <span className="border-none">Generate Anime</span>
+            </Button>
           </div>
-        </div>
+        </section>
+        <section className="flex-1 mt-8 pl-12">
+          <Image
+            src="/images/home-banner.webp"
+            alt="Home banner"
+            height={420}
+            width={470}
+          />
+          <UserStories stories={stories} />
+        </section>
       </div>
     </div>
   );
+
+  // return (
+  //   <div className="w-full">
+  //     <div className="mx-auto max-w-4xl shadow-fm-button-shadow-secondary rounded-fm-3xl border p-10  shadow-xl">
+  //       <h1 className="text-center text-fm-4xl font-fm-extrabold mb-4">
+  //         Tell Your Story
+  //       </h1>
+  //       <p className="text-center max-w-xl mx-auto mb-10">
+  //         Share your imagination and watch it transform into an animated
+  //         masterpiece. Every great story starts with a single idea.
+  //       </p>
+
+  //       <div className="space-y-4 flex items-center gap-4">
+  //         <Input
+  //           id="show-name"
+  //           label="Show Name"
+  //           placeholder="Enter show name"
+  //           value={showName}
+  //           onChange={(e) => setShowName(e.target.value)}
+  //           decoration="outline"
+  //           fullWidth
+  //         />
+
+  //         <div className="w-full mb-4.5">
+  //           <label className="text-fm-sm font-fm-medium block">Style</label>
+  //           <DropdownMenu
+  //             open={isStyleDropdownOpen}
+  //             onOpenChange={setStyleDropdownOpen}
+  //           >
+  //             <DropdownMenuTrigger asChild>
+  //               <button
+  //                 type="button"
+  //                 className={cn(
+  //                   "w-full h-12 px-3 py-4 rounded-fm-s border",
+  //                   "text-fm-primary font-fm-text leading-fm-md text-fm-md",
+  //                   "border-fm-divider-primary focus:border-fm-divider-contrast",
+  //                   "focus:outline-none transition-all duration-200",
+  //                   "flex items-center justify-between",
+  //                   "hover:border-fm-divider-contrast"
+  //                 )}
+  //               >
+  //                 <span className={cn(!selectedStyle && "text-fm-placeholder")}>
+  //                   {selectedStyle?.name || "Select a style"}
+  //                 </span>
+  //                 <ChevronRightIcon
+  //                   className={cn(
+  //                     "size-4 text-fm-icon-active transition-transform",
+  //                     isStyleDropdownOpen && "rotate-90"
+  //                   )}
+  //                 />
+  //               </button>
+  //             </DropdownMenuTrigger>
+  //             <DropdownMenuContent
+  //               align="start"
+  //               className="w-(--radix-dropdown-menu-trigger-width)"
+  //             >
+  //               <DropdownMenuRadioGroup
+  //                 value={styleId?.toString()}
+  //                 onValueChange={(value) => {
+  //                   setStyleId(value ? parseInt(value, 10) : null);
+  //                   setStyleDropdownOpen(false);
+  //                 }}
+  //               >
+  //                 {STYLE_OPTIONS.map((style) => (
+  //                   <DropdownMenuRadioItem
+  //                     key={style.code}
+  //                     value={style.code.toString()}
+  //                   >
+  //                     {style.name}
+  //                   </DropdownMenuRadioItem>
+  //                 ))}
+  //               </DropdownMenuRadioGroup>
+  //             </DropdownMenuContent>
+  //           </DropdownMenu>
+  //         </div>
+  //       </div>
+
+  //       <TextArea
+  //         id="script-text"
+  //         label="Enter story"
+  //         minHeight={200}
+  //         maxLength={2000}
+  //         placeholder="Once upon a time, in a world where..."
+  //         value={scriptText}
+  //         onChange={(e) => setScriptText(e.target.value)}
+  //         className="mt-4"
+  //       />
+
+  //       <span className="flex justify-end text-fm-neutral-400 text-fm-sm mt-2">
+  //         {scriptText.length}/2000
+  //       </span>
+
+  //       <div>
+  //         <span className="text-xs font-fm-brand ">Character Description</span>
+  //         <div
+  //           {...getRootProps()}
+  //           className={cn(
+  //             "border-2 border-dashed rounded-fm-lg p-8 text-center cursor-pointer transition-all",
+  //             isDragActive ? "border-fm-neutral-800" : "border-fm-neutral-500",
+  //             selectedFile && "border-fm-primary bg-fm-neutral-100",
+  //             loading && "cursor-wait pointer-events-none"
+  //           )}
+  //         >
+  //           <input {...getInputProps()} />
+
+  //           {selectedFile ? (
+  //             <div className="space-y-2">
+  //               <p className="text-sm">{selectedFile.name}</p>
+  //               <Button
+  //                 variant="text"
+  //                 size="sm"
+  //                 onClick={(e) => {
+  //                   e.stopPropagation();
+  //                   handleRemoveFile();
+  //                 }}
+  //               >
+  //                 Remove file
+  //               </Button>
+  //             </div>
+  //           ) : (
+  //             <div className="space-y-2">
+  //               <p className="text-fm-base text-fm-neutral-600">
+  //                 Drag and drop a CSV file here, or click to select
+  //               </p>
+  //               <p className="text-fm-sm text-fm-neutral-400">
+  //                 Only CSV files are accepted
+  //               </p>
+  //             </div>
+  //           )}
+  //         </div>
+  //       </div>
+
+  //       <div className="flex justify-end mt-4">
+  //         <Button
+  //           isDisabled={
+  //             !(scriptText && selectedFile && showName && styleId) || loading
+  //           }
+  //           onClick={onGenerate}
+  //         >
+  //           Generate
+  //         </Button>
+  //       </div>
+
+  //       <p className="text-center text-fm-neutral-400 text-fm-sm">
+  //         Your story will be transformed into an animated experience
+  //       </p>
+  //     </div>
+  //     <UserStories stories={stories} />
+  //   </div>
+  // );
 }
 
 export default function UserUploads() {
