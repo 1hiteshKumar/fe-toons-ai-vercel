@@ -1,9 +1,7 @@
 import React from "react";
 import { ClockIcon } from "../aural/icons/clock-icon";
 import { cn } from "../aural/lib/utils";
-import { Button } from "@/aural/components/ui/button";
-import { EditBigIcon } from "@/aural/icons/edit-big-icon";
-import { TrashIcon } from "@/aural/icons/trash-icon";
+import { Pencil, Trash } from "@/lib/icons";
 
 export interface ShotHeaderProps {
   type?: string;
@@ -20,54 +18,34 @@ export default function ShotHeader({
 }: ShotHeaderProps) {
   return (
     <div className="flex justify-between">
-      <div
-        className={cn(
-          "flex items-center rounded-full bg-fm-neutral-200 border border-fm-divider-primary w-max ",
-          className
-        )}
-      >
+      <div className={cn("flex items-center w-max ", className)}>
         {/* Shot Identifier Section */}
-        <div className="flex items-center justify-center px-4 py-3">
-          <span className="font-bold text-white text-sm">
+        <div className="flex items-center justify-center p-3">
+          <span className="font-bold text-white text-fm-lg font-fm-poppins">
             Shot {shotNumber}
           </span>
         </div>
 
-        {/* Vertical Divider */}
-        <div className="h-full w-px bg-fm-divider-secondary" />
-
-        {/* Vertical Divider */}
         {duration && (
           <>
-            <div className="h-full w-px bg-fm-divider-primary" />
             {/* Duration Indicator Section */}
-            <div className="flex items-center justify-center gap-1.5 px-4 py-3">
-              <ClockIcon className="h-4 w-4 text-fm-neutral-600" />
-              <span className="text-fm-neutral-600 text-sm">{duration}s</span>
+            <div className="flex items-center justify-center gap-1 p-2 bg-[#1F1F1F] rounded-xl">
+              <ClockIcon className="h-4 w-4 text-white" />
+              <span className="text-white text-fm-md font-bold font-fm-poppins">
+                {duration}s
+              </span>
             </div>
           </>
         )}
       </div>
-      <div className="flex gap-2">
-        <Button
-          variant="outline"
-          size="sm"
-          className="cursor-not-allowed"
-          disabled
-        >
+      <div className="flex gap-5">
+        <button className="cursor-not-allowed" disabled>
+          <Trash />
+        </button>
+        <button className="cursor-not-allowed" disabled>
           {" "}
-          <EditBigIcon className="size-5" />
-          Edit {type || "Image"}
-        </Button>
-        <Button
-          variant="outline"
-          size="sm"
-          noise="low"
-          disabled
-          innerClassName="bg-fm-primary-400 border-none cursor-not-allowed"
-        >
-          <TrashIcon className="size-5" />
-        </Button>
+          <Pencil />
+        </button>
       </div>
     </div>
   );

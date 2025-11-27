@@ -18,7 +18,7 @@ export const API_URLS = {
 };
 
 export const TABS = [
-  { id: "upload-story", label: "Upload Story" },
+  { id: "story", label: "Story" },
   { id: "scenes", label: "Scenes" },
   { id: "characters", label: "Characters" },
   { id: "shot-images", label: "Shot Images" },

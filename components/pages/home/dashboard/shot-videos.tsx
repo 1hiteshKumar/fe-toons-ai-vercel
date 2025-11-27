@@ -1,6 +1,6 @@
 "use client";
 
-import { ShotAssets } from "@/lib/types";
+import { GeneratingStatus, ShotAssets } from "@/lib/types";
 import { convertGoogleDriveUrl, getGroupedShots } from "@/lib/helpers";
 import Loading from "@/components/loading";
 import { useMemo, useState, useRef, useEffect } from "react";
@@ -15,20 +15,27 @@ import { cn } from "@/aural/lib/utils";
 
 interface StartFrame {
   sfx?: string[];
+  narration?: string | null;
+  frame_visual?: string;
+  dialogue?: Record<string, string | null>;
+  thought?: Record<string, string | null>;
   [key: string]: unknown;
 }
 
 interface EndFrame {
   sfx?: string[];
+
   [key: string]: unknown;
 }
 
 export default function ShotVideos({
   data,
   onNext,
+  generatingStatus,
 }: {
   data: ShotAssets | null;
   onNext?: () => void;
+  generatingStatus: GeneratingStatus;
 }) {
   const groupedShots = useMemo(() => getGroupedShots(data), [data]);
 
@@ -133,11 +140,14 @@ export default function ShotVideos({
     }
   }, [selectedShot, effectiveSelectedScene]);
 
-  if (!data) {
+  if (
+    !data?.results.length &&
+    (generatingStatus === "IN_PROGRESS" || generatingStatus === "PENDING")
+  ) {
     return <Loading text="shot videos" />;
   }
 
-  if (!data.results || data.results.length === 0) {
+  if (!data?.results.length) {
     return (
       <div className="flex items-center justify-center h-96">
         <p className="text-fm-primary text-lg">No shot videos found</p>
@@ -167,7 +177,8 @@ export default function ShotVideos({
               variant="outline"
               rightIcon={<ArrowRightIcon className="text-white" />}
               noise="none"
-              className="font-fm-poppins"
+              className="font-fm-poppins rounded-lg"
+              innerClassName="rounded-lg"
             >
               Continue
             </Button>
@@ -177,10 +188,10 @@ export default function ShotVideos({
       <div className="flex gap-6 w-full min-h-0 h-full">
         {/* Scene Selection - Left Column */}
         <div className="flex flex-col gap-3 shrink-0">
-          <h3 className="text-sm font-semibold text-fm-secondary-800 uppercase tracking-wide shrink-0">
+          {/* <h3 className="text-sm font-semibold text-fm-secondary-800 uppercase tracking-wide shrink-0">
             Scenes
-          </h3>
-          <div className="flex flex-col gap-2 w-32 max-h-[65vh] overflow-y-auto min-h-0 p-1">
+          </h3> */}
+          <div className="flex flex-col gap-4 w-full max-h-[70vh] overflow-y-auto min-h-0 py-1">
             {groupedShots.map(({ scene_beat_id, shots }) => {
               const total = shots.length;
               const completed = shots.filter(
@@ -188,69 +199,71 @@ export default function ShotVideos({
               ).length;
 
               return (
-                <Button
+                <button
                   key={scene_beat_id}
-                  variant={
-                    effectiveSelectedScene === scene_beat_id
-                      ? "primary"
-                      : "secondary"
-                  }
                   onClick={() => {
                     setSelectedScene(scene_beat_id);
                     setSelectedShot(0);
                   }}
-                  size="sm"
+                  className={cn(
+                    "bg-black w-full p-4 flex items-center gap-2 rounded-xl text-nowrap font-fm-poppins text-fm-lg font-bold cursor-pointer ",
+                    {
+                      "bg-[#833AFF]": effectiveSelectedScene === scene_beat_id,
+                    }
+                  )}
                 >
-                  Scene {scene_beat_id}{" "}
-                  <span>
+                  <span> Scene {scene_beat_id} </span>
+                  <span
+                    className={cn("bg-[#2A2A2A] rounded-[100px] p-2 ", {
+                      "bg-[#4207A5]": effectiveSelectedScene === scene_beat_id,
+                    })}
+                  >
                     ({completed}/{total})
                   </span>
-                </Button>
+                </button>
               );
             })}
           </div>
         </div>
 
         {/* Main Video Display - Middle Column */}
-        <div className="w-84">
-          <div>
-            <div
-              className={cn(
-                "relative aspect-9/16 w-full shrink-0 max-h-[60vh] mt-7 rounded-lg overflow-hidden",
-                !selectedShotVideoUrl && "bg-fm-surface-tertiary animate-pulse"
-              )}
-            >
-              {selectedShotVideoUrl && (
-                <>
-                  <video
-                    ref={videoRef}
-                    src={selectedShotVideoUrl}
-                    controls
-                    className="h-full object-contain"
-                    onEnded={() => {
-                      moveToNextShot();
-                    }}
-                  />
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="absolute top-2 right-14"
-                    disabled
-                  >
-                    <EditBigIcon className="size-5" />
-                    Edit Video
-                  </Button>
-                </>
-              )}
-            </div>
+        <div className="w-92">
+          <div
+            className={cn(
+              "relative aspect-9/16 w-full shrink-0 max-h-[70vh] rounded-lg overflow-hidden",
+              !selectedShotVideoUrl && "bg-fm-surface-tertiary animate-pulse"
+            )}
+          >
+            {selectedShotVideoUrl && (
+              <>
+                <video
+                  ref={videoRef}
+                  src={selectedShotVideoUrl}
+                  controls
+                  className="h-full object-cover w-full"
+                  onEnded={() => {
+                    moveToNextShot();
+                  }}
+                />
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="absolute top-2 right-6"
+                  disabled
+                >
+                  <EditBigIcon className="size-5" />
+                  Edit Video
+                </Button>
+              </>
+            )}
           </div>
         </div>
 
         {/* Shot List - Right Column */}
-        <div className="flex flex-col flex-1 min-w-0 space-y-3 max-h-[75vh]">
-          <h3 className="text-sm font-semibold text-fm-secondary-800 uppercase tracking-wide shrink-0">
+        <div className="flex flex-col flex-1 min-w-0 space-y-3 max-h-[70vh]">
+          {/* <h3 className="text-sm font-semibold text-fm-secondary-800 uppercase tracking-wide shrink-0">
             Videos ({shotsInScene.length})
-          </h3>
+          </h3> */}
           <div
             ref={shotListRef}
             className="flex-1 space-y-2 overflow-y-auto min-h-0"
@@ -264,7 +277,8 @@ export default function ShotVideos({
                 | EndFrame
                 | undefined;
               const shotSfxList = getCombinedSfx(shotStartFrame, shotEndFrame);
-              const shotDescription = shot.panel_data?.start_frame?.frame_description || "";
+              const shotDescription =
+                shot.panel_data?.start_frame?.frame_description || "";
 
               return (
                 <div
@@ -281,11 +295,7 @@ export default function ShotVideos({
                   aria-pressed={isSelected}
                   aria-label={`Select shot ${index + 1}`}
                   onClick={() => setSelectedShot(index)}
-                  className={`w-full text-left p-3 rounded-lg border flex transition-all duration-200 shrink-0 ${
-                    isSelected
-                      ? "border-fm-secondary-800  shadow-sm"
-                      : "border-fm-divider-primary bg-fm-surface-secondary hover:border-fm-divider-contrast"
-                  }`}
+                  className={`w-full text-left p-5 rounded-xl bg-black transition-all duration-200 shrink-0 `}
                 >
                   <div className="flex items-start gap-3 w-full">
                     <div className="flex-1 min-w-0 space-y-4">
@@ -298,25 +308,86 @@ export default function ShotVideos({
                       />
                       {shotDescription && (
                         <div className="space-y-0.5">
-                          <p className="text-fm-sm font-medium text-fm-secondary-600 uppercase tracking-wide">
-                            Description
+                          <p className="text-fm-sm font-medium uppercase text-[#AB79FF] tracking-wider">
+                            Description:
                           </p>
-                          <TextArea
-                            value={shotDescription}
-                            className="text-xs text-fm-secondary-800 line-clamp-2 leading-relaxed wrap-break-word"
-                          />
+                          <p className="font-fm-poppins text-fm-md">
+                            {shotDescription}
+                          </p>
                         </div>
                       )}
+
+                      {shotStartFrame?.narration && (
+                        <div className="space-y-0.5 w-full">
+                          <p className="text-fm-sm font-medium uppercase text-[#AB79FF] tracking-wider">
+                            Narration:
+                          </p>
+
+                          <p className="font-fm-poppins text-fm-md">
+                            {shotStartFrame.narration}
+                          </p>
+                        </div>
+                      )}
+                      {shotStartFrame?.dialogue &&
+                        Object.values(shotStartFrame.dialogue).some(
+                          (value) => value !== null && value !== ""
+                        ) && (
+                          <div className="space-y-1.5 w-full">
+                            <p className="text-fm-sm font-medium uppercase text-[#AB79FF] tracking-wider">
+                              Dialogue:
+                            </p>
+                            <div className="space-y-2">
+                              {Object.entries(shotStartFrame.dialogue).map(
+                                ([character, text]) => {
+                                  if (!text) return null;
+                                  return (
+                                    <p
+                                      key={character}
+                                      className="font-fm-poppins text-fm-md"
+                                    >
+                                      <span>{character}:</span> {text}
+                                    </p>
+                                  );
+                                }
+                              )}
+                            </div>
+                          </div>
+                        )}
+                      {shotStartFrame?.thought &&
+                        Object.values(shotStartFrame.thought).some(
+                          (value) => value !== null && value !== ""
+                        ) && (
+                          <div className="space-y-2 w-full">
+                            <p className="text-fm-sm font-medium uppercase text-[#AB79FF] tracking-wider">
+                              Thought:
+                            </p>
+                            <div className="space-y-2">
+                              {Object.entries(shotStartFrame.thought).map(
+                                ([character, text]) => {
+                                  if (!text) return null;
+                                  return (
+                                    <p
+                                      key={character}
+                                      className="font-fm-poppins text-fm-md"
+                                    >
+                                      <span>{character}:</span> {text}
+                                    </p>
+                                  );
+                                }
+                              )}
+                            </div>
+                          </div>
+                        )}
                       {shotSfxList.length > 0 && (
                         <div className="space-y-0.5">
-                          <p className="text-fm-sm font-medium text-fm-secondary-600 uppercase tracking-wide">
-                            SFX
+                          <p className="text-fm-sm font-medium uppercase text-[#AB79FF] tracking-wider">
+                            SFX:
                           </p>
                           <div className="flex flex-wrap gap-1">
                             {shotSfxList.slice(0, 2).map((sfx, sfxIndex) => (
                               <span
                                 key={sfxIndex}
-                                className="inline-flex items-center px-2 py-0.5 rounded text-fm-xs font-medium bg-fm-primary-100 text-fm-primary-700 border border-fm-primary-300"
+                                className="inline-flex items-center px-2 py-1 rounded text-fm-xs font-medium bg-[#1F1F1F] text-fm-primary "
                               >
                                 {sfx}
                               </span>
@@ -332,7 +403,7 @@ export default function ShotVideos({
                     </div>
                     <div
                       className={cn(
-                        "relative w-20 h-28 shrink-0 rounded-lg overflow-hidden border border-fm-divider-primary",
+                        "relative  w-31 h-54 shrink-0 rounded-lg overflow-hidden border border-fm-divider-primary",
                         !shot.start_frame_url &&
                           "animate-pulse bg-fm-surface-tertiary"
                       )}

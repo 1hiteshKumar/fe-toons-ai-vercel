@@ -1,6 +1,6 @@
 "use client";
 
-import { ShotAssets } from "@/lib/types";
+import { GeneratingStatus, ShotAssets } from "@/lib/types";
 import { Button } from "@/aural/components/ui/button";
 import { useState } from "react";
 import Loading from "@/components/loading";
@@ -8,7 +8,13 @@ import { DownloadIcon } from "@/aural/icons/download-icon";
 import { CopyIcon } from "@/aural/icons/copy-icon";
 import { AiAvatarIcon } from "@/aural/icons/ai-avatar-icon";
 
-export default function Publish({ data }: { data: ShotAssets | null }) {
+export default function Publish({
+  data,
+  generatingStatus,
+}: {
+  data: ShotAssets | null;
+  generatingStatus: GeneratingStatus;
+}) {
   const [copied, setCopied] = useState(false);
 
   if (!data) {
@@ -45,6 +51,10 @@ export default function Publish({ data }: { data: ShotAssets | null }) {
     }
   };
 
+  const isGenerating =
+    generatingStatus === "IN_PROGRESS" || generatingStatus === "PENDING";
+  const generationFailed = generatingStatus === "FAILED";
+
   return (
     <div className="flex flex-col items-center justify-center min-h-[calc(100vh-200px)] ">
       <div className="max-w-5xl w-full space-y-12">
@@ -58,12 +68,24 @@ export default function Publish({ data }: { data: ShotAssets | null }) {
               </div>
             </div>
             <h1 className="text-4xl md:text-6xl font-bold bg-linear-to-r from-fm-primary-500 to-fm-secondary-500 bg-clip-text text-transparent">
-              Your Story is {!videoUrl && "Almost"} Complete!
+              {videoUrl
+                ? "Your Story is Complete!"
+                : isGenerating
+                ? "Your Story is Almost Complete!"
+                : generationFailed
+                ? "Your Story Generation Failed!"
+                : "Your Story is Processing..."}
             </h1>
           </div>
           <p className="text-xl md:text-2xl text-fm-secondary-700 font-light">
-            &quot;{showName}&quot; is {!videoUrl && "getting"} ready to share
-            with the world
+            &quot;{showName}&quot; is{" "}
+            {videoUrl
+              ? "ready to watch!"
+              : isGenerating
+              ? "getting ready to share with the world"
+              : generationFailed
+              ? "failed to generate. Please try again!"
+              : "processing..."}
           </p>
         </div>
 
@@ -72,7 +94,7 @@ export default function Publish({ data }: { data: ShotAssets | null }) {
           className="flex justify-center animate-fadeIn"
           style={{ animationDelay: "0.1s" }}
         >
-          {videoUrl ? (
+          {videoUrl && (
             <div className="relative w-full max-w-xl group">
               <div className="absolute -inset-1 bg-linear-to-r from-fm-primary-500/50 via-fm-secondary-500/50 to-fm-primary-500/50 rounded-2xl blur-lg opacity-75 group-hover:opacity-100 transition-opacity duration-300" />
               <div className="relative bg-fm-surface-secondary rounded-2xl p-2 overflow-hidden">
@@ -85,28 +107,29 @@ export default function Publish({ data }: { data: ShotAssets | null }) {
                 />
               </div>
             </div>
-          ) : (
+          )}
+        </div>
+
+        {/* Status Message */}
+        {generationFailed && (
+          <div
+            className="text-center space-y-2 animate-fadeIn flex flex-col justify-center items-center"
+            style={{ animationDelay: "0.2s" }}
+          >
             <div className="relative">
               <div className="absolute inset-0 bg-fm-primary-500/20 blur-3xl rounded-full" />
               <div className="relative w-40 h-40 bg-linear-to-br from-fm-primary-500 to-fm-primary-700 rounded-full flex items-center justify-center shadow-2xl border-4 border-fm-primary-300">
                 <span className="text-7xl font-bold text-white">!</span>
               </div>
             </div>
-          )}
-        </div>
-
-        {/* Status Message */}
-        {!hasVideo && (
-          <div
-            className="text-center space-y-2 animate-fadeIn"
-            style={{ animationDelay: "0.2s" }}
-          >
             <h2 className="text-2xl md:text-3xl font-semibold text-fm-primary-500">
               Video Not Available
             </h2>
-            <p className="text-fm-neutral-300 text-sm max-w-xl mx-auto">
-              The final video is still being processed or is not available.
-            </p>
+            {isGenerating && (
+              <p className="text-fm-neutral-300 text-sm max-w-xl mx-auto">
+                The final video is still being processed or is not available.
+              </p>
+            )}
           </div>
         )}
 
