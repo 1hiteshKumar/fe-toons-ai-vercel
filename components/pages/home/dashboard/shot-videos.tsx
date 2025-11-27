@@ -1,6 +1,6 @@
 "use client";
 
-import { ShotAssets } from "@/lib/types";
+import { GeneratingStatus, ShotAssets } from "@/lib/types";
 import { convertGoogleDriveUrl, getGroupedShots } from "@/lib/helpers";
 import Loading from "@/components/loading";
 import { useMemo, useState, useRef, useEffect } from "react";
@@ -31,9 +31,11 @@ interface EndFrame {
 export default function ShotVideos({
   data,
   onNext,
+  generatingStatus,
 }: {
   data: ShotAssets | null;
   onNext?: () => void;
+  generatingStatus: GeneratingStatus;
 }) {
   const groupedShots = useMemo(() => getGroupedShots(data), [data]);
 
@@ -138,11 +140,14 @@ export default function ShotVideos({
     }
   }, [selectedShot, effectiveSelectedScene]);
 
-  if (!data) {
+  if (
+    !data?.results.length &&
+    (generatingStatus === "IN_PROGRESS" || generatingStatus === "PENDING")
+  ) {
     return <Loading text="shot videos" />;
   }
 
-  if (!data.results || data.results.length === 0) {
+  if (!data?.results.length) {
     return (
       <div className="flex items-center justify-center h-96">
         <p className="text-fm-primary text-lg">No shot videos found</p>

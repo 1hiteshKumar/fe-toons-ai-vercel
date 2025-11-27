@@ -1,12 +1,12 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 import { API_URLS, TABS } from "@/server/constants";
 import ShotImages from "../home/dashboard/shot-images";
-import { ShotAssets } from "@/lib/types";
+import { GeneratingStatus, ShotAssets } from "@/lib/types";
 import ShotVideos from "../home/dashboard/shot-videos";
 import Publish from "../home/dashboard/publish";
 import { cn } from "@/aural/lib/utils";
@@ -40,6 +40,9 @@ function DashboardContent({ taskId }: { taskId: string }) {
 
   const { poll, stopPolling } = usePolling();
 
+  const [generatingStatus, setGeneratingStatus] = useState<GeneratingStatus>("PENDING");
+  const hasTriggeredShotVideosRef = useRef(false);
+
   useEffect(() => {
     const isSharedTabs = ["shot-images", "shot-videos", "publish"].includes(
       active
@@ -58,9 +61,12 @@ function DashboardContent({ taskId }: { taskId: string }) {
           const status = res?.task?.status;
           setShotAssets(res);
           if (status === "COMPLETED" || status === "FAILED") {
+            setGeneratingStatus(status);
             stopPolling(pollingKey);
             if (status === "COMPLETED") {
               toast.success("Shot assets ready");
+            } else {
+              toast.error("Something went wrong while generating shots");
             }
           }
         },
@@ -154,12 +160,22 @@ function DashboardContent({ taskId }: { taskId: string }) {
           <ShotImages
             data={shotAssets}
             onNext={() => setActive("shot-videos")}
+            generatingStatus={generatingStatus}
           />
         )}
         {active === "shot-videos" && (
-          <ShotVideos data={shotAssets} onNext={() => setActive("publish")} />
+          <ShotVideos
+            data={shotAssets}
+            onNext={() => setActive("publish")}
+            generatingStatus={generatingStatus}
+          />
         )}
-        {active === "publish" && <Publish data={shotAssets} />}
+        {active === "publish" && (
+          <Publish
+            data={shotAssets}
+            generatingStatus={generatingStatus}
+          />
+        )}
       </main>
     </div>
   );

@@ -7,7 +7,8 @@ export default function Loading({ text }: { text: string }) {
             <div className="w-6 h-6 border-2 border-fm-primary border-t-transparent rounded-full animate-spin"></div>
           </div>
         </div>
-        <p className="text-fm-primary text-lg">Loading {text}...</p>
+        <p className="text-fm-primary text-lg">Generating {text}...</p>
+        <p className="text-fm-secondary text-sm">We are generating best results for you. This may take some time</p>
       </div>
     </div>
   );

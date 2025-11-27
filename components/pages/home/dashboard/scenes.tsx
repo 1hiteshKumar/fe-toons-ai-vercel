@@ -76,9 +76,9 @@ export default function Scenes({ onNext }: { onNext?: () => void }) {
           )
         }
       />
-      <div className="space-y-8">
+      <div className="space-y-8 mt-14">
         {Object.entries(scenes).map(([episodeName, episodeScenes]) => (
-          <div key={episodeName} className="space-y-12">
+          <div key={episodeName} className="space-y-10">
             <h2 className="text-xl font-bold">{episodeName}</h2>
             <div className="grid grid-cols-3 gap-7">
               {episodeScenes.map((scene, index) => (

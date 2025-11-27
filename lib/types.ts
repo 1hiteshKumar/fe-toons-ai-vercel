@@ -114,3 +114,5 @@ export type ShotGrouped = {
   scene_beat_id: string;
   shots: PanelItem[];
 };
+
+export type GeneratingStatus="COMPLETED" | "FAILED" | "PENDING" | "IN_PROGRESS"
