@@ -22,6 +22,7 @@ export const TABS = [
   { id: "scenes", label: "Scenes" },
   { id: "characters", label: "Characters" },
   { id: "shot-images", label: "Shot Images" },
+  { id: "editor", label: "Editor" },
   { id: "shot-videos", label: "Shot Videos" },
   { id: "publish", label: "Publish" },
 ] as const;
