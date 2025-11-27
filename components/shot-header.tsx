@@ -1,7 +1,7 @@
 import React from "react";
 import { ClockIcon } from "../aural/icons/clock-icon";
 import { cn } from "../aural/lib/utils";
-import { Pencil, Trash } from "@/lib/icons";
+import { DurationIcon, Pencil, Trash } from "@/lib/icons";
 
 export interface ShotHeaderProps {
   type?: string;
@@ -30,7 +30,7 @@ export default function ShotHeader({
           <>
             {/* Duration Indicator Section */}
             <div className="flex items-center justify-center gap-1 p-2 bg-[#1F1F1F] rounded-xl">
-              <ClockIcon className="h-4 w-4 text-white" />
+              <DurationIcon className="h-4 w-4 text-white" />
               <span className="text-white text-fm-md font-bold font-fm-poppins">
                 {duration}s
               </span>

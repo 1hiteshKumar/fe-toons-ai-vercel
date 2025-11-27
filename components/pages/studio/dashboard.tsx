@@ -14,6 +14,7 @@ import { toast } from "sonner";
 import usePolling, { PollingProvider } from "@/lib/hooks/use-polling";
 import {
   CharactersIcon,
+  Pencil,
   PublishIcon,
   ShotImagesIcon,
   ShotVideosIcon,
@@ -140,7 +141,7 @@ function DashboardContent({ taskId }: { taskId: string }) {
             "flex gap-2 items-center justify-center rounded-xl py-3.5 px-3 transition-all duration-200 relative group cursor-pointer bg-[#833AFF] font-poppins"
           )}
         >
-          <PencilIcon className="size-5" />
+          <Pencil className="size-5" />
 
           <span
             className={cn(
@@ -161,11 +162,13 @@ function DashboardContent({ taskId }: { taskId: string }) {
         {active === "shot-images" && (
           <ShotImages
             data={shotAssets}
-            onNext={() => setActive("shot-videos")}
+            onNext={() => setActive("editor")}
             generatingStatus={generatingStatus}
           />
         )}
-        {active === "editor" && <Editor onNext={()=>setActive("shot-videos")} />}
+        {active === "editor" && (
+          <Editor onNext={() => setActive("shot-videos")} />
+        )}
         {active === "shot-videos" && (
           <ShotVideos
             data={shotAssets}
