@@ -8,6 +8,7 @@ import { DownloadIcon } from "@/aural/icons/download-icon";
 import { CopyIcon } from "@/aural/icons/copy-icon";
 import { AiAvatarIcon } from "@/aural/icons/ai-avatar-icon";
 import { getSequentialShotVideoUrls } from "@/lib/helpers";
+import { cn } from "@/aural/lib/utils";
 
 export default function Publish({
   data,
@@ -170,7 +171,9 @@ export default function Publish({
               <div className="absolute -inset-1 bg-linear-to-r from-fm-primary-500/50 via-fm-secondary-500/50 to-fm-primary-500/50 rounded-2xl blur-lg opacity-75 group-hover:opacity-100 transition-opacity duration-300" />
               <div className="relative bg-fm-surface-secondary rounded-2xl p-2 overflow-hidden">
                 <video
-                  key={`sequential-${sequentialShotVideos.length}-${sequentialShotVideos[0] || ""}`}
+                  key={`sequential-${sequentialShotVideos.length}-${
+                    sequentialShotVideos[0] || ""
+                  }`}
                   ref={videoRef}
                   src={
                     sequentialShotVideos[currentVideoIndex] ||
@@ -221,7 +224,10 @@ export default function Publish({
             isDisabled={!hasVideo}
             noise="none"
             className="min-w-[200px]"
-            innerClassName="border-none bg-[#833AFF] rounded-lg font-fm-poppins text-white"
+            innerClassName={cn(
+              "border-none bg-[#833AFF] rounded-lg font-fm-poppins text-fm-lg text-white",
+              !hasVideo && "bg-fm-neutral-100"
+            )}
           >
             <DownloadIcon className="size-5" />
             Download Video
@@ -233,7 +239,10 @@ export default function Publish({
             noise="none"
             className="min-w-[200px]"
             isDisabled={!hasVideo}
-            innerClassName="rounded-lg font-fm-poppins text-white"
+            innerClassName={cn(
+              "rounded-lg font-fm-poppins text-white",
+              !hasVideo && "bg-fm-neutral-100"
+            )}
           >
             <CopyIcon className="size-5" />
             {copied ? "Link Copied!" : "Copy Share Link"}
