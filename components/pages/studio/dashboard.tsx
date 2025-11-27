@@ -5,13 +5,12 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 import { API_URLS, TABS } from "@/server/constants";
-import ShotImages from "../home/dashboard/shot-images";
 import { GeneratingStatus, ShotAssets } from "@/lib/types";
-import ShotVideos from "../home/dashboard/shot-videos";
-import Publish from "../home/dashboard/publish";
 import { cn } from "@/aural/lib/utils";
 import { toast } from "sonner";
 import usePolling, { PollingProvider } from "@/lib/hooks/use-polling";
+import Scenes from "../home/dashboard/scenes";
+
 import {
   CharactersIcon,
   Pencil,
@@ -19,11 +18,13 @@ import {
   ShotImagesIcon,
   ShotVideosIcon,
 } from "@/lib/icons";
-import { PencilIcon } from "@/aural/icons/pencil-icon";
-import Editor from "../home/dashboard/editor";
 
 const Characters = dynamic(() => import("../home/dashboard/characters"));
-const Scenes = dynamic(() => import("../home/dashboard/scenes"));
+const Editor = dynamic(() => import("../home/dashboard/editor"));
+const ShotImages = dynamic(() => import("../home/dashboard/shot-images"));
+
+const Publish = dynamic(() => import("../home/dashboard/publish"));
+const ShotVideos = dynamic(() => import("../home/dashboard/shot-videos"));
 
 const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
   characters: CharactersIcon,
@@ -44,7 +45,6 @@ function DashboardContent({ taskId }: { taskId: string }) {
 
   const [generatingStatus, setGeneratingStatus] =
     useState<GeneratingStatus>("PENDING");
-  const hasTriggeredShotVideosRef = useRef(false);
 
   useEffect(() => {
     const isSharedTabs = ["shot-images", "shot-videos", "publish"].includes(
