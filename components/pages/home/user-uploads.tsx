@@ -53,17 +53,16 @@ function UserUploadsContent() {
   const selectedStyle = STYLE_OPTIONS.find((style) => style.code === styleId);
 
   return (
-    <div className="w-full space-y-12">
-      <nav className="flex items-center justify-center text-2xl gap-2 font-bold">
+    <div className="w-full space-y-12 py-7">
+      <nav className="flex items-center justify-center">
         <Image
-          src="/images/pockettoons-logo.webp"
+          src="/images/toons.png"
           alt="PocketToons Logo"
           width={120}
           height={40}
           className="h-10 w-auto"
           priority
         />
-        Pocket Toons
       </nav>
       <div className="flex">
         <section className="flex-1 space-y-7 mt-8">
@@ -150,19 +149,21 @@ function UserUploadsContent() {
                 </DropdownMenu>
               </div>
             </div>
-            <TextArea
+           <div className="bg-fm-neutral-0! font-fm-poppins p-4! rounded-xl">
+             <TextArea
               id="script-text"
               minHeight={200}
-              maxHeight={400}
+              maxHeight={250}
               maxLength={2000}
               placeholder="Once upon a time, in a world where..."
               value={scriptText}
               autoGrow
               onChange={(e) => setScriptText(e.target.value)}
               classes={{
-                textarea: "border-0 rounded-xl bg-fm-neutral-0! font-fm-poppins p-4!",
+                textarea: "border-0 bg-fm-neutral-0! p-0! font-fm-poppins",
               }}
             />
+           </div>
 
             <div className="mt-8">
               <p className="text-fm-md font-fm-poppins mb-2 text-fm-neutral-1100/80">
