@@ -221,7 +221,7 @@ export default function Publish({
             isDisabled={!hasVideo}
             noise="none"
             className="min-w-[200px]"
-            innerClassName="border-none bg-[#833AFF] rounded-lg font-fm-poppins"
+            innerClassName="border-none bg-[#833AFF] rounded-lg font-fm-poppins text-white"
           >
             <DownloadIcon className="size-5" />
             Download Video
@@ -233,7 +233,7 @@ export default function Publish({
             noise="none"
             className="min-w-[200px]"
             isDisabled={!hasVideo}
-            innerClassName="rounded-lg font-fm-poppins"
+            innerClassName="rounded-lg font-fm-poppins text-white"
           >
             <CopyIcon className="size-5" />
             {copied ? "Link Copied!" : "Copy Share Link"}

@@ -23,7 +23,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className={poppins.variable}>
-      <body className="bg-neutral-900  text-neutral-100 font-fm-poppins container mx-auto">
+      <body className="bg-[#141414]  text-neutral-100 font-fm-poppins container mx-auto">
         {children}
         <Toaster />
       </body>

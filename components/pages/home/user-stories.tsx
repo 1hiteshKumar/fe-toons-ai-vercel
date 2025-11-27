@@ -45,7 +45,7 @@ export default function UserStories({ stories }: { stories: Stories[] }) {
         subHeading="Track the status of your story submission."
       />
 
-      <div className="grid grid-cols-2 gap-4">
+      <div className="flex gap-4 w-full max-w-[636px] overflow-x-auto ">
         {stories?.map(
           ({
             showName,

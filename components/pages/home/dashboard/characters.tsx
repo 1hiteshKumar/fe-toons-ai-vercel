@@ -157,7 +157,7 @@ export default function Characters({ onNext }: { onNext?: () => void }) {
                     onClick={() => setSelectedView("front")}
                     variant={"outline"}
                     noise="none"
-                    innerClassName={cn("rounded-xl!", {
+                    innerClassName={cn("rounded-xl! font-fm-poppins", {
                       "bg-[#833AFF] border-none": selectedView === "front",
                     })}
                   >
@@ -167,7 +167,7 @@ export default function Characters({ onNext }: { onNext?: () => void }) {
                     variant={"outline"}
                     onClick={() => setSelectedView("back")}
                     noise="none"
-                    innerClassName={cn("rounded-xl!", {
+                    innerClassName={cn("rounded-xl! font-fm-poppins", {
                       "bg-[#833AFF] border-none": selectedView === "back",
                     })}
                   >

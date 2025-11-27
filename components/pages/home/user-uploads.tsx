@@ -65,7 +65,7 @@ function UserUploadsContent() {
         />
       </nav>
       <div className="flex">
-        <section className="flex-1 space-y-7 mt-8">
+        <section className="flex-1 space-y-5">
           <div>
             <p className="font-bold text-2xl">Tell your story</p>
             <p className="max-w-lg text-fm-neutral-1100/80 text-fm-md mt-4">
@@ -73,7 +73,7 @@ function UserUploadsContent() {
               great story starts with a single idea!
             </p>
           </div>
-          <div className="mt-12 space-y-4">
+          <div className="mt-6 space-y-4">
             <div className="space-y-4 flex items-center gap-4">
               <Input
                 id="show-name"
@@ -153,7 +153,7 @@ function UserUploadsContent() {
              <TextArea
               id="script-text"
               minHeight={200}
-              maxHeight={250}
+              maxHeight={200}
               maxLength={2000}
               placeholder="Once upon a time, in a world where..."
               value={scriptText}
@@ -165,7 +165,7 @@ function UserUploadsContent() {
             />
            </div>
 
-            <div className="mt-8">
+            <div className="mt-4">
               <p className="text-fm-md font-fm-poppins mb-2 text-fm-neutral-1100/80">
                 Character Description
               </p>
@@ -183,7 +183,7 @@ function UserUploadsContent() {
                 <input {...getInputProps()} />
 
                 {selectedFile ? (
-                  <div className="space-y-14">
+                  <div className="space-y-7">
                     <p className="text-sm">{selectedFile.name}</p>
                     <Button
                       variant="text"
