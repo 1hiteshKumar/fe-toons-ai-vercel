@@ -10,7 +10,7 @@ export default function Heading({
   rightElement?: React.ReactNode;
 }) {
   return (
-    <div className="mb-5 relative">
+    <div className="mb-10 relative">
       <div className="flex items-start gap-4 justify-between">
         {/* Decorative accent line */}
         <div className="flex-1 space-y-2">
