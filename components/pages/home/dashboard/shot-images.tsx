@@ -312,7 +312,12 @@ export default function ShotImages({
                   aria-pressed={isSelected}
                   aria-label={`Select shot ${index + 1}`}
                   onClick={() => setSelectedShot(index)}
-                  className={`w-full text-left p-5 rounded-xl bg-black transition-all duration-200 shrink-0 `}
+                  className={cn(
+                    "w-full text-left p-5 rounded-xl bg-black transition-all duration-200 shrink-0",
+                    {
+                      "border-2 border-[#833AFF]": isSelected,
+                    }
+                  )}
                 >
                   <div className="flex items-start gap-3 min-w-0">
                     <div className="flex-1 min-w-0 space-y-4">
