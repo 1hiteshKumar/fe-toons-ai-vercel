@@ -258,21 +258,21 @@ function UserUploadsContent() {
                 )}
               </div>
             </div>
-           <div className="bg-fm-neutral-0! font-fm-poppins p-4! rounded-xl">
-             <TextArea
-              id="script-text"
-              minHeight={196}
-              maxHeight={196}
-              maxLength={2000}
-              placeholder="Once upon a time, in a world where..."
-              value={scriptText}
-              autoGrow
-              onChange={(e) => setScriptText(e.target.value)}
-              classes={{
-                textarea: "border-0 bg-fm-neutral-0! p-0! font-fm-poppins",
-              }}
-            />
-           </div>
+            <div className="bg-fm-neutral-0! font-fm-poppins p-4! rounded-xl">
+              <TextArea
+                id="script-text"
+                minHeight={196}
+                maxHeight={196}
+                maxLength={2000}
+                placeholder="Once upon a time, in a world where..."
+                value={scriptText}
+                autoGrow
+                onChange={(e) => setScriptText(e.target.value)}
+                classes={{
+                  textarea: "border-0 bg-fm-neutral-0! p-0! font-fm-poppins",
+                }}
+              />
+            </div>
 
             <div className="mt-3">
               <p className="text-fm-md font-fm-poppins mb-2 text-fm-neutral-1100/80">
@@ -330,7 +330,10 @@ function UserUploadsContent() {
               noise="none"
               className="font-fm-poppins rounded-sm"
               onClick={onGenerate}
-                innerClassName="border-none bg-[#833AFF] rounded-lg font-fm-poppins text-fm-lg text-white"
+              innerClassName={cn(
+                "border-none bg-[#833AFF] rounded-lg font-fm-poppins text-fm-lg text-white",
+                isDisabled && "bg-fm-neutral-100"
+              )}
             >
               <span className="border-none">Generate Anime</span>
             </Button>

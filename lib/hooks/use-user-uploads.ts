@@ -6,6 +6,8 @@ import usePolling from "./use-polling";
 import { API_URLS, PROMPT } from "@/server/constants";
 import { toast } from "sonner";
 import { addTask } from "@/server/mutations/add-task";
+import fetchShotAssets from "@/server/queries/fetch-shot-assets";
+import { ShotAssets } from "@/lib/types";
 
 type ValidationResponse = {
   validation_task_id: string;
@@ -53,8 +55,49 @@ export default function useUserUploads() {
     const stored = localStorage.getItem("stories");
     if (stored) {
       try {
-        const parsedStories = JSON.parse(stored);
+        const parsedStories = JSON.parse(stored) as Stories[];
         setStories(parsedStories);
+        
+        // Fetch shot assets for stories with finalShowId and update status
+        const updateStoryStatuses = async () => {
+          const updatedStories = await Promise.all(
+            parsedStories.map(async (story) => {
+              if (story.finalShowId) {
+                try {
+                  const shotAssets = (await fetchShotAssets(
+                    story.finalShowId
+                  )) as ShotAssets | null;
+                  
+                  if (shotAssets?.task?.status) {
+                    const taskStatus = shotAssets.task.status;
+                    let newStatus: "PENDING" | "SUCCESS" | "FAILED" = "PENDING";
+                    
+                    if (taskStatus === "COMPLETED") {
+                      newStatus = "SUCCESS";
+                    } else if (taskStatus === "FAILED") {
+                      newStatus = "FAILED";
+                    }
+                    
+                    return {
+                      ...story,
+                      status: newStatus,
+                    };
+                  }
+                } catch (error) {
+                  console.error(
+                    `Error fetching shot assets for story ${story.validation_task_id}:`,
+                    error
+                  );
+                }
+              }
+              return story;
+            })
+          );
+          
+          setStories(updatedStories);
+        };
+        
+        updateStoryStatuses();
       } catch (error) {
         console.error("Error parsing stories from localStorage:", error);
       }
