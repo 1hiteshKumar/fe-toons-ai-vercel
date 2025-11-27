@@ -262,7 +262,7 @@ export default function ShotImages({
                   </Button>
                   {selectedShotData?.audio_url && (
                     <Button
-                      variant="secondary"
+                      variant="outline"
                       size="sm"
                       className="absolute bottom-2 right-12"
                       onClick={toggleAudio}
