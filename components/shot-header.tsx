@@ -20,7 +20,7 @@ export default function ShotHeader({
     <div className="flex justify-between">
       <div className={cn("flex items-center w-max ", className)}>
         {/* Shot Identifier Section */}
-        <div className="flex items-center justify-center p-3">
+        <div className="flex items-center justify-center p-3 pl-0">
           <span className="font-bold text-white text-fm-lg font-fm-poppins">
             Shot {shotNumber}
           </span>

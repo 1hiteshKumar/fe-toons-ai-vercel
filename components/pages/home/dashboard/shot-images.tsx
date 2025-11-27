@@ -317,11 +317,11 @@ export default function ShotImages({
                   <div className="flex items-start gap-3 min-w-0">
                     <div className="flex-1 min-w-0 space-y-4">
                       <ShotHeader
-                        duration={
-                          shot.panel_prompt_data?.duration
-                            ? shot.panel_prompt_data.duration
-                            : 4
-                        }
+                        // duration={
+                        //   shot.panel_prompt_data?.duration
+                        //     ? shot.panel_prompt_data.duration
+                        //     : 4
+                        // }
                         shotNumber={index + 1}
                       />
                       <div className="flex flex-col gap-2">

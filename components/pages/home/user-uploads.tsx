@@ -53,7 +53,7 @@ function UserUploadsContent() {
   const selectedStyle = STYLE_OPTIONS.find((style) => style.code === styleId);
 
   return (
-    <div className="w-full space-y-12 p-5">
+    <div className="w-full space-y-6 p-5 mx-auto">
       <nav className="flex items-center justify-center">
         <Image
           src="/images/toons.png"
@@ -73,7 +73,7 @@ function UserUploadsContent() {
               great story starts with a single idea!
             </p>
           </div>
-          <div className="mt-6 space-y-4">
+          <div className="mt-6 space-y-2">
             <div className="space-y-4 flex items-center gap-4">
               <Input
                 id="show-name"
@@ -152,8 +152,8 @@ function UserUploadsContent() {
            <div className="bg-fm-neutral-0! font-fm-poppins p-4! rounded-xl">
              <TextArea
               id="script-text"
-              minHeight={200}
-              maxHeight={200}
+              minHeight={196}
+              maxHeight={196}
               maxLength={2000}
               placeholder="Once upon a time, in a world where..."
               value={scriptText}
@@ -165,14 +165,14 @@ function UserUploadsContent() {
             />
            </div>
 
-            <div className="mt-4">
+            <div className="mt-3">
               <p className="text-fm-md font-fm-poppins mb-2 text-fm-neutral-1100/80">
                 Character Description
               </p>
               <div
                 {...getRootProps()}
                 className={cn(
-                  "border-2 border-dashed bg-fm-neutral-0 rounded-fm-xl p-8 text-center cursor-pointer transition-all",
+                  "border-2 border-dashed bg-fm-neutral-0 rounded-fm-xl px-8 py-2 text-center cursor-pointer transition-all",
                   isDragActive
                     ? "border-fm-neutral-800"
                     : "border-fm-neutral-500",
@@ -226,7 +226,7 @@ function UserUploadsContent() {
             </Button>
           </div>
         </section>
-        <section className="flex-1 mt-8 pl-12">
+        <section className="flex-1 mt-8 pl-14">
           <Image
             src="/images/home-banner.webp"
             alt="Home banner"
