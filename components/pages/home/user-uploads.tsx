@@ -3,20 +3,13 @@
 import { Button } from "@/aural/components/ui/button";
 import TextArea from "@/aural/components/ui/textarea";
 import Input from "@/aural/components/ui/input";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuRadioGroup,
-  DropdownMenuRadioItem,
-  DropdownMenuTrigger,
-  useOpenState,
-} from "@/aural/components/ui/dropdown";
 import { PollingProvider } from "@/lib/hooks/use-polling";
 import useUserUploads from "@/lib/hooks/use-user-uploads";
 import UserStories from "./user-stories";
 import { cn } from "@/aural/lib/utils";
-import { ChevronRightIcon } from "@/aural/icons/chevron-right-icon";
 import Image from "next/image";
+import { useState, useRef, useEffect } from "react";
+import ChevronRightIcon from "@/aural/icons/chevron-right-icon";
 
 const STYLE_OPTIONS = [
   {
@@ -47,10 +40,110 @@ function UserUploadsContent() {
     setShowName,
   } = useUserUploads();
 
-  const { open: isStyleDropdownOpen, onOpenChange: setStyleDropdownOpen } =
-    useOpenState();
+  const [isStyleDropdownOpen, setStyleDropdownOpen] = useState(false);
+  const [highlightedIndex, setHighlightedIndex] = useState(-1);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+  const triggerRef = useRef<HTMLButtonElement>(null);
+  const optionRefs = useRef<(HTMLButtonElement | null)[]>([]);
 
   const selectedStyle = STYLE_OPTIONS.find((style) => style.code === styleId);
+
+  // Handle keyboard navigation
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (!isStyleDropdownOpen) {
+        // Open dropdown on ArrowDown or Enter when closed
+        if (event.key === "ArrowDown" || event.key === "Enter") {
+          event.preventDefault();
+          setStyleDropdownOpen(true);
+          // Set initial highlight to selected item or first item
+          const currentIndex = STYLE_OPTIONS.findIndex(
+            (style) => style.code === styleId
+          );
+          setHighlightedIndex(currentIndex >= 0 ? currentIndex : 0);
+        }
+        return;
+      }
+
+      switch (event.key) {
+        case "ArrowDown":
+          event.preventDefault();
+          setHighlightedIndex((prev) =>
+            prev < STYLE_OPTIONS.length - 1 ? prev + 1 : 0
+          );
+          break;
+        case "ArrowUp":
+          event.preventDefault();
+          setHighlightedIndex((prev) =>
+            prev > 0 ? prev - 1 : STYLE_OPTIONS.length - 1
+          );
+          break;
+        case "Enter":
+          event.preventDefault();
+          if (highlightedIndex >= 0 && highlightedIndex < STYLE_OPTIONS.length) {
+            const selectedOption = STYLE_OPTIONS[highlightedIndex];
+            setStyleId(selectedOption.code);
+            setStyleDropdownOpen(false);
+            setHighlightedIndex(-1);
+          }
+          break;
+        case "Escape":
+          event.preventDefault();
+          setStyleDropdownOpen(false);
+          setHighlightedIndex(-1);
+          triggerRef.current?.focus();
+          break;
+      }
+    };
+
+    const triggerElement = triggerRef.current;
+    if (triggerElement) {
+      triggerElement.addEventListener("keydown", handleKeyDown);
+    }
+
+    return () => {
+      if (triggerElement) {
+        triggerElement.removeEventListener("keydown", handleKeyDown);
+      }
+    };
+  }, [isStyleDropdownOpen, highlightedIndex, styleId, setStyleId]);
+
+  // Scroll highlighted option into view
+  useEffect(() => {
+    if (
+      isStyleDropdownOpen &&
+      highlightedIndex >= 0 &&
+      optionRefs.current[highlightedIndex]
+    ) {
+      optionRefs.current[highlightedIndex]?.scrollIntoView({
+        block: "nearest",
+        behavior: "smooth",
+      });
+    }
+  }, [highlightedIndex, isStyleDropdownOpen]);
+
+  // Handle click outside to close dropdown
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        dropdownRef.current &&
+        triggerRef.current &&
+        !dropdownRef.current.contains(event.target as Node) &&
+        !triggerRef.current.contains(event.target as Node)
+      ) {
+        setStyleDropdownOpen(false);
+        setHighlightedIndex(-1);
+      }
+    };
+
+    if (isStyleDropdownOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [isStyleDropdownOpen]);
 
   return (
     <div className="w-full space-y-6 p-5 mx-auto">
@@ -89,64 +182,80 @@ function UserUploadsContent() {
                 }}
               />
 
-              <div className="w-full mb-4.5">
-                <p className="font-fm-poppins text-fm-sm mb-2 text-fm-neutral-1100/80">
+              <div className="w-full mb-4.5 relative">
+                <p className="font-fm-poppins text-fm-sm mb-2 text-white">
                   STYLE
                 </p>
-                <DropdownMenu
-                  open={isStyleDropdownOpen}
-                  onOpenChange={setStyleDropdownOpen}
+                <button
+                  ref={triggerRef}
+                  type="button"
+                  onClick={() => {
+                    const willOpen = !isStyleDropdownOpen;
+                    setStyleDropdownOpen(willOpen);
+                    if (willOpen) {
+                      // Set initial highlight to selected item or first item
+                      const currentIndex = STYLE_OPTIONS.findIndex(
+                        (style) => style.code === styleId
+                      );
+                      setHighlightedIndex(currentIndex >= 0 ? currentIndex : 0);
+                    }
+                  }}
+                  className={cn(
+                    "w-full h-12 px-3 py-4 rounded-xl",
+                    "text-white font-fm-text leading-fm-md text-fm-md",
+                    "bg-black",
+                    "focus:outline-none transition-all duration-200",
+                    "flex items-center justify-between"
+                  )}
                 >
-                  <DropdownMenuTrigger
-                    asChild
-                    className="border-0 bg-black rounded-xl"
+                  <span
+                    className={cn(
+                      !selectedStyle && "text-fm-placeholder",
+                      selectedStyle && "text-white"
+                    )}
                   >
-                    <button
-                      type="button"
-                      className={cn(
-                        "w-full h-12 px-3 py-4 rounded-fm-s border",
-                        "text-fm-primary font-fm-text leading-fm-md text-fm-md",
-                        "border-fm-divider-primary focus:border-fm-divider-contrast",
-                        "focus:outline-none transition-all duration-200",
-                        "flex items-center justify-between",
-                        "hover:border-fm-divider-contrast"
-                      )}
-                    >
-                      <span
-                        className={cn(!selectedStyle && "text-fm-placeholder")}
-                      >
-                        {selectedStyle?.name || "Select a style"}
-                      </span>
-                      <ChevronRightIcon
+                    {selectedStyle?.name || "Select a style"}
+                  </span>
+               
+                  <ChevronRightIcon
                         className={cn(
                           "size-5 text-fm-icon-active transition-transform border rounded-full",
                           isStyleDropdownOpen ? "-rotate-90" : "rotate-90"
                         )}
                       />
-                    </button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent
-                    align="start"
-                    className="w-(--radix-dropdown-menu-trigger-width) bg-black"
+                  
+                </button>
+                {isStyleDropdownOpen && (
+                  <div
+                    ref={dropdownRef}
+                    className="absolute z-50 w-full mt-1 bg-black border border-fm-divider-primary rounded-xl shadow-lg overflow-hidden"
                   >
-                    <DropdownMenuRadioGroup
-                      value={styleId?.toString()}
-                      onValueChange={(value) => {
-                        setStyleId(value ? parseInt(value, 10) : null);
-                        setStyleDropdownOpen(false);
-                      }}
-                    >
-                      {STYLE_OPTIONS.map((style) => (
-                        <DropdownMenuRadioItem
-                          key={style.code}
-                          value={style.code.toString()}
-                        >
-                          {style.name}
-                        </DropdownMenuRadioItem>
-                      ))}
-                    </DropdownMenuRadioGroup>
-                  </DropdownMenuContent>
-                </DropdownMenu>
+                    {STYLE_OPTIONS.map((style, index) => (
+                      <button
+                        key={style.code}
+                        ref={(el) => {
+                          optionRefs.current[index] = el;
+                        }}
+                        type="button"
+                        onClick={() => {
+                          setStyleId(style.code);
+                          setStyleDropdownOpen(false);
+                          setHighlightedIndex(-1);
+                        }}
+                        onMouseEnter={() => setHighlightedIndex(index)}
+                        className={cn(
+                          "w-full px-3 py-3 text-left text-white text-fm-md",
+                          "hover:bg-[#141414] transition-colors",
+                          "first:rounded-t-xl last:rounded-b-xl",
+                          highlightedIndex === index && "bg-[#141414]",
+                          styleId === style.code && "bg-[#141414]"
+                        )}
+                      >
+                        {style.name}
+                      </button>
+                    ))}
+                  </div>
+                )}
               </div>
             </div>
            <div className="bg-fm-neutral-0! font-fm-poppins p-4! rounded-xl">
