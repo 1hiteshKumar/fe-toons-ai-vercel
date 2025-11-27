@@ -325,6 +325,7 @@ function UserUploadsContent() {
               isDisabled={
                 !(scriptText && selectedFile && showName && styleId) || loading
               }
+              
               variant="outline"
               noise="none"
               className="font-fm-poppins rounded-sm"
