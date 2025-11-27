@@ -98,7 +98,7 @@ export default function ShotImages({
     return <Loading text="shot images" />;
   }
 
-  if (!data?.results) {
+  if (!data?.results.length) {
     return (
       <div className="flex items-center justify-center h-96">
         <p className="text-fm-primary text-lg">No shot images found</p>

@@ -19,6 +19,7 @@ import {
   ShotVideosIcon,
 } from "@/lib/icons";
 import { PencilIcon } from "@/aural/icons/pencil-icon";
+import Editor from "../home/dashboard/editor";
 
 const Characters = dynamic(() => import("../home/dashboard/characters"));
 const Scenes = dynamic(() => import("../home/dashboard/scenes"));
@@ -40,7 +41,8 @@ function DashboardContent({ taskId }: { taskId: string }) {
 
   const { poll, stopPolling } = usePolling();
 
-  const [generatingStatus, setGeneratingStatus] = useState<GeneratingStatus>("PENDING");
+  const [generatingStatus, setGeneratingStatus] =
+    useState<GeneratingStatus>("PENDING");
   const hasTriggeredShotVideosRef = useRef(false);
 
   useEffect(() => {
@@ -163,6 +165,7 @@ function DashboardContent({ taskId }: { taskId: string }) {
             generatingStatus={generatingStatus}
           />
         )}
+        {active === "editor" && <Editor onNext={()=>setActive("shot-videos")} />}
         {active === "shot-videos" && (
           <ShotVideos
             data={shotAssets}
@@ -171,10 +174,7 @@ function DashboardContent({ taskId }: { taskId: string }) {
           />
         )}
         {active === "publish" && (
-          <Publish
-            data={shotAssets}
-            generatingStatus={generatingStatus}
-          />
+          <Publish data={shotAssets} generatingStatus={generatingStatus} />
         )}
       </main>
     </div>
