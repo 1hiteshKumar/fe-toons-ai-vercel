@@ -58,7 +58,7 @@ export default function UserStories({ stories }: { stories: Stories[] }) {
             const StoryCard = (
               <div
                 className={cn(
-                  "group relative border rounded-lg p-5 bg-fm-surface-secondary",
+                  "group relative border rounded-lg p-5 bg-fm-surface-secondary w-74 h-41",
                   "hover:border-fm-divider-contrast transition-all duration-200",
                   "hover:shadow-lg flex items-start justify-between gap-4",
                   status === "SUCCESS" && "border-fm-positive-500/20",
