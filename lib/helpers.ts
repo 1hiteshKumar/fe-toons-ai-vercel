@@ -113,3 +113,63 @@ export const areShotVideosInSequence = (data: ShotAssets | null): boolean => {
   // Return true only if we found at least one video in the first scene starting from shot 1
   return foundFirstVideo;
 };
+
+/**
+ * Gets sequential shot video URLs from the first scene
+ * Returns an array of video URLs in sequence (starting from shot 1, no gaps)
+ * Returns empty array if:
+ * - Final video URL is present
+ * - Not generating
+ * - No data
+ * - Videos are not in sequence
+ */
+export const getSequentialShotVideoUrls = (
+  data: ShotAssets | null,
+  finalVideoUrl: string | null,
+  isGenerating: boolean
+): string[] => {
+  // Don't return sequential videos if final video is available or not generating
+  if (finalVideoUrl || !isGenerating || !data) {
+    return [];
+  }
+
+  // Check if shot videos are available and in sequence
+  if (!areShotVideosInSequence(data)) {
+    return [];
+  }
+
+  const groupedShots = getGroupedShots(data);
+
+  // Sort scenes by scene_beat_id to ensure proper order
+  const sortedScenes = [...groupedShots].sort((a, b) => {
+    const sceneA = parseInt(a.scene_beat_id) || 0;
+    const sceneB = parseInt(b.scene_beat_id) || 0;
+    return sceneA - sceneB;
+  });
+
+  if (sortedScenes.length === 0) {
+    return [];
+  }
+
+  // Get videos from the first scene in sequence
+  const firstScene = sortedScenes[0];
+  const firstSceneShots = firstScene.shots;
+
+  // Sort shots by panel_number to ensure proper order
+  const sortedShots = [...firstSceneShots].sort(
+    (a, b) => a.panel_number - b.panel_number
+  );
+
+  // Get all videos in sequence (starting from shot 1, no gaps)
+  const videos: string[] = [];
+  for (const shot of sortedShots) {
+    if (shot.single_image_video_url) {
+      videos.push(convertGoogleDriveUrl(shot.single_image_video_url));
+    } else {
+      // If we hit a gap, stop here
+      break;
+    }
+  }
+
+  return videos;
+};

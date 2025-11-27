@@ -2,11 +2,12 @@
 
 import { GeneratingStatus, ShotAssets } from "@/lib/types";
 import { Button } from "@/aural/components/ui/button";
-import { useState } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import Loading from "@/components/loading";
 import { DownloadIcon } from "@/aural/icons/download-icon";
 import { CopyIcon } from "@/aural/icons/copy-icon";
 import { AiAvatarIcon } from "@/aural/icons/ai-avatar-icon";
+import { getSequentialShotVideoUrls } from "@/lib/helpers";
 
 export default function Publish({
   data,
@@ -16,14 +17,74 @@ export default function Publish({
   generatingStatus: GeneratingStatus;
 }) {
   const [copied, setCopied] = useState(false);
-
-  if (!data) {
-    return <Loading text="publish page" />;
-  }
+  const [currentVideoIndex, setCurrentVideoIndex] = useState(0);
+  const videoRef = useRef<HTMLVideoElement>(null);
 
   const videoUrl = data?.task?.output_video_url_single_image || null;
   const showName = data?.task?.props?.show_name || "Your Story";
   const hasVideo = !!videoUrl;
+
+  const isGenerating =
+    generatingStatus === "IN_PROGRESS" || generatingStatus === "PENDING";
+  const generationFailed = generatingStatus === "FAILED";
+
+  // Get shot videos in sequence if final video is not available and still generating
+  const sequentialShotVideos = useMemo(
+    () => getSequentialShotVideoUrls(data, videoUrl, isGenerating),
+    [data, videoUrl, isGenerating]
+  );
+
+  const shouldPlaySequentialVideos =
+    !videoUrl && isGenerating && sequentialShotVideos.length > 0;
+
+  // Handle video end event to play next video in sequence
+  useEffect(() => {
+    if (!shouldPlaySequentialVideos || !videoRef.current) {
+      return;
+    }
+
+    const video = videoRef.current;
+
+    const handleVideoEnd = () => {
+      if (currentVideoIndex < sequentialShotVideos.length - 1) {
+        setCurrentVideoIndex((prev) => prev + 1);
+      }
+    };
+
+    const handleVideoLoaded = () => {
+      video.play().catch((err) => {
+        console.error("Error playing video:", err);
+      });
+    };
+
+    const handleCanPlay = () => {
+      video.play().catch((err) => {
+        console.error("Error playing video:", err);
+      });
+    };
+
+    video.addEventListener("ended", handleVideoEnd);
+    video.addEventListener("loadeddata", handleVideoLoaded);
+    video.addEventListener("canplay", handleCanPlay);
+
+    // Auto-play when video is ready
+    if (video.readyState >= 2) {
+      // HAVE_CURRENT_DATA or higher
+      video.play().catch((err) => {
+        console.error("Error playing video:", err);
+      });
+    }
+
+    return () => {
+      video.removeEventListener("ended", handleVideoEnd);
+      video.removeEventListener("loadeddata", handleVideoLoaded);
+      video.removeEventListener("canplay", handleCanPlay);
+    };
+  }, [shouldPlaySequentialVideos, currentVideoIndex, sequentialShotVideos]);
+
+  if (!data) {
+    return <Loading text="publish page" />;
+  }
 
   const handleDownload = () => {
     if (!videoUrl) return;
@@ -50,10 +111,6 @@ export default function Publish({
       }
     }
   };
-
-  const isGenerating =
-    generatingStatus === "IN_PROGRESS" || generatingStatus === "PENDING";
-  const generationFailed = generatingStatus === "FAILED";
 
   return (
     <div className="flex flex-col items-center justify-center min-h-[calc(100vh-200px)] ">
@@ -104,6 +161,26 @@ export default function Publish({
                   controls
                   muted
                   playsInline
+                />
+              </div>
+            </div>
+          )}
+          {shouldPlaySequentialVideos && (
+            <div className="relative w-full max-w-xl group">
+              <div className="absolute -inset-1 bg-linear-to-r from-fm-primary-500/50 via-fm-secondary-500/50 to-fm-primary-500/50 rounded-2xl blur-lg opacity-75 group-hover:opacity-100 transition-opacity duration-300" />
+              <div className="relative bg-fm-surface-secondary rounded-2xl p-2 overflow-hidden">
+                <video
+                  key={`sequential-${sequentialShotVideos.length}-${sequentialShotVideos[0] || ""}`}
+                  ref={videoRef}
+                  src={
+                    sequentialShotVideos[currentVideoIndex] ||
+                    sequentialShotVideos[0]
+                  }
+                  className="w-full h-auto max-h-[420px] rounded-xl shadow-2xl"
+                  controls
+                  muted
+                  playsInline
+                  autoPlay
                 />
               </div>
             </div>
