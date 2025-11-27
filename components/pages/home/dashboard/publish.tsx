@@ -117,9 +117,11 @@ export default function Publish({ data }: { data: ShotAssets | null }) {
         >
           <Button
             onClick={handleDownload}
-            variant="primary"
+            variant="outline"
             isDisabled={!hasVideo}
+            noise="none"
             className="min-w-[200px]"
+            innerClassName="border-none bg-[#833AFF] rounded-lg font-fm-poppins"
           >
             <DownloadIcon className="size-5" />
             Download Video
@@ -127,9 +129,11 @@ export default function Publish({ data }: { data: ShotAssets | null }) {
 
           <Button
             onClick={handleCopyLink}
-            variant="secondary"
+            variant="outline"
+            noise="none"
             className="min-w-[200px]"
             isDisabled={!hasVideo}
+            innerClassName="rounded-lg font-fm-poppins"
           >
             <CopyIcon className="size-5" />
             {copied ? "Link Copied!" : "Copy Share Link"}

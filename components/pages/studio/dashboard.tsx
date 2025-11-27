@@ -70,8 +70,8 @@ function DashboardContent({ taskId }: { taskId: string }) {
 
   return (
     <div className="flex flex-col h-full w-full">
-      <nav className="w-full flex items-center gap-6 justify-between border-b border-neutral-800">
-        <div className="shrink-0 px-6 py-6">
+      <nav className="w-full p-5 flex items-center gap-6 justify-between border-b border-neutral-800 overflow-x-auto">
+        <div className="shrink-0">
           <Link href="/">
             <Image
               src="/images/pockettoons-logo.webp"
@@ -143,7 +143,7 @@ function DashboardContent({ taskId }: { taskId: string }) {
           </span>
         </button>
       </nav>
-      <main className="flex-1 py-5 px-10 overflow-y-scroll">
+      <main className="flex-1 p-5  overflow-y-scroll">
         {active === "scenes" && (
           <Scenes onNext={() => setActive("characters")} />
         )}
