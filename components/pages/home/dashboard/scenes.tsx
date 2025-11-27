@@ -70,9 +70,9 @@ export default function Scenes({ onNext }: { onNext?: () => void }) {
           )
         }
       />
-      <div className="space-y-8">
+      <div className="space-y-8 mt-14">
         {Object.entries(scenes).map(([episodeName, episodeScenes]) => (
-          <div key={episodeName} className="space-y-12">
+          <div key={episodeName} className="space-y-10">
             <h2 className="text-xl font-bold">{episodeName}</h2>
             <div className="grid grid-cols-3 gap-7">
               {episodeScenes.map((scene, index) => (
@@ -80,16 +80,15 @@ export default function Scenes({ onNext }: { onNext?: () => void }) {
                   key={index}
                   className="bg-fm-neutral-0  rounded-2xl p-5 shadow-xl hover:shadow-md transition-shadow space-y-3"
                 >
-           
-                    <p className="font-bold">Scene {scene.beat_number}</p>
-                
+                  <p className="font-bold">Scene {scene.beat_number}</p>
+
                   <div className="space-y-2.5">
                     <div>
                       <span className="fm-secondary-purple text-sm uppercase tracking-wide">
                         Description:
                       </span>
                       <p className="mt-1.5 leading-relaxed italic h-52 overflow-hidden line-clamp-8">
-                      {scene.scene_description}
+                        {scene.scene_description}
                       </p>
                     </div>
                     <div>
