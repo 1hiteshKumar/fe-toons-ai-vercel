@@ -120,7 +120,7 @@ function UserUploadsContent() {
                       </span>
                       <ChevronRightIcon
                         className={cn(
-                          "size-4 text-fm-icon-active transition-transform",
+                          "size-5 text-fm-icon-active transition-transform border rounded-full",
                           isStyleDropdownOpen && "rotate-90"
                         )}
                       />
@@ -128,7 +128,7 @@ function UserUploadsContent() {
                   </DropdownMenuTrigger>
                   <DropdownMenuContent
                     align="start"
-                    className="w-(--radix-dropdown-menu-trigger-width)"
+                    className="w-(--radix-dropdown-menu-trigger-width) bg-black"
                   >
                     <DropdownMenuRadioGroup
                       value={styleId?.toString()}
@@ -153,7 +153,7 @@ function UserUploadsContent() {
             <TextArea
               id="script-text"
               minHeight={200}
-              maxHeight={288}
+              maxHeight={400}
               maxLength={2000}
               placeholder="Once upon a time, in a world where..."
               value={scriptText}
@@ -219,6 +219,7 @@ function UserUploadsContent() {
               noise="none"
               className="font-fm-poppins rounded-sm"
               onClick={onGenerate}
+                innerClassName="border-none bg-[#833AFF] rounded-lg font-fm-poppins text-fm-lg text-white"
             >
               <span className="border-none">Generate Anime</span>
             </Button>
