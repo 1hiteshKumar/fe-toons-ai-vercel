@@ -53,9 +53,6 @@ function DashboardContent({ taskId }: { taskId: string }) {
 
     if (isSharedTabs && !shotAssets) {
       const pollingKey = `shot_assets_${taskId}`;
-      toast.success(
-        "We are generating best results for you. This may take some time"
-      );
       poll({
         url: API_URLS.FETCH_SHOT_ASSETS({ taskId }),
         pollingKey,
