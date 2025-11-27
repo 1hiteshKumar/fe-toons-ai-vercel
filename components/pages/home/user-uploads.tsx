@@ -85,7 +85,7 @@ function UserUploadsContent() {
                 decoration="outline"
                 fullWidth
                 classes={{
-                  label: "font-poppins mb-2",
+                  label: "font-poppins mb-2 text-fm-neutral-1100/80",
                   input: "bg-black text-fm-md rounded-xl border-0",
                 }}
               />
