@@ -1,6 +1,6 @@
 "use client";
 
-import { ShotAssets } from "@/lib/types";
+import { GeneratingStatus, ShotAssets } from "@/lib/types";
 import Image from "next/image";
 import { convertGoogleDriveUrl, getGroupedShots } from "@/lib/helpers";
 import Loading from "@/components/loading";
@@ -16,11 +16,11 @@ import { cn } from "@/aural/lib/utils";
 export default function ShotImages({
   data,
   onNext,
-  isGeneratingShotAssets,
+  generatingStatus,
 }: {
   data: ShotAssets | null;
   onNext?: () => void;
-  isGeneratingShotAssets: boolean;
+  generatingStatus: GeneratingStatus;
 }) {
   const groupedShots = useMemo(() => getGroupedShots(data), [data]);
 
@@ -91,9 +91,10 @@ export default function ShotImages({
     }
   }, [selectedShot, effectiveSelectedScene]);
 
-  console.log(isGeneratingShotAssets)
-
-  if (!data?.results.length && isGeneratingShotAssets) {
+  if (
+    !data?.results.length &&
+    (generatingStatus === "IN_PROGRESS" || generatingStatus === "PENDING")
+  ) {
     return <Loading text="shot images" />;
   }
 

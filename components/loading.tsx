@@ -8,6 +8,7 @@ export default function Loading({ text }: { text: string }) {
           </div>
         </div>
         <p className="text-fm-primary text-lg">Generating {text}...</p>
+        <p className="text-fm-secondary text-sm">We are generating best results for you. This may take some time</p>
       </div>
     </div>
   );

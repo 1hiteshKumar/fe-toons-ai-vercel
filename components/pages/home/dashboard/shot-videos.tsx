@@ -1,6 +1,6 @@
 "use client";
 
-import { ShotAssets } from "@/lib/types";
+import { GeneratingStatus, ShotAssets } from "@/lib/types";
 import { convertGoogleDriveUrl, getGroupedShots } from "@/lib/helpers";
 import Loading from "@/components/loading";
 import { useMemo, useState, useRef, useEffect } from "react";
@@ -31,11 +31,11 @@ interface EndFrame {
 export default function ShotVideos({
   data,
   onNext,
-  isGeneratingShotAssets,
+  generatingStatus,
 }: {
   data: ShotAssets | null;
   onNext?: () => void;
-  isGeneratingShotAssets: boolean;
+  generatingStatus: GeneratingStatus;
 }) {
   const groupedShots = useMemo(() => getGroupedShots(data), [data]);
 
@@ -140,7 +140,10 @@ export default function ShotVideos({
     }
   }, [selectedShot, effectiveSelectedScene]);
 
-  if (!data?.results.length && isGeneratingShotAssets) {
+  if (
+    !data?.results.length &&
+    (generatingStatus === "IN_PROGRESS" || generatingStatus === "PENDING")
+  ) {
     return <Loading text="shot videos" />;
   }
 
