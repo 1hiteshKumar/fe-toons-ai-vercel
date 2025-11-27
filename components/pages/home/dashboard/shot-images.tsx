@@ -315,7 +315,7 @@ export default function ShotImages({
                   className={cn(
                     "w-full text-left p-5 rounded-xl bg-black transition-all duration-200 shrink-0",
                     {
-                      "border-2 border-[#833AFF]": isSelected,
+                      "border border-[#833AFF]": isSelected,
                     }
                   )}
                 >
