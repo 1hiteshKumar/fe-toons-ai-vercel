@@ -121,7 +121,7 @@ function UserUploadsContent() {
                       <ChevronRightIcon
                         className={cn(
                           "size-5 text-fm-icon-active transition-transform border rounded-full",
-                          isStyleDropdownOpen && "rotate-90"
+                          isStyleDropdownOpen ? "-rotate-90" : "rotate-90"
                         )}
                       />
                     </button>
