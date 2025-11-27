@@ -82,7 +82,7 @@ function DashboardContent({ taskId }: { taskId: string }) {
 
   return (
     <div className="flex flex-col h-full w-full">
-      <nav className="w-full p-5 flex items-center gap-6 justify-between border-b border-neutral-800 overflow-x-auto">
+      <nav className="w-full p-5  flex items-center gap-0 justify-between border-b border-neutral-800 overflow-x-auto">
         <div className="shrink-0">
           <Link href="/">
             <Image
@@ -110,14 +110,14 @@ function DashboardContent({ taskId }: { taskId: string }) {
                   }
                 }}
                 className={cn(
-                  "flex gap-2 items-center justify-center rounded-xl py-3.5 px-6 transition-all duration-200 relative group cursor-pointer hover:text-[#833AFF] font-poppins",
+                  "flex gap-2 items-center justify-center rounded-xl py-3.5 px-4 transition-all duration-200 relative group cursor-pointer hover:text-[#833AFF] font-poppins",
                   isActive ? "bg-white" : "bg-black hover:bg-white"
                 )}
               >
                 {Icon && (
                   <Icon
                     className={cn(
-                      "size-4 transition-colors",
+                      "size-3 transition-colors",
                       isActive
                         ? "text-[#833AFF]"
                         : "text-neutral-500 group-hover:text-[#833AFF]"
