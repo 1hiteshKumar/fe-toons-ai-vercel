@@ -8,7 +8,13 @@ import { DownloadIcon } from "@/aural/icons/download-icon";
 import { CopyIcon } from "@/aural/icons/copy-icon";
 import { AiAvatarIcon } from "@/aural/icons/ai-avatar-icon";
 
-export default function Publish({ data }: { data: ShotAssets | null }) {
+export default function Publish({
+  data,
+  isGeneratingShotAssets,
+}: {
+  data: ShotAssets | null;
+  isGeneratingShotAssets: boolean;
+}) {
   const [copied, setCopied] = useState(false);
 
   if (!data) {
@@ -58,12 +64,16 @@ export default function Publish({ data }: { data: ShotAssets | null }) {
               </div>
             </div>
             <h1 className="text-4xl md:text-6xl font-bold bg-linear-to-r from-fm-primary-500 to-fm-secondary-500 bg-clip-text text-transparent">
-              Your Story is {!videoUrl && "Almost"} Complete!
+              {!videoUrl && isGeneratingShotAssets
+                ? "Your Story is Almost Complete!"
+                : "Your Story Generation Failed!"}
             </h1>
           </div>
           <p className="text-xl md:text-2xl text-fm-secondary-700 font-light">
-            &quot;{showName}&quot; is {!videoUrl && "getting"} ready to share
-            with the world
+            &quot;{showName}&quot; is{" "}
+            {!videoUrl && isGeneratingShotAssets
+              ? "Getting ready to share with the world"
+              : "Failed to generate. Please try again!"}
           </p>
         </div>
 
@@ -72,7 +82,7 @@ export default function Publish({ data }: { data: ShotAssets | null }) {
           className="flex justify-center animate-fadeIn"
           style={{ animationDelay: "0.1s" }}
         >
-          {videoUrl ? (
+          {videoUrl && (
             <div className="relative w-full max-w-xl group">
               <div className="absolute -inset-1 bg-linear-to-r from-fm-primary-500/50 via-fm-secondary-500/50 to-fm-primary-500/50 rounded-2xl blur-lg opacity-75 group-hover:opacity-100 transition-opacity duration-300" />
               <div className="relative bg-fm-surface-secondary rounded-2xl p-2 overflow-hidden">
@@ -85,7 +95,9 @@ export default function Publish({ data }: { data: ShotAssets | null }) {
                 />
               </div>
             </div>
-          ) : (
+          )}
+
+          {!videoUrl && !isGeneratingShotAssets && (
             <div className="relative">
               <div className="absolute inset-0 bg-fm-primary-500/20 blur-3xl rounded-full" />
               <div className="relative w-40 h-40 bg-linear-to-br from-fm-primary-500 to-fm-primary-700 rounded-full flex items-center justify-center shadow-2xl border-4 border-fm-primary-300">

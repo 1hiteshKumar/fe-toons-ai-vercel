@@ -16,9 +16,11 @@ import { cn } from "@/aural/lib/utils";
 export default function ShotImages({
   data,
   onNext,
+  isGeneratingShotAssets,
 }: {
   data: ShotAssets | null;
   onNext?: () => void;
+  isGeneratingShotAssets: boolean;
 }) {
   const groupedShots = useMemo(() => getGroupedShots(data), [data]);
 
@@ -89,11 +91,13 @@ export default function ShotImages({
     }
   }, [selectedShot, effectiveSelectedScene]);
 
-  if (!data) {
+  console.log(isGeneratingShotAssets)
+
+  if (!data?.results.length && isGeneratingShotAssets) {
     return <Loading text="shot images" />;
   }
 
-  if (!data.results || data.results.length === 0) {
+  if (!data?.results) {
     return (
       <div className="flex items-center justify-center h-96">
         <p className="text-fm-primary text-lg">No shot images found</p>

@@ -200,7 +200,7 @@ function UserUploadsContent() {
                   <input {...getInputProps()} />
 
                   {selectedFile ? (
-                    <div className="space-y-4">
+                    <div className="space-y-2">
                       <p className="text-sm text-white">{selectedFile.name}</p>
                       <Button
                         variant="text"
@@ -214,7 +214,7 @@ function UserUploadsContent() {
                       </Button>
                     </div>
                   ) : (
-                    <div className="space-y-2">
+                    <div className="space-y-3">
                       <p className="text-fm-md text-white">
                         Drag and drop your character description sheet here or
                         click to select

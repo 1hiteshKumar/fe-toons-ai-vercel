@@ -31,9 +31,11 @@ interface EndFrame {
 export default function ShotVideos({
   data,
   onNext,
+  isGeneratingShotAssets,
 }: {
   data: ShotAssets | null;
   onNext?: () => void;
+  isGeneratingShotAssets: boolean;
 }) {
   const groupedShots = useMemo(() => getGroupedShots(data), [data]);
 
@@ -138,11 +140,11 @@ export default function ShotVideos({
     }
   }, [selectedShot, effectiveSelectedScene]);
 
-  if (!data) {
+  if (!data?.results.length && isGeneratingShotAssets) {
     return <Loading text="shot videos" />;
   }
 
-  if (!data.results || data.results.length === 0) {
+  if (!data?.results.length) {
     return (
       <div className="flex items-center justify-center h-96">
         <p className="text-fm-primary text-lg">No shot videos found</p>

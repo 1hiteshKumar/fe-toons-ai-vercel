@@ -40,6 +40,8 @@ function DashboardContent({ taskId }: { taskId: string }) {
 
   const { poll, stopPolling } = usePolling();
 
+  const [isGeneratingShotAssets, setIsGeneratingShotAssets] = useState(true);
+
   useEffect(() => {
     const isSharedTabs = ["shot-images", "shot-videos", "publish"].includes(
       active
@@ -58,9 +60,12 @@ function DashboardContent({ taskId }: { taskId: string }) {
           const status = res?.task?.status;
           setShotAssets(res);
           if (status === "COMPLETED" || status === "FAILED") {
+            setIsGeneratingShotAssets(false);
             stopPolling(pollingKey);
             if (status === "COMPLETED") {
               toast.success("Shot assets ready");
+            } else {
+              toast.error("Something went wrong while generating shots");
             }
           }
         },
@@ -154,12 +159,22 @@ function DashboardContent({ taskId }: { taskId: string }) {
           <ShotImages
             data={shotAssets}
             onNext={() => setActive("shot-videos")}
+            isGeneratingShotAssets={isGeneratingShotAssets}
           />
         )}
         {active === "shot-videos" && (
-          <ShotVideos data={shotAssets} onNext={() => setActive("publish")} />
+          <ShotVideos
+            data={shotAssets}
+            onNext={() => setActive("publish")}
+            isGeneratingShotAssets={isGeneratingShotAssets}
+          />
         )}
-        {active === "publish" && <Publish data={shotAssets} />}
+        {active === "publish" && (
+          <Publish
+            data={shotAssets}
+            isGeneratingShotAssets={isGeneratingShotAssets}
+          />
+        )}
       </main>
     </div>
   );
