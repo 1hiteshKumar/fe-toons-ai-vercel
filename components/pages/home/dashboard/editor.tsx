@@ -30,6 +30,7 @@ export default function Editor({ onNext }: { onNext: () => void }) {
           alt="Editor"
           fill
           className="object-contain"
+          preload
         />
       </div>{" "}
     </>

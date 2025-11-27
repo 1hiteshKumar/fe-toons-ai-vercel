@@ -115,30 +115,38 @@ export const areShotVideosInSequence = (data: ShotAssets | null): boolean => {
 };
 
 /**
- * Gets sequential shot video URLs from the first scene
- * Returns an array of video URLs in sequence (starting from shot 1, no gaps)
+ * Gets sequential shot video URLs across all scenes for sequential playback
+ * Returns an array of video URLs in order: scene 1 → shot 1, shot 2 … → scene 2 → shot 1 …
+ * 
+ * Features:
+ * - Plays videos sequentially across all scenes
+ * - Skips missing or out-of-order shots but continues with next shot
+ * - Skips scenes with no valid shots
+ * - Stops returning videos if finalVideoUrl exists or isGenerating is false
+ * - Reactive to polling updates (uses latest data object)
+ * - Converts URLs using convertGoogleDriveUrl()
+ * 
  * Returns empty array if:
  * - Final video URL is present
  * - Not generating
  * - No data
- * - Videos are not in sequence
  */
 export const getSequentialShotVideoUrls = (
   data: ShotAssets | null,
   finalVideoUrl: string | null,
   isGenerating: boolean
 ): string[] => {
-  // Don't return sequential videos if final video is available or not generating
-  if (finalVideoUrl || !isGenerating || !data) {
+  // Stop returning videos if final video exists or generation is complete
+  if (finalVideoUrl || !isGenerating || !data || !data.results) {
     return [];
   }
 
-  // Check if shot videos are available and in sequence
-  if (!areShotVideosInSequence(data)) {
-    return [];
-  }
-
+  // Group shots by scene_beat_id
   const groupedShots = getGroupedShots(data);
+
+  if (groupedShots.length === 0) {
+    return [];
+  }
 
   // Sort scenes by scene_beat_id to ensure proper order
   const sortedScenes = [...groupedShots].sort((a, b) => {
@@ -147,29 +155,17 @@ export const getSequentialShotVideoUrls = (
     return sceneA - sceneB;
   });
 
-  if (sortedScenes.length === 0) {
-    return [];
-  }
+  // Process all scenes sequentially and collect video URLs using flatMap
+  return sortedScenes.flatMap((scene) => {
+    // Sort shots within each scene by panel_number to ensure proper order
+    const sortedShots = [...scene.shots].sort(
+      (a, b) => a.panel_number - b.panel_number
+    );
 
-  // Get videos from the first scene in sequence
-  const firstScene = sortedScenes[0];
-  const firstSceneShots = firstScene.shots;
-
-  // Sort shots by panel_number to ensure proper order
-  const sortedShots = [...firstSceneShots].sort(
-    (a, b) => a.panel_number - b.panel_number
-  );
-
-  // Get all videos in sequence (starting from shot 1, no gaps)
-  const videos: string[] = [];
-  for (const shot of sortedShots) {
-    if (shot.single_image_video_url) {
-      videos.push(convertGoogleDriveUrl(shot.single_image_video_url));
-    } else {
-      // If we hit a gap, stop here
-      break;
-    }
-  }
-
-  return videos;
+    // Collect valid video URLs from this scene, skipping missing ones
+    // If a scene has no valid shots, flatMap will return an empty array (scene is skipped)
+    return sortedShots
+      .filter((shot) => shot.single_image_video_url) // Skip shots without video URLs
+      .map((shot) => convertGoogleDriveUrl(shot.single_image_video_url));
+  });
 };
