@@ -53,7 +53,7 @@ function UserUploadsContent() {
   const selectedStyle = STYLE_OPTIONS.find((style) => style.code === styleId);
 
   return (
-    <div className="w-full space-y-12 py-7">
+    <div className="w-full space-y-12 p-5">
       <nav className="flex items-center justify-center">
         <Image
           src="/images/toons.png"
