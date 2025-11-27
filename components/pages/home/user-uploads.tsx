@@ -80,7 +80,10 @@ function UserUploadsContent() {
           break;
         case "Enter":
           event.preventDefault();
-          if (highlightedIndex >= 0 && highlightedIndex < STYLE_OPTIONS.length) {
+          if (
+            highlightedIndex >= 0 &&
+            highlightedIndex < STYLE_OPTIONS.length
+          ) {
             const selectedOption = STYLE_OPTIONS[highlightedIndex];
             setStyleId(selectedOption.code);
             setStyleDropdownOpen(false);
@@ -216,14 +219,13 @@ function UserUploadsContent() {
                   >
                     {selectedStyle?.name || "Select a style"}
                   </span>
-               
+
                   <ChevronRightIcon
-                        className={cn(
-                          "size-5 text-fm-icon-active transition-transform border rounded-full",
-                          isStyleDropdownOpen ? "-rotate-90" : "rotate-90"
-                        )}
-                      />
-                  
+                    className={cn(
+                      "size-5 text-fm-icon-active transition-transform border rounded-full",
+                      isStyleDropdownOpen ? "-rotate-90" : "rotate-90"
+                    )}
+                  />
                 </button>
                 {isStyleDropdownOpen && (
                   <div
@@ -325,14 +327,15 @@ function UserUploadsContent() {
               isDisabled={
                 !(scriptText && selectedFile && showName && styleId) || loading
               }
-              
               variant="outline"
               noise="none"
               className="font-fm-poppins rounded-sm"
               onClick={onGenerate}
               innerClassName={cn(
                 "border-none bg-[#833AFF] rounded-lg font-fm-poppins text-fm-lg text-white",
-                 !(scriptText && selectedFile && showName && styleId) || loading && "bg-fm-neutral-100"
+                (!(scriptText && selectedFile && showName && styleId) ||
+                  loading) &&
+                  "bg-fm-neutral-100"
               )}
             >
               <span className="border-none">Generate Anime</span>
