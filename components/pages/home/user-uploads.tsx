@@ -292,10 +292,10 @@ function UserUploadsContent() {
                 <input {...getInputProps()} />
 
                 {selectedFile ? (
-                  <div className="space-y-7">
+                  <div className="space-y-7 py-3">
                     <p className="text-sm">{selectedFile.name}</p>
                     <Button
-                      variant="text"
+                      variant="outline"
                       size="sm"
                       noise="none"
                       onClick={(e) => {
@@ -332,7 +332,7 @@ function UserUploadsContent() {
               onClick={onGenerate}
               innerClassName={cn(
                 "border-none bg-[#833AFF] rounded-lg font-fm-poppins text-fm-lg text-white",
-                isDisabled && "bg-fm-neutral-100"
+                 !(scriptText && selectedFile && showName && styleId) || loading && "bg-fm-neutral-100"
               )}
             >
               <span className="border-none">Generate Anime</span>
