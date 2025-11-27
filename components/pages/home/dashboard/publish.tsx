@@ -115,7 +115,7 @@ export default function Publish({
 
   return (
     <div className="flex flex-col items-center justify-center min-h-[calc(100vh-200px)] ">
-      <div className="max-w-5xl w-full space-y-12">
+      <div className="max-w-5xl w-full space-y-7">
         {/* Header Section */}
         <div className="text-center space-y-4 animate-fadeIn">
           <div className="flex items-center justify-center gap-4 mb-2">
@@ -125,7 +125,7 @@ export default function Publish({
                 <AiAvatarIcon />
               </div>
             </div>
-            <h1 className="text-4xl md:text-6xl font-bold bg-linear-to-r from-fm-primary-500 to-fm-secondary-500 bg-clip-text text-transparent">
+            <h1 className="text-4xl font-bold bg-linear-to-r from-fm-primary-500 to-fm-secondary-500 bg-clip-text text-transparent">
               {videoUrl
                 ? "Your Story is Complete!"
                 : isGenerating

@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState } from "react";
 import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
@@ -17,6 +17,9 @@ import {
   PublishIcon,
   ShotImagesIcon,
   ShotVideosIcon,
+  ScenesIcon,
+  StoryIcon,
+  EditorIcon,
 } from "@/lib/icons";
 
 const Characters = dynamic(() => import("../home/dashboard/characters"));
@@ -27,8 +30,11 @@ const Publish = dynamic(() => import("../home/dashboard/publish"));
 const ShotVideos = dynamic(() => import("../home/dashboard/shot-videos"));
 
 const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
+  story: StoryIcon,
+  scenes: ScenesIcon,
   characters: CharactersIcon,
   "shot-images": ShotImagesIcon,
+  editor: EditorIcon,
   "shot-videos": ShotVideosIcon,
   publish: PublishIcon,
 };
