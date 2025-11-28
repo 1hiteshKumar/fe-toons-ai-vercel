@@ -9,7 +9,6 @@ import { GeneratingStatus, ShotAssets } from "@/lib/types";
 import { cn } from "@/aural/lib/utils";
 import { toast } from "sonner";
 import usePolling, { PollingProvider } from "@/lib/hooks/use-polling";
-import Scenes from "../home/dashboard/scenes";
 
 import {
   CharactersIcon,
@@ -22,11 +21,11 @@ import {
   EditorIcon,
 } from "@/lib/icons";
 
-const Characters = dynamic(() => import("../home/dashboard/characters"));
+import Characters from "../home/dashboard/characters";
 const Editor = dynamic(() => import("../home/dashboard/editor"));
 const ShotImages = dynamic(() => import("../home/dashboard/shot-images"));
 const Story = dynamic(() => import("../home/dashboard/story"));
-
+const Scenes = dynamic(() => import("../home/dashboard/scenes"));
 const Publish = dynamic(() => import("../home/dashboard/publish"));
 const ShotVideos = dynamic(() => import("../home/dashboard/shot-videos"));
 
