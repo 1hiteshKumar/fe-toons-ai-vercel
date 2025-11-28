@@ -114,8 +114,73 @@ export default function Publish({
   };
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-[calc(100vh-200px)] ">
-      <div className="max-w-5xl w-full space-y-7">
+    <div className="flex flex-col items-center justify-center min-h-[calc(100vh-100px)] ">
+      <div className="max-w-5xl w-full space-y-7 flex justify-center items-center gap-12">
+        <div>
+          {/* Video Container */}
+          <div
+            className="flex justify-center animate-fadeIn"
+            style={{ animationDelay: "0.1s" }}
+          >
+            {videoUrl && (
+              <div className="relative w-full max-w-xl group">
+                <div className="absolute -inset-1 bg-linear-to-r from-fm-primary-500/50 via-fm-secondary-500/50 to-fm-primary-500/50 rounded-2xl blur-lg opacity-75 group-hover:opacity-100 transition-opacity duration-300" />
+                <div className="relative bg-fm-surface-secondary rounded-2xl p-2 overflow-hidden">
+                  <video
+                    src={videoUrl}
+                    className="w-full h-auto max-h-[520px] rounded-xl shadow-2xl"
+                    controls
+                    muted
+                    playsInline
+                  />
+                </div>
+              </div>
+            )}
+            {shouldPlaySequentialVideos && (
+              <div className="relative w-full max-w-xl group">
+                <div className="absolute -inset-1 bg-linear-to-r from-fm-primary-500/50 via-fm-secondary-500/50 to-fm-primary-500/50 rounded-2xl blur-lg opacity-75 group-hover:opacity-100 transition-opacity duration-300" />
+                <div className="relative bg-fm-surface-secondary rounded-2xl p-2 overflow-hidden">
+                  <video
+                    key={`sequential-${sequentialShotVideos.length}-${
+                      sequentialShotVideos[0] || ""
+                    }`}
+                    ref={videoRef}
+                    src={
+                      sequentialShotVideos[currentVideoIndex] ||
+                      sequentialShotVideos[0]
+                    }
+                    className="w-full h-auto max-h-[420px] rounded-xl shadow-2xl"
+                    controls
+                    playsInline
+                  />
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Status Message */}
+          {generationFailed && (
+            <div
+              className="text-center space-y-2 animate-fadeIn flex flex-col justify-center items-center"
+              style={{ animationDelay: "0.2s" }}
+            >
+              <div className="relative">
+                <div className="absolute inset-0 bg-fm-primary-500/20 blur-3xl rounded-full" />
+                <div className="relative w-40 h-40 bg-linear-to-br from-fm-primary-500 to-fm-primary-700 rounded-full flex items-center justify-center shadow-2xl border-4 border-fm-primary-300">
+                  <span className="text-7xl font-bold text-white">!</span>
+                </div>
+              </div>
+              <h2 className="text-2xl md:text-3xl font-semibold text-fm-primary-500">
+                Video Not Available
+              </h2>
+              {isGenerating && (
+                <p className="text-fm-neutral-300 text-sm max-w-xl mx-auto">
+                  The final video is still being processed or is not available.
+                </p>
+              )}
+            </div>
+          )}
+        </div>
         {/* Header Section */}
         <div className="text-center space-y-4 animate-fadeIn">
           <div className="flex items-center justify-center gap-4 mb-2">
@@ -150,106 +215,42 @@ export default function Publish({
               ? "failed to generate. Please try again!"
               : "processing..."}
           </p>
-        </div>
 
-        {/* Video Container */}
-        <div
-          className="flex justify-center animate-fadeIn"
-          style={{ animationDelay: "0.1s" }}
-        >
-          {videoUrl && (
-            <div className="relative w-full max-w-xl group">
-              <div className="absolute -inset-1 bg-linear-to-r from-fm-primary-500/50 via-fm-secondary-500/50 to-fm-primary-500/50 rounded-2xl blur-lg opacity-75 group-hover:opacity-100 transition-opacity duration-300" />
-              <div className="relative bg-fm-surface-secondary rounded-2xl p-2 overflow-hidden">
-                <video
-                  src={videoUrl}
-                  className="w-full h-auto max-h-[420px] rounded-xl shadow-2xl"
-                  controls
-                  muted
-                  playsInline
-                />
-              </div>
-            </div>
-          )}
-          {shouldPlaySequentialVideos && (
-            <div className="relative w-full max-w-xl group">
-              <div className="absolute -inset-1 bg-linear-to-r from-fm-primary-500/50 via-fm-secondary-500/50 to-fm-primary-500/50 rounded-2xl blur-lg opacity-75 group-hover:opacity-100 transition-opacity duration-300" />
-              <div className="relative bg-fm-surface-secondary rounded-2xl p-2 overflow-hidden">
-                <video
-                  key={`sequential-${sequentialShotVideos.length}-${
-                    sequentialShotVideos[0] || ""
-                  }`}
-                  ref={videoRef}
-                  src={
-                    sequentialShotVideos[currentVideoIndex] ||
-                    sequentialShotVideos[0]
-                  }
-                  className="w-full h-auto max-h-[420px] rounded-xl shadow-2xl"
-                  controls
-                  playsInline
-                />
-              </div>
-            </div>
-          )}
-        </div>
-
-        {/* Status Message */}
-        {generationFailed && (
+          {/* Action Buttons */}
           <div
-            className="text-center space-y-2 animate-fadeIn flex flex-col justify-center items-center"
-            style={{ animationDelay: "0.2s" }}
+            className="flex flex-col sm:flex-row gap-4 justify-center items-center animate-fadeIn mt-14"
+            style={{ animationDelay: "0.3s" }}
           >
-            <div className="relative">
-              <div className="absolute inset-0 bg-fm-primary-500/20 blur-3xl rounded-full" />
-              <div className="relative w-40 h-40 bg-linear-to-br from-fm-primary-500 to-fm-primary-700 rounded-full flex items-center justify-center shadow-2xl border-4 border-fm-primary-300">
-                <span className="text-7xl font-bold text-white">!</span>
-              </div>
-            </div>
-            <h2 className="text-2xl md:text-3xl font-semibold text-fm-primary-500">
-              Video Not Available
-            </h2>
-            {isGenerating && (
-              <p className="text-fm-neutral-300 text-sm max-w-xl mx-auto">
-                The final video is still being processed or is not available.
-              </p>
-            )}
+            <Button
+              onClick={handleDownload}
+              variant="outline"
+              isDisabled={!hasVideo}
+              noise="none"
+              className="min-w-[200px]"
+              innerClassName={cn(
+                "border-none bg-[#833AFF] rounded-lg font-fm-poppins text-fm-lg text-white",
+                !hasVideo && "bg-fm-neutral-100"
+              )}
+            >
+              <DownloadIcon className="size-5" />
+              Download Video
+            </Button>
+
+            <Button
+              onClick={handleCopyLink}
+              variant="outline"
+              noise="none"
+              className="min-w-[200px]"
+              isDisabled={!hasVideo}
+              innerClassName={cn(
+                "rounded-lg font-fm-poppins text-white",
+                !hasVideo && "bg-fm-neutral-100"
+              )}
+            >
+              <CopyIcon className="size-5" />
+              {copied ? "Link Copied!" : "Copy Share Link"}
+            </Button>
           </div>
-        )}
-
-        {/* Action Buttons */}
-        <div
-          className="flex flex-col sm:flex-row gap-4 justify-center items-center animate-fadeIn"
-          style={{ animationDelay: "0.3s" }}
-        >
-          <Button
-            onClick={handleDownload}
-            variant="outline"
-            isDisabled={!hasVideo}
-            noise="none"
-            className="min-w-[200px]"
-            innerClassName={cn(
-              "border-none bg-[#833AFF] rounded-lg font-fm-poppins text-fm-lg text-white",
-              !hasVideo && "bg-fm-neutral-100"
-            )}
-          >
-            <DownloadIcon className="size-5" />
-            Download Video
-          </Button>
-
-          <Button
-            onClick={handleCopyLink}
-            variant="outline"
-            noise="none"
-            className="min-w-[200px]"
-            isDisabled={!hasVideo}
-            innerClassName={cn(
-              "rounded-lg font-fm-poppins text-white",
-              !hasVideo && "bg-fm-neutral-100"
-            )}
-          >
-            <CopyIcon className="size-5" />
-            {copied ? "Link Copied!" : "Copy Share Link"}
-          </Button>
         </div>
       </div>
     </div>

@@ -26,10 +26,11 @@ export default function Story({
       storedTasksData = JSON.parse(storedTasksData);
       //@ts-expect-error for now
       const taskData = storedTasksData?.filter(
-        (f: Story) => Number(f.finalShowId) !== Number(taskId)
+        (f: Story) => Number(f.finalShowId) === Number(taskId)
       )[0];
       // eslint-disable-next-line react-hooks/set-state-in-effect
       setTaskData(taskData);
+      console.log(taskData)
     }
   }, [taskId]);
 
@@ -58,7 +59,7 @@ export default function Story({
         }
       />
       <div className="flex justify-center gap-7">
-        <div className="w-1/2 space-y-3">
+        <div className="w-1/2 space-y-7">
           <div className="bg-fm-neutral-0! font-fm-poppins p-4! rounded-xl relative">
             <TextArea
               id="script-text"
