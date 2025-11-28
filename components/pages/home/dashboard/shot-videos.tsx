@@ -239,7 +239,7 @@ export default function ShotVideos({
                   ref={videoRef}
                   src={selectedShotVideoUrl}
                   controls
-                  className="h-full object-cover w-full"
+                  className="h-full object-contain w-full"
                   onEnded={() => {
                     moveToNextShot();
                   }}
@@ -251,7 +251,6 @@ export default function ShotVideos({
                   disabled
                 >
                   <EditBigIcon className="size-5" />
-                  Edit Video
                 </Button>
               </>
             )}
