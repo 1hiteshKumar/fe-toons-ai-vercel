@@ -2,12 +2,12 @@
 
 import Link from "next/link";
 import { Tag } from "@/aural/components/ui/tag";
-import { Stories } from "@/lib/hooks/use-user-uploads";
+import { Story } from "@/lib/hooks/use-user-uploads";
 import Heading from "@/components/heading";
 import { cn } from "@/aural/lib/utils";
 import { ChevronRightIcon } from "@/aural/icons/chevron-right-icon";
 
-export default function UserStories({ stories }: { stories: Stories[] }) {
+export default function UserStories({ stories }: { stories: Story[] }) {
   if (stories.length === 0) return null;
 
   const statusColorMap: Record<string, "warning" | "positive" | "negative"> = {

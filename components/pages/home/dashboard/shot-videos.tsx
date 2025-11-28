@@ -226,34 +226,39 @@ export default function ShotVideos({
         </div>
 
         {/* Main Video Display - Middle Column */}
-        <div className="w-92">
-          <div
-            className={cn(
-              "relative aspect-9/16 w-full shrink-0 max-h-[70vh] rounded-lg overflow-hidden",
-              !selectedShotVideoUrl && "bg-fm-surface-tertiary animate-pulse"
-            )}
-          >
-            {selectedShotVideoUrl && (
-              <>
-                <video
-                  ref={videoRef}
-                  src={selectedShotVideoUrl}
-                  controls
-                  className="h-full object-contain w-full"
-                  onEnded={() => {
-                    moveToNextShot();
-                  }}
-                />
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="absolute top-2 right-6"
-                  disabled
-                >
-                  <EditBigIcon className="size-5" />
-                </Button>
-              </>
-            )}
+        <div className="w-84">
+          <div className="relative w-full">
+            <div className="relative bg-fm-surface-secondary rounded-2xl p-2.5 overflow-hidden w-max mx-auto">
+              <div
+                className={cn(
+                  "relative aspect-9/16 w-full shrink-0 max-h-[70vh] rounded-2xl overflow-hidden ",
+                  !selectedShotVideoUrl &&
+                    "bg-fm-surface-tertiary animate-pulse"
+                )}
+              >
+                {selectedShotVideoUrl && (
+                  <>
+                    <video
+                      ref={videoRef}
+                      src={selectedShotVideoUrl}
+                      controls
+                      className="h-full object-contain rounded-2xl"
+                      onEnded={() => {
+                        moveToNextShot();
+                      }}
+                    />
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="absolute top-2 right-6"
+                      disabled
+                    >
+                      <EditBigIcon className="size-5" />
+                    </Button>
+                  </>
+                )}
+              </div>
+            </div>
           </div>
         </div>
 

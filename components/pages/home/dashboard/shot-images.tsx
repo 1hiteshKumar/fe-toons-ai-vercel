@@ -215,7 +215,7 @@ export default function ShotImages({
         </div>
 
         {/* Main Image Display - Middle Column */}
-        <div className="w-92">
+        <div className="w-84">
           <div className="rounded-lg w-full overflow-hidden h-full flex flex-col">
             {selectedShotData?.audio_url && (
               <audio
@@ -233,44 +233,52 @@ export default function ShotImages({
               />
             )}
 
-            <div
-              className={cn(
-                "relative aspect-9/16 w-full shrink-0 max-h-[70vh] rounded-lg overflow-hidden",
-                !selectedShotImageUrl && "bg-fm-surface-tertiary animate-pulse"
-              )}
-            >
-              {" "}
-              {selectedShotImageUrl && (
-                <>
-                  {" "}
-                  <Image
-                    src={selectedShotImageUrl}
-                    alt={`Shot ${
-                      selectedShotData?.panel_number || selectedShot + 1
-                    }`}
-                    fill
-                    className="object-contain"
-                    unoptimized
-                  />
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="absolute top-2 right-10"
-                  >
-                    <EditBigIcon className="size-5" />
-                  </Button>
-                  {selectedShotData?.audio_url && (
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="absolute bottom-2 right-12"
-                      onClick={toggleAudio}
-                    >
-                      <PlayPauseIcon isPlaying={isPlaying} className="size-5" />
-                    </Button>
+            <div className="relative w-full">
+              <div className="relative bg-fm-surface-secondary rounded-2xl px-2 py-2.5 overflow-hidden">
+                <div
+                  className={cn(
+                    "relative aspect-9/16 w-full shrink-0 max-h-[70vh] rounded-xl overflow-hidden",
+                    !selectedShotImageUrl &&
+                      "bg-fm-surface-tertiary animate-pulse"
                   )}
-                </>
-              )}
+                >
+                  {" "}
+                  {selectedShotImageUrl && (
+                    <>
+                      {" "}
+                      <Image
+                        src={selectedShotImageUrl}
+                        alt={`Shot ${
+                          selectedShotData?.panel_number || selectedShot + 1
+                        }`}
+                        fill
+                        className="object-contain rounded-2xl "
+                        unoptimized
+                      />
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="absolute top-2 right-10"
+                      >
+                        <EditBigIcon className="size-5" />
+                      </Button>
+                      {selectedShotData?.audio_url && (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="absolute bottom-2 right-12"
+                          onClick={toggleAudio}
+                        >
+                          <PlayPauseIcon
+                            isPlaying={isPlaying}
+                            className="size-5"
+                          />
+                        </Button>
+                      )}
+                    </>
+                  )}
+                </div>
+              </div>
             </div>
           </div>
         </div>
