@@ -234,7 +234,7 @@ export default function ShotImages({
             )}
 
             <div className="relative w-full">
-              <div className="relative bg-fm-surface-secondary rounded-2xl px-2 py-2.5 overflow-hidden">
+              <div className="relative bg-fm-surface-secondary rounded-2xl p-2.5 overflow-hidden">
                 <div
                   className={cn(
                     "relative aspect-9/16 w-full shrink-0 max-h-[70vh] rounded-xl overflow-hidden",
