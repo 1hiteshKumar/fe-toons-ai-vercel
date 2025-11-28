@@ -148,6 +148,9 @@ function UserUploadsContent() {
     };
   }, [isStyleDropdownOpen]);
 
+  const disableGenerateAnime =
+    !(scriptText && selectedFile && showName && styleId) || loading;
+
   return (
     <div className="w-full space-y-6 p-5 mx-auto">
       <nav className="flex items-center justify-center">
@@ -324,18 +327,14 @@ function UserUploadsContent() {
           </div>
           <div className="flex justify-center mt-4">
             <Button
-              isDisabled={
-                !(scriptText && selectedFile && showName && styleId) || loading
-              }
+              isDisabled={disableGenerateAnime}
               variant="outline"
               noise="none"
               className="font-fm-poppins rounded-sm"
               onClick={onGenerate}
               innerClassName={cn(
                 "border-none bg-[#833AFF] rounded-lg font-fm-poppins text-fm-lg text-white",
-                (!(scriptText && selectedFile && showName && styleId) ||
-                  loading) &&
-                  "bg-fm-neutral-100"
+                disableGenerateAnime && "bg-fm-neutral-100"
               )}
             >
               <span className="border-none">Generate Anime</span>
