@@ -249,16 +249,15 @@ export default function ShotImages({
                       selectedShotData?.panel_number || selectedShot + 1
                     }`}
                     fill
-                    className="object-cover"
+                    className="object-contain"
                     unoptimized
                   />
                   <Button
                     variant="outline"
                     size="sm"
-                    className="absolute top-2 right-6"
+                    className="absolute top-2 right-10"
                   >
                     <EditBigIcon className="size-5" />
-                    Edit Image
                   </Button>
                   {selectedShotData?.audio_url && (
                     <Button
@@ -366,7 +365,7 @@ export default function ShotImages({
                                     return (
                                       <p
                                         key={character}
-                                        className="font-fm-poppins text-fm-md"
+                                        className="font-fm-poppins italic text-fm-md"
                                       >
                                         <span>{character}:</span> {text}
                                       </p>
@@ -391,7 +390,7 @@ export default function ShotImages({
                                     return (
                                       <p
                                         key={character}
-                                        className="font-fm-poppins text-fm-md"
+                                        className="font-fm-poppins italic text-fm-md"
                                       >
                                         <span>{character}:</span> {text}
                                       </p>

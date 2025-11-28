@@ -327,7 +327,7 @@ export default function ShotVideos({
                             Narration:
                           </p>
 
-                          <p className="font-fm-poppins text-fm-md">
+                          <p className="font-fm-poppins italic text-fm-md">
                             {shotStartFrame.narration}
                           </p>
                         </div>
@@ -347,7 +347,7 @@ export default function ShotVideos({
                                   return (
                                     <p
                                       key={character}
-                                      className="font-fm-poppins text-fm-md"
+                                      className="font-fm-poppins italic text-fm-md"
                                     >
                                       <span>{character}:</span> {text}
                                     </p>
@@ -372,7 +372,7 @@ export default function ShotVideos({
                                   return (
                                     <p
                                       key={character}
-                                      className="font-fm-poppins text-fm-md"
+                                      className="font-fm-poppins italic text-fm-md"
                                     >
                                       <span>{character}:</span> {text}
                                     </p>
