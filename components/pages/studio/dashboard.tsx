@@ -52,6 +52,8 @@ function DashboardContent({ taskId }: { taskId: string }) {
   const [generatingStatus, setGeneratingStatus] =
     useState<GeneratingStatus>("PENDING");
 
+    const [characterToAvatarMapping, setCharacterToAvatarMapping] = useState({});
+
   useEffect(() => {
     const isSharedTabs = ["shot-images", "shot-videos", "publish"].includes(
       active
@@ -156,10 +158,10 @@ function DashboardContent({ taskId }: { taskId: string }) {
           <Story onNext={() => setActive("characters")} taskId={taskId} />
         )}
         {active === "scenes" && (
-          <Scenes onNext={() => setActive("shot-images")} />
+          <Scenes onNext={() => setActive("shot-images")} characterToAvatarMapping={characterToAvatarMapping} />
         )}
         {active === "characters" && (
-          <Characters onNext={() => setActive("scenes")} />
+          <Characters onNext={() => setActive("scenes")} setCharacterToAvatarMapping={setCharacterToAvatarMapping} />
         )}
         {active === "shot-images" && (
           <ShotImages

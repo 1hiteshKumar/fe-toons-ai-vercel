@@ -16,11 +16,18 @@ interface Character {
   close_up?: string;
 }
 
-export default function Characters({ onNext }: { onNext?: () => void }) {
+export default function Characters({
+  onNext,
+  setCharacterToAvatarMapping,
+}: {
+  onNext?: () => void;
+  setCharacterToAvatarMapping: (val: Record<string, string>) => void;
+}) {
   const [characters, setCharacters] = useState<Character[]>([]);
   const [selectedCharacter, setSelectedCharacter] = useState<Character | null>(
     null
   );
+
   const [loading, setLoading] = useState(true);
   const params = useParams() as { id: string };
 
@@ -31,6 +38,12 @@ export default function Characters({ onNext }: { onNext?: () => void }) {
         const res = await fetchCharacters(params.id);
         const chars = res.characters || [];
         setCharacters(chars);
+        const avatarMapping = {};
+        //@ts-expect-error for now
+        chars.forEach((c) => (avatarMapping[c.name] = c.close_up));
+
+        setCharacterToAvatarMapping(avatarMapping);
+
         if (chars.length > 0) {
           setSelectedCharacter((prev) => prev || chars[0]);
         }

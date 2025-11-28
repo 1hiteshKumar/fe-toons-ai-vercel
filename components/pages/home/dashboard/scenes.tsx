@@ -3,9 +3,10 @@ import Loading from "@/components/loading";
 import fetchScenes from "@/server/queries/fetch-scenes";
 import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
-import { toast } from "sonner";
 import { Button } from "@/aural/components/ui/button";
 import ArrowRightIcon from "@/aural/icons/arrow-right-icon";
+import Image from "next/image";
+import { convertGoogleDriveUrl } from "@/lib/helpers";
 
 interface Scene {
   beat_number: number;
@@ -20,7 +21,13 @@ type ScenesData = {
   [episodeName: string]: Scene[];
 };
 
-export default function Scenes({ onNext }: { onNext?: () => void }) {
+export default function Scenes({
+  onNext,
+  characterToAvatarMapping,
+}: {
+  onNext?: () => void;
+  characterToAvatarMapping: Record<string, string>;
+}) {
   const [scenes, setScenes] = useState<ScenesData>({});
   const [isLoading, setIsLoading] = useState(true);
   const params = useParams() as { id: string };
@@ -101,8 +108,40 @@ export default function Scenes({ onNext }: { onNext?: () => void }) {
                       <div className="-mx-5">
                         <hr className="border-t border-fm-neutral-300 w-full" />
                       </div>
-                      <p className=" font-bold text-sm mt-2 py-2">
-                        {scene.characters || "N/A"}
+                      <p className="font-bold text-sm mt-2 py-2 flex items-center gap-4">
+                        {scene.characters
+                          ? (() => {
+                              const chars = scene.characters
+                                .split(",")
+                                .map((c) => c.trim()) ;
+                              const visible = chars.slice(0, 3); 
+                              const remaining = chars.length - visible.length;
+
+                              return (
+                                <>
+                                  {visible.map((c) => {
+                                    const avatar = characterToAvatarMapping[c];
+                                    return avatar ? (
+                                      <span
+                                        key={c}
+                                        className="flex items-center gap-2"
+                                      >
+                                        <Image
+                                          src={convertGoogleDriveUrl(avatar)}
+                                          alt={c}
+                                          width={40}
+                                          height={40}
+                                          className="rounded-full"
+                                        />
+                                        <span>{c}</span>
+                                      </span>
+                                    ) : null;
+                                  })}
+                                  {remaining > 0 && <span>+{remaining}</span>}
+                                </>
+                              );
+                            })()
+                          : "N/A"}
                       </p>
                     </div>
                   </div>

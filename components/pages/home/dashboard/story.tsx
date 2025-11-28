@@ -30,7 +30,7 @@ export default function Story({
       )[0];
       // eslint-disable-next-line react-hooks/set-state-in-effect
       setTaskData(taskData);
-      console.log(taskData)
+      console.log(taskData);
     }
   }, [taskId]);
 
