@@ -4,7 +4,7 @@ import Loading from "@/components/loading";
 import Heading from "@/components/heading";
 import TextArea from "@/aural/components/ui/textarea";
 import { useEffect, useState } from "react";
-import { Story } from "@/lib/hooks/use-user-uploads";
+import type { Story } from "@/lib/hooks/use-user-uploads";
 import { Button } from "@/aural/components/ui/button";
 import { cn } from "@/aural/lib/utils";
 import { PencilIcon } from "@/aural/icons/pencil-icon";
