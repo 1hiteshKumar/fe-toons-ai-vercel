@@ -131,7 +131,7 @@ export default function Scenes({
                                           alt={c}
                                           width={40}
                                           height={40}
-                                          className="rounded-full"
+                                          className="rounded-[100%] size-10 object-cover"
                                         />
                                         <span>{c}</span>
                                       </span>

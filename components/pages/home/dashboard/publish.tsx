@@ -128,7 +128,7 @@ export default function Publish({
                 <div className="relative bg-fm-surface-secondary rounded-2xl p-2 overflow-hidden">
                   <video
                     src={videoUrl}
-                    className="w-full h-auto max-h-[520px] rounded-xl shadow-2xl"
+                    className="w-84 h-auto max-h-[600px] rounded-xl shadow-2xl"
                     controls
                     muted
                     playsInline
@@ -149,7 +149,7 @@ export default function Publish({
                       sequentialShotVideos[currentVideoIndex] ||
                       sequentialShotVideos[0]
                     }
-                    className="w-full h-auto max-h-[420px] rounded-xl shadow-2xl"
+                    className="w-84 h-auto max-h-[600px] rounded-xl shadow-2xl"
                     controls
                     playsInline
                   />
