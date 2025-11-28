@@ -135,7 +135,12 @@ export default function Publish({
                 : "Your Story is Processing..."}
             </h1>
           </div>
-          <p className="text-xl md:text-2xl text-fm-secondary-700 font-light">
+          <p
+            className={cn(
+              "text-xl md:text-2xl text-fm-secondary-700 font-light",
+              isGenerating && "animate-pulse"
+            )}
+          >
             &quot;{showName}&quot; is{" "}
             {videoUrl
               ? "ready to watch!"
@@ -181,9 +186,7 @@ export default function Publish({
                   }
                   className="w-full h-auto max-h-[420px] rounded-xl shadow-2xl"
                   controls
-                  muted
                   playsInline
-                  autoPlay
                 />
               </div>
             </div>

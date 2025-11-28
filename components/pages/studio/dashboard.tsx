@@ -25,6 +25,7 @@ import {
 const Characters = dynamic(() => import("../home/dashboard/characters"));
 const Editor = dynamic(() => import("../home/dashboard/editor"));
 const ShotImages = dynamic(() => import("../home/dashboard/shot-images"));
+const Story = dynamic(() => import("../home/dashboard/story"));
 
 const Publish = dynamic(() => import("../home/dashboard/publish"));
 const ShotVideos = dynamic(() => import("../home/dashboard/shot-videos"));
@@ -42,7 +43,7 @@ const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
 export type TabId = (typeof TABS)[number]["id"];
 
 function DashboardContent({ taskId }: { taskId: string }) {
-  const [active, setActive] = useState<TabId>("scenes");
+  const [active, setActive] = useState<TabId>("characters");
   const router = useRouter();
 
   const [shotAssets, setShotAssets] = useState<ShotAssets | null>(null);
@@ -103,11 +104,7 @@ function DashboardContent({ taskId }: { taskId: string }) {
               <button
                 key={id}
                 onClick={() => {
-                  if (id === "story") {
-                    router.push("/");
-                  } else {
-                    setActive(id);
-                  }
+                  setActive(id);
                 }}
                 className={cn(
                   "flex gap-2 items-center justify-center rounded-xl py-3.5 px-4 transition-all duration-200 relative group cursor-pointer hover:text-[#833AFF] font-poppins",
@@ -156,26 +153,27 @@ function DashboardContent({ taskId }: { taskId: string }) {
         </button>
       </nav>
       <main className="flex-1 p-5  overflow-y-scroll">
+        {active === "story" && (
+          <Story onNext={() => setActive("characters")} taskId={taskId} />
+        )}
         {active === "scenes" && (
-          <Scenes onNext={() => setActive("characters")} />
+          <Scenes onNext={() => setActive("shot-images")} />
         )}
         {active === "characters" && (
-          <Characters onNext={() => setActive("shot-images")} />
+          <Characters onNext={() => setActive("scenes")} />
         )}
         {active === "shot-images" && (
           <ShotImages
             data={shotAssets}
-            onNext={() => setActive("editor")}
+            onNext={() => setActive("shot-videos")}
             generatingStatus={generatingStatus}
           />
         )}
-        {active === "editor" && (
-          <Editor onNext={() => setActive("shot-videos")} />
-        )}
+        {active === "editor" && <Editor onNext={() => setActive("publish")} />}
         {active === "shot-videos" && (
           <ShotVideos
             data={shotAssets}
-            onNext={() => setActive("publish")}
+            onNext={() => setActive("editor")}
             generatingStatus={generatingStatus}
           />
         )}

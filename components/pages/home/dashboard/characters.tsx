@@ -13,6 +13,7 @@ interface Character {
   name: string;
   front_view: string;
   back_view: string;
+  close_up?: string;
 }
 
 export default function Characters({ onNext }: { onNext?: () => void }) {
@@ -20,7 +21,6 @@ export default function Characters({ onNext }: { onNext?: () => void }) {
   const [selectedCharacter, setSelectedCharacter] = useState<Character | null>(
     null
   );
-  const [selectedView, setSelectedView] = useState<"front" | "back">("front");
   const [loading, setLoading] = useState(true);
   const params = useParams() as { id: string };
 
@@ -43,7 +43,6 @@ export default function Characters({ onNext }: { onNext?: () => void }) {
 
   const handleCharacterSelect = (character: Character) => {
     setSelectedCharacter(character);
-    setSelectedView("front");
   };
 
   const getImageUrl = (url: string) => convertGoogleDriveUrl(url);
@@ -101,28 +100,41 @@ export default function Characters({ onNext }: { onNext?: () => void }) {
                       : "border-fm-divider-primary hover:border-fm-pr"
                   )}
                 >
-                  <div className="aspect-square relative bg-fm-surface-tertiary flex">
-                    <div className="relative w-1/2 h-full">
+                  <div className="aspect-square relative bg-fm-surface-tertiary">
+                    {character.close_up ? (
                       <Image
-                        src={getImageUrl(character.front_view)}
-                        alt={`${character.name} - front view`}
+                        src={getImageUrl(character.close_up)}
+                        alt={`${character.name} - close up`}
                         fill
                         className="object-cover transition-transform duration-200 group-hover:scale-105"
                         sizes="(max-width: 128px) 100vw, 128px"
                         unoptimized
                       />
-                    </div>
-                    <div className="w-px bg-fm-divider-primary" />
-                    <div className="relative w-1/2 h-full">
-                      <Image
-                        src={getImageUrl(character.back_view)}
-                        alt={`${character.name} - back view`}
-                        fill
-                        className="object-cover transition-transform duration-200 group-hover:scale-105"
-                        sizes="(max-width: 128px) 100vw, 128px"
-                        unoptimized
-                      />
-                    </div>
+                    ) : (
+                      <div className="flex h-full">
+                        <div className="relative w-1/2 h-full">
+                          <Image
+                            src={getImageUrl(character.front_view)}
+                            alt={`${character.name} - front view`}
+                            fill
+                            className="object-cover transition-transform duration-200 group-hover:scale-105"
+                            sizes="(max-width: 128px) 100vw, 128px"
+                            unoptimized
+                          />
+                        </div>
+                        <div className="w-px bg-fm-divider-primary" />
+                        <div className="relative w-1/2 h-full">
+                          <Image
+                            src={getImageUrl(character.back_view)}
+                            alt={`${character.name} - back view`}
+                            fill
+                            className="object-cover transition-transform duration-200 group-hover:scale-105"
+                            sizes="(max-width: 128px) 100vw, 128px"
+                            unoptimized
+                          />
+                        </div>
+                      </div>
+                    )}
                   </div>
                   <div className="absolute inset-0 bg-linear-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-200" />
                   <div className="absolute bottom-0 left-0 right-0 p-2">
@@ -152,46 +164,58 @@ export default function Characters({ onNext }: { onNext?: () => void }) {
                 <p className="text-3xl font-bold text-fm-primary mb-2">
                   {selectedCharacter.name}
                 </p>
-                <div className="flex gap-2 mt-4">
-                  <Button
-                    onClick={() => setSelectedView("front")}
-                    variant={"outline"}
-                    noise="none"
-                    innerClassName={cn("rounded-xl! font-fm-poppins", {
-                      "bg-[#833AFF] border-none": selectedView === "front",
-                    })}
-                  >
-                    Front View
-                  </Button>
-                  <Button
-                    variant={"outline"}
-                    onClick={() => setSelectedView("back")}
-                    noise="none"
-                    innerClassName={cn("rounded-xl! font-fm-poppins", {
-                      "bg-[#833AFF] border-none": selectedView === "back",
-                    })}
-                  >
-                    Back View
-                  </Button>
-                </div>
               </div>
 
-              {/* Main Image Display */}
-              <div className="flex-1 flex items-center justify-center p-8 relative overflow-hidden">
-                <div className="relative w-full h-full max-w-4xl max-h-[600px] rounded-xl overflow-hidden shadow-2xl border-2">
-                  <Image
-                    src={getImageUrl(
-                      selectedView === "front"
-                        ? selectedCharacter.front_view
-                        : selectedCharacter.back_view
-                    )}
-                    alt={`${selectedCharacter.name} - ${selectedView} view`}
-                    fill
-                    className="object-contain"
-                    sizes="(max-width: 1024px) 100vw, 1024px"
-                    priority
-                    unoptimized
-                  />
+              {/* Main Image Display - All 3 views at once */}
+              <div className="flex-1 flex items-center justify-center p-6 relative overflow-hidden min-h-0">
+                <div className="w-full h-full max-h-[calc(100vh-350px)] flex gap-4 items-center justify-center">
+                  {/* Front View */}
+                  <div className="flex-1 h-full max-h-full relative rounded-xl overflow-hidden shadow-2xl border-2 border-fm-divider-primary bg-fm-surface-tertiary">
+                    <div className="absolute top-2 left-2 z-10 bg-black/60 px-2 py-1 rounded text-xs font-semibold text-white">
+                      Front
+                    </div>
+                    <Image
+                      src={getImageUrl(selectedCharacter.front_view)}
+                      alt={`${selectedCharacter.name} - front view`}
+                      fill
+                      className="object-contain"
+                      sizes="(max-width: 400px) 100vw, 400px"
+                      priority
+                      unoptimized
+                    />
+                  </div>
+
+                  {/* Close-up View */}
+                  {selectedCharacter.close_up && (
+                    <div className="flex-1 h-full max-h-full relative rounded-xl overflow-hidden shadow-2xl border-2 border-fm-divider-primary bg-fm-surface-tertiary">
+                      <div className="absolute top-2 left-2 z-10 bg-black/60 px-2 py-1 rounded text-xs font-semibold text-white">
+                        Close-up
+                      </div>
+                      <Image
+                        src={getImageUrl(selectedCharacter.close_up)}
+                        alt={`${selectedCharacter.name} - close up`}
+                        fill
+                        className="object-contain"
+                        sizes="(max-width: 400px) 100vw, 400px"
+                        unoptimized
+                      />
+                    </div>
+                  )}
+
+                  {/* Back View */}
+                  <div className="flex-1 h-full max-h-full relative rounded-xl overflow-hidden shadow-2xl border-2 border-fm-divider-primary bg-fm-surface-tertiary">
+                    <div className="absolute top-2 left-2 z-10 bg-black/60 px-2 py-1 rounded text-xs font-semibold text-white">
+                      Back
+                    </div>
+                    <Image
+                      src={getImageUrl(selectedCharacter.back_view)}
+                      alt={`${selectedCharacter.name} - back view`}
+                      fill
+                      className="object-contain"
+                      sizes="(max-width: 400px) 100vw, 400px"
+                      unoptimized
+                    />
+                  </div>
                 </div>
 
                 {/* Decorative background elements */}

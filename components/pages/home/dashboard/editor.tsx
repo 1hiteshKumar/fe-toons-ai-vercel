@@ -18,7 +18,7 @@ export default function Editor({ onNext }: { onNext: () => void }) {
         </Button>{" "}
       </div>
       <div className="flex-1 w-full h-auto relative min-h-0">
-        <Image src="/images/editorimage.webp" alt="Editor" fill preload />
+        <Image src="/images/editorimage.webp" className="object-contain" alt="Editor" fill preload />
       </div>
     </div>
   );

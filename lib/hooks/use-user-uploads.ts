@@ -22,9 +22,9 @@ type ValidationResponse = {
   message: string;
 };
 
-export type Stories = {
+export type Story = {
   validation_task_id: string;
-  status: "PENDING" | "SUCCESS" | "FAILED";
+  status: "PENDING" | "SUCCESS" | "FAILED" | "COMPLETED";
   scriptText?: string;
   createdAt?: string;
   showName: string;
@@ -35,7 +35,7 @@ export default function useUserUploads() {
   const [scriptText, setScriptText] = useState(PROMPT);
   const [csvUrl, setCSVurl] = useState<string>();
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const [stories, setStories] = useState<Stories[]>([]);
+  const [stories, setStories] = useState<Story[]>([]);
   const [loading, setLoading] = useState(false);
   const [styleId, setStyleId] = useState<number | null>(87);
   const [showName, setShowName] = useState("TDMB");
@@ -55,7 +55,7 @@ export default function useUserUploads() {
     const stored = localStorage.getItem("stories");
     if (stored) {
       try {
-        const parsedStories = JSON.parse(stored) as Stories[];
+        const parsedStories = JSON.parse(stored) as Story[];
         setStories(parsedStories);
         
         // Fetch shot assets for stories with finalShowId and update status

@@ -19,11 +19,11 @@ export const API_URLS = {
 
 export const TABS = [
   { id: "story", label: "Story" },
-  { id: "scenes", label: "Scenes" },
   { id: "characters", label: "Characters" },
+  { id: "scenes", label: "Scenes" },
   { id: "shot-images", label: "Shot Images" },
-  { id: "editor", label: "Editor" },
   { id: "shot-videos", label: "Shot Videos" },
+  { id: "editor", label: "Editor" },
   { id: "publish", label: "Publish" },
 ] as const;
 
