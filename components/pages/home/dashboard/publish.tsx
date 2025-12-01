@@ -9,6 +9,7 @@ import { CopyIcon } from "@/aural/icons/copy-icon";
 import { AiAvatarIcon } from "@/aural/icons/ai-avatar-icon";
 import { getSequentialShotVideoUrls } from "@/lib/helpers";
 import { cn } from "@/aural/lib/utils";
+import { toast } from "sonner";
 
 export default function Publish({
   data,
@@ -20,6 +21,7 @@ export default function Publish({
   const [copied, setCopied] = useState(false);
   const [currentVideoIndex, setCurrentVideoIndex] = useState(0);
   const videoRef = useRef<HTMLVideoElement>(null);
+  const finalVideoRef = useRef<HTMLVideoElement>(null);
 
   const videoUrl = data?.task?.output_video_url_single_image || null;
   const showName = data?.task?.props?.show_name || "Your Story";
@@ -87,17 +89,38 @@ export default function Publish({
     return <Loading text="publish page" />;
   }
 
-  const handleDownload = () => {
+  const handleDownload = async () => {
     if (!videoUrl) return;
+    toast.info("Downloading, this may take some time")
 
-    const link = document.createElement("a");
-    link.href = videoUrl;
+    try {
+      // Fetch the video as a blob to handle cross-origin downloads
+      const response = await fetch(videoUrl);
+      if (!response.ok) {
+        throw new Error("Failed to fetch video");
+      }
+      
+      const blob = await response.blob();
+      const blobUrl = window.URL.createObjectURL(blob);
 
-    link.download = "video.mp4";
+      // Create a temporary anchor element to trigger download
+      const link = document.createElement("a");
+      link.href = blobUrl;
+      link.download = `${showName || "video"}.mp4`;
+      document.body.appendChild(link);
+      link.click();
+      
+      // Clean up
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(blobUrl);
+      toast.success("Downloaded successully")
+    } catch (error) {
+      console.error("Failed to download video:", error);
+      // Fallback: try opening in new tab if blob download fails
+      window.open(videoUrl, "_blank");
+      toast.error("Downloaded failed")
 
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+    }
   };
 
   const handleCopyLink = async () => {
@@ -127,6 +150,7 @@ export default function Publish({
                 <div className="absolute -inset-1 bg-linear-to-r from-fm-primary-500/50 via-fm-secondary-500/50 to-fm-primary-500/50 rounded-2xl blur-lg opacity-75 group-hover:opacity-100 transition-opacity duration-300" />
                 <div className="relative bg-fm-surface-secondary rounded-2xl p-2 overflow-hidden">
                   <video
+                    ref={finalVideoRef}
                     src={videoUrl}
                     className="w-84 h-auto max-h-[600px] rounded-xl shadow-2xl"
                     controls
