@@ -180,11 +180,24 @@ export const getSequentialShotVideoUrls = (
 };
 
 export function getIdFromGoogleDoc(url: string) {
-  if(!url) return "URL NOT FOUND"
-  const parts = url.split("/d/");
-  if (parts.length < 2) {
-    throw new Error("Not a valid Google Docs URL");
+  if (!url) return "URL NOT FOUND";
+
+  // 1️⃣ Google Docs URL pattern
+  if (url.includes("/d/")) {
+    const parts = url.split("/d/");
+    if (parts.length < 2) {
+      throw new Error("Not a valid Google Docs URL");
+    }
+    const id = parts[1].split("/")[0];
+    return id;
   }
-  const id = parts[1].split("/")[0];
-  return id
+
+  // 2️⃣ Cloudfront or general file URL pattern (take last path segment without extension)
+  try {
+    const filename = url.substring(url.lastIndexOf("/") + 1); // get last part
+    const id = filename.replace(/\.[^/.]+$/, ""); // remove extension if any
+    return id;
+  } catch (err) {
+    throw new Error("Cannot extract ID from URL");
+  }
 }

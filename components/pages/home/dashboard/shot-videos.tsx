@@ -250,7 +250,7 @@ export default function ShotVideos({
                     <Button
                       variant="outline"
                       size="sm"
-                      className="absolute top-2 right-6"
+                      className="absolute top-2 right-2"
                       disabled
                     >
                       <EditBigIcon className="size-5" />

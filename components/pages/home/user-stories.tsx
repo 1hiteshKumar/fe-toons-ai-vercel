@@ -85,6 +85,11 @@ export default function UserStories({ stories }: { stories: Story[] }) {
                       </Tag>
                     </div>
                   </div>
+                  {finalShowId && (
+                    <div className="flex items-center text-xs underline ">
+                      <span>ID: {finalShowId}</span>
+                    </div>
+                  )}
                   {createdAt && (
                     <div className="flex items-center text-xs text-fm-neutral-500">
                       <span>Created {formatDate(createdAt)}</span>

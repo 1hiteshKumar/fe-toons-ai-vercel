@@ -2,6 +2,7 @@ import { baseFetch } from "@/lib/baseFetchUtil";
 import { API_URLS } from "../constants";
 import { Story } from "@/lib/hooks/use-user-uploads";
 import { getIdFromGoogleDoc } from "@/lib/helpers";
+import mammoth from "mammoth";
 
 export default async function fetchShotAssets(taskId: string) {
   const res = await baseFetch(
@@ -14,11 +15,26 @@ export default async function fetchShotAssets(taskId: string) {
 
 export const fetchStoryData = async (taskId: string): Promise<Story> => {
   const { task } = await fetchShotAssets(taskId);
-  const docId = getIdFromGoogleDoc(task.script_file_url);
-  const scriptTextRes = await fetch(
-    `https://docs.google.com/document/d/${docId}/export?format=txt`
-  );
-  const scriptText = await scriptTextRes.text();
+  const url = task.script_file_url;
+  let scriptText = "";
+
+  if (url.includes("docs.google.com/document")) {
+    // Google Docs
+    const docId = getIdFromGoogleDoc(url);
+    const scriptTextRes = await fetch(
+      `https://docs.google.com/document/d/${docId}/export?format=txt`
+    );
+    scriptText = await scriptTextRes.text();
+  } else if (url.endsWith(".docx")) {
+    // Cloudfront DOCX
+    const res = await fetch(url);
+    const arrayBuffer = await res.arrayBuffer();
+    const { value } = await mammoth.extractRawText({ arrayBuffer });
+    scriptText = value;
+  } else {
+    throw new Error("Unsupported script file URL format");
+  }
+
   return {
     finalShowId: task.id,
     status: task.status,

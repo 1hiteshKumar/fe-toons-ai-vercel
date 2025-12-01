@@ -151,11 +151,7 @@ export default function Characters({
                   </div>
                   <div className="absolute inset-0 bg-linear-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-200" />
                   <div className="absolute bottom-0 left-0 right-0 p-2">
-                    <p
-                      className={cn(
-                        "font-semibold text-white drop-shadow-lg transition-opacity duration-200"
-                      )}
-                    >
+                    <p className="inline-block z-10 px-2 py-1 rounded-md bg-black/70 backdrop-blur-sm text-xs font-semibold text-white">
                       {character.name}
                     </p>
                   </div>

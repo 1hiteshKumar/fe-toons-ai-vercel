@@ -258,7 +258,7 @@ export default function ShotImages({
                       <Button
                         variant="outline"
                         size="sm"
-                        className="absolute top-2 right-10"
+                        className="absolute top-2 right-4"
                       >
                         <EditBigIcon className="size-5" />
                       </Button>
@@ -266,7 +266,7 @@ export default function ShotImages({
                         <Button
                           variant="outline"
                           size="sm"
-                          className="absolute bottom-2 right-12"
+                          className="absolute bottom-2 right-4"
                           onClick={toggleAudio}
                         >
                           <PlayPauseIcon
