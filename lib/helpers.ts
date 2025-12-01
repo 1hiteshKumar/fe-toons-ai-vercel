@@ -23,12 +23,15 @@ export function convertGoogleDriveUrl(url: string): string {
 export const getGroupedShots = (data: ShotAssets | null): ShotGrouped[] => {
   if (!data) return [];
 
-  const grouped = data.results.reduce((acc: Record<string, PanelItem[]>, shot) => {
-    const key = shot.panel_data.scene_beat_id;
-    if (!acc[key]) acc[key] = [];
-    acc[key].push(shot);
-    return acc;
-  }, {});
+  const grouped = data.results.reduce(
+    (acc: Record<string, PanelItem[]>, shot) => {
+      const key = shot.panel_data.scene_beat_id;
+      if (!acc[key]) acc[key] = [];
+      acc[key].push(shot);
+      return acc;
+    },
+    {}
+  );
 
   return Object.entries(grouped).map(([scene_beat_id, shots]) => ({
     scene_beat_id,
@@ -48,7 +51,7 @@ export const areShotVideosInSequence = (data: ShotAssets | null): boolean => {
   }
 
   const groupedShots = getGroupedShots(data);
-  
+
   // Sort scenes by scene_beat_id to ensure proper order
   const sortedScenes = [...groupedShots].sort((a, b) => {
     const sceneA = parseInt(a.scene_beat_id) || 0;
@@ -64,23 +67,29 @@ export const areShotVideosInSequence = (data: ShotAssets | null): boolean => {
 
   const firstScene = sortedScenes[0];
   const firstSceneShots = firstScene.shots;
-  
+
   // Sort shots by panel_number to ensure proper order
-  const sortedFirstSceneShots = [...firstSceneShots].sort((a, b) => a.panel_number - b.panel_number);
-  
+  const sortedFirstSceneShots = [...firstSceneShots].sort(
+    (a, b) => a.panel_number - b.panel_number
+  );
+
   if (sortedFirstSceneShots.length === 0) {
     return false; // No shots in first scene
   }
-  
+
   // Check if we have shot videos in sequence for the first scene
   // We must have shot 1 first, then shot 2, etc. (no gaps)
   let foundFirstVideo = false;
   let lastVideoIndex = -1;
-  
-  for (let shotIndex = 0; shotIndex < sortedFirstSceneShots.length; shotIndex++) {
+
+  for (
+    let shotIndex = 0;
+    shotIndex < sortedFirstSceneShots.length;
+    shotIndex++
+  ) {
     const shot = sortedFirstSceneShots[shotIndex];
     const hasVideo = !!shot.single_image_video_url;
-    
+
     if (hasVideo) {
       if (!foundFirstVideo) {
         // This is the first video we found
@@ -109,7 +118,7 @@ export const areShotVideosInSequence = (data: ShotAssets | null): boolean => {
       // If we haven't found any videos yet, continue to next shot
     }
   }
-  
+
   // Return true only if we found at least one video in the first scene starting from shot 1
   return foundFirstVideo;
 };
@@ -117,7 +126,7 @@ export const areShotVideosInSequence = (data: ShotAssets | null): boolean => {
 /**
  * Gets sequential shot video URLs across all scenes for sequential playback
  * Returns an array of video URLs in order: scene 1 → shot 1, shot 2 … → scene 2 → shot 1 …
- * 
+ *
  * Features:
  * - Plays videos sequentially across all scenes
  * - Skips missing or out-of-order shots but continues with next shot
@@ -125,7 +134,7 @@ export const areShotVideosInSequence = (data: ShotAssets | null): boolean => {
  * - Stops returning videos if finalVideoUrl exists or isGenerating is false
  * - Reactive to polling updates (uses latest data object)
  * - Converts URLs using convertGoogleDriveUrl()
- * 
+ *
  * Returns empty array if:
  * - Final video URL is present
  * - Not generating
@@ -169,3 +178,13 @@ export const getSequentialShotVideoUrls = (
       .map((shot) => convertGoogleDriveUrl(shot.single_image_video_url));
   });
 };
+
+export function getIdFromGoogleDoc(url: string) {
+  if(!url) return "URL NOT FOUND"
+  const parts = url.split("/d/");
+  if (parts.length < 2) {
+    throw new Error("Not a valid Google Docs URL");
+  }
+  const id = parts[1].split("/")[0];
+  return id
+}

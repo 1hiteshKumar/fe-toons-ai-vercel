@@ -10,6 +10,7 @@ import { cn } from "@/aural/lib/utils";
 import { PencilIcon } from "@/aural/icons/pencil-icon";
 import { TrashIcon } from "@/aural/icons/trash-icon";
 import ArrowRightIcon from "@/aural/icons/arrow-right-icon";
+import { fetchStoryData } from "@/server/queries/fetch-shot-assets";
 
 export default function Story({
   taskId,
@@ -21,16 +22,22 @@ export default function Story({
   const [taskData, setTaskData] = useState<Story>();
 
   useEffect(() => {
-    let storedTasksData = localStorage.getItem("stories");
-    if (storedTasksData) {
-      storedTasksData = JSON.parse(storedTasksData);
-      //@ts-expect-error for now
-      const taskData = storedTasksData?.filter(
-        (f: Story) => Number(f.finalShowId) === Number(taskId)
-      )[0];
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      setTaskData(taskData);
+    async function getStory() {
+      let storedTasksData = localStorage.getItem("stories");
+      if (storedTasksData) {
+        storedTasksData = JSON.parse(storedTasksData);
+        //@ts-expect-error for now
+        const taskData = storedTasksData?.filter(
+          (f: Story) => Number(f.finalShowId) === Number(taskId)
+        )[0];
+        if (!taskData) {
+          const data = await fetchStoryData(taskId);
+
+          setTaskData(data);
+        } else setTaskData(taskData);
+      }
     }
+    getStory();
   }, [taskId]);
 
   if (!taskData) {
@@ -108,6 +115,10 @@ export default function Story({
               {taskData.showName}
             </h2>
             <div className="space-y-4">
+              <div>
+                <p className="text-sm text-fm-secondary-800 mb-2">Task ID</p>
+                <p className="text-fm-primary">{taskId}</p>
+              </div>
               <div>
                 <p className="text-sm text-fm-secondary-800 mb-2">Status</p>
                 <span
