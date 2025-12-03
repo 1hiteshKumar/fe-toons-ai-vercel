@@ -7,70 +7,70 @@ import React, {
   useEffect,
   useRef,
   useState,
-} from "react"
-import { CharCount } from "./char-count"
-import { HelperText } from "./helper-text"
-import { Label } from "./label"
-import { cn } from "../../lib/utils"
-import { cva } from "class-variance-authority"
+} from "react";
+import { CharCount } from "./char-count";
+import { HelperText } from "./helper-text";
+import { Label } from "./label";
+import { cn } from "../../lib/utils";
+import { cva } from "class-variance-authority";
 
 // Types
-type TextAreaVariant = "default" | "error" | "warning" | "success"
-type TextAreaDecoration = "underline" | "outline" | "filled"
+type TextAreaVariant = "default" | "error" | "warning" | "success";
+type TextAreaDecoration = "underline" | "outline" | "filled";
 
 interface TextAreaBaseProps {
-  variant?: TextAreaVariant
-  decoration?: TextAreaDecoration
-  disabled?: boolean
-  className?: string
-  placeholder?: string
-  value?: string
-  autoComplete?: string
-  autoFocus?: boolean
-  onChange?: (e: React.ChangeEvent<HTMLTextAreaElement>) => void
-  onBlur?: (e: React.FocusEvent<HTMLTextAreaElement>) => void
-  onFocus?: (e: React.FocusEvent<HTMLTextAreaElement>) => void
-  onInput?: (e: React.FocusEvent<HTMLTextAreaElement>) => void
-  onKeyDown?: (e: React.KeyboardEvent<HTMLTextAreaElement>) => void
-  id?: string
-  name?: string
-  required?: boolean
-  maxLength?: number
-  rows?: number
-  autoGrow?: boolean
-  maxHeight?: number
-  minHeight?: number
-  unstyled?: boolean
-  "aria-describedby"?: string
-  "aria-invalid"?: boolean
-  "aria-labelledby"?: string
+  variant?: TextAreaVariant;
+  decoration?: TextAreaDecoration;
+  disabled?: boolean;
+  className?: string;
+  placeholder?: string;
+  value?: string;
+  autoComplete?: string;
+  autoFocus?: boolean;
+  onChange?: (e: React.ChangeEvent<HTMLTextAreaElement>) => void;
+  onBlur?: (e: React.FocusEvent<HTMLTextAreaElement>) => void;
+  onFocus?: (e: React.FocusEvent<HTMLTextAreaElement>) => void;
+  onInput?: (e: React.FocusEvent<HTMLTextAreaElement>) => void;
+  onKeyDown?: (e: React.KeyboardEvent<HTMLTextAreaElement>) => void;
+  id?: string;
+  name?: string;
+  required?: boolean;
+  maxLength?: number;
+  rows?: number;
+  autoGrow?: boolean;
+  maxHeight?: number;
+  minHeight?: number;
+  unstyled?: boolean;
+  "aria-describedby"?: string;
+  "aria-invalid"?: boolean;
+  "aria-labelledby"?: string;
 }
 
 interface TextAreaProps extends TextAreaBaseProps {
-  label?: ReactNode
-  helperText?: ReactNode
-  fullWidth?: boolean
-  showCharCount?: boolean
+  label?: ReactNode;
+  helperText?: ReactNode;
+  fullWidth?: boolean;
+  showCharCount?: boolean;
   classes?: {
-    root?: string
-    label?: string
-    wrapper?: string
-    textarea?: string
-    helperText?: string
-    charCount?: string
-  }
+    root?: string;
+    label?: string;
+    wrapper?: string;
+    textarea?: string;
+    helperText?: string;
+    charCount?: string;
+  };
 }
 
 interface TextAreaComponent
   extends ForwardRefExoticComponent<
     TextAreaProps & RefAttributes<HTMLTextAreaElement>
   > {
-  Root: typeof TextAreaRoot
-  Label: typeof TextAreaLabel
-  Wrapper: typeof TextAreaWrapper
-  Base: typeof TextAreaBase
-  HelperText: typeof HelperText
-  CharCount: typeof CharCount
+  Root: typeof TextAreaRoot;
+  Label: typeof TextAreaLabel;
+  Wrapper: typeof TextAreaWrapper;
+  Base: typeof TextAreaBase;
+  HelperText: typeof HelperText;
+  CharCount: typeof CharCount;
 }
 
 // CVA for textarea variants with decoration support
@@ -105,7 +105,7 @@ const textareaVariants = cva(
       state: "default",
     },
   }
-)
+);
 
 // Auto-grow hook
 const useAutoGrow = (
@@ -116,56 +116,56 @@ const useAutoGrow = (
   autoGrow: boolean = true
 ) => {
   const adjustHeight = useCallback(() => {
-    const textarea = textareaRef.current
-    if (!textarea || !autoGrow) return
+    const textarea = textareaRef.current;
+    if (!textarea || !autoGrow) return;
 
     // Reset height to auto to get the correct scrollHeight
-    textarea.style.height = "auto"
+    textarea.style.height = "auto";
 
-    let newHeight = textarea.scrollHeight
+    let newHeight = textarea.scrollHeight;
 
     // Apply min height constraint
     if (minHeight && newHeight < minHeight) {
-      newHeight = minHeight
+      newHeight = minHeight;
     }
 
     // Apply max height constraint
     if (maxHeight && newHeight > maxHeight) {
-      newHeight = maxHeight
-      textarea.style.overflowY = "auto"
+      newHeight = maxHeight;
+      textarea.style.overflowY = "auto";
     } else {
-      textarea.style.overflowY = "hidden"
+      textarea.style.overflowY = "hidden";
     }
 
-    textarea.style.height = `${newHeight}px`
-  }, [textareaRef, minHeight, maxHeight, autoGrow])
+    textarea.style.height = `${newHeight}px`;
+  }, [textareaRef, minHeight, maxHeight, autoGrow]);
 
   useEffect(() => {
-    adjustHeight()
-  }, [value, adjustHeight])
+    adjustHeight();
+  }, [value, adjustHeight]);
 
   useEffect(() => {
-    const textarea = textareaRef.current
-    if (!textarea || !autoGrow) return
+    const textarea = textareaRef.current;
+    if (!textarea || !autoGrow) return;
 
     // Set initial min height
     if (minHeight) {
-      textarea.style.minHeight = `${minHeight}px`
+      textarea.style.minHeight = `${minHeight}px`;
     }
 
-    adjustHeight()
+    adjustHeight();
 
     // Handle window resize
-    const handleResize = () => adjustHeight()
-    window.addEventListener("resize", handleResize)
+    const handleResize = () => adjustHeight();
+    window.addEventListener("resize", handleResize);
 
     return () => {
-      window.removeEventListener("resize", handleResize)
-    }
-  }, [adjustHeight, minHeight, autoGrow, textareaRef])
+      window.removeEventListener("resize", handleResize);
+    };
+  }, [adjustHeight, minHeight, autoGrow, textareaRef]);
 
-  return adjustHeight
-}
+  return adjustHeight;
+};
 
 // Atomic components
 
@@ -173,8 +173,8 @@ const useAutoGrow = (
 const TextAreaRoot = forwardRef<
   HTMLDivElement,
   React.PropsWithChildren<{
-    className?: string
-    fullWidth?: boolean
+    className?: string;
+    fullWidth?: boolean;
   }>
 >(({ children, className = "", fullWidth = false }, ref) => (
   <div
@@ -189,23 +189,23 @@ const TextAreaRoot = forwardRef<
   >
     {children}
   </div>
-))
-TextAreaRoot.displayName = "TextAreaRoot"
+));
+TextAreaRoot.displayName = "TextAreaRoot";
 
 // Label component (wrapper around existing Label)
 const TextAreaLabel = forwardRef<
   HTMLLabelElement,
   {
-    htmlFor?: string
-    className?: string
-    children: ReactNode
-    disabled?: boolean
-    required?: boolean
+    htmlFor?: string;
+    className?: string;
+    children: ReactNode;
+    disabled?: boolean;
+    required?: boolean;
   }
 >((props, ref) => {
-  return <Label ref={ref} {...props} />
-})
-TextAreaLabel.displayName = "TextAreaLabel"
+  return <Label ref={ref} {...props} />;
+});
+TextAreaLabel.displayName = "TextAreaLabel";
 
 // Wrapper for textarea with relative positioning
 const TextAreaWrapper = forwardRef<
@@ -215,8 +215,8 @@ const TextAreaWrapper = forwardRef<
   <div ref={ref} className={cn("relative", className)}>
     {children}
   </div>
-))
-TextAreaWrapper.displayName = "TextAreaWrapper"
+));
+TextAreaWrapper.displayName = "TextAreaWrapper";
 
 // Base textarea component without any wrapper elements
 const TextAreaBase = forwardRef<HTMLTextAreaElement, TextAreaBaseProps>(
@@ -247,11 +247,11 @@ const TextAreaBase = forwardRef<HTMLTextAreaElement, TextAreaBaseProps>(
     },
     ref
   ) => {
-    const [isFocused, setIsFocused] = useState(false)
-    const [textareaValue, setTextareaValue] = useState(value || "")
-    const internalRef = useRef<HTMLTextAreaElement>(null)
+    const [isFocused, setIsFocused] = useState(false);
+    const [textareaValue, setTextareaValue] = useState(value || "");
+    const internalRef = useRef<HTMLTextAreaElement>(null);
     const textareaRef =
-      (ref as React.RefObject<HTMLTextAreaElement>) || internalRef
+      (ref as React.RefObject<HTMLTextAreaElement>) || internalRef;
 
     // Auto-grow functionality
     useAutoGrow(
@@ -260,35 +260,35 @@ const TextAreaBase = forwardRef<HTMLTextAreaElement, TextAreaBaseProps>(
       minHeight,
       maxHeight,
       autoGrow
-    )
+    );
 
     // Handle focus state
     const handleFocus = (e: React.FocusEvent<HTMLTextAreaElement>) => {
-      setIsFocused(true)
-      if (onFocus) onFocus(e)
-    }
+      setIsFocused(true);
+      if (onFocus) onFocus(e);
+    };
 
     // Handle blur state
     const handleBlur = (e: React.FocusEvent<HTMLTextAreaElement>) => {
-      setIsFocused(false)
-      if (onBlur) onBlur(e)
-    }
+      setIsFocused(false);
+      if (onBlur) onBlur(e);
+    };
 
     // Handle textarea change
     const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-      const newValue = e.target.value
+      const newValue = e.target.value;
 
       // Respect maxLength
       if (maxLength && newValue.length > maxLength) {
-        return
+        return;
       }
 
-      setTextareaValue(newValue)
-      if (onChange) onChange(e)
-    }
+      setTextareaValue(newValue);
+      if (onChange) onChange(e);
+    };
 
     // Determine focus state
-    const state = disabled ? "disabled" : isFocused ? "focused" : "default"
+    const state = disabled ? "disabled" : isFocused ? "focused" : "default";
 
     // Apply styles only if not unstyled
     const textareaClassName = unstyled
@@ -298,7 +298,7 @@ const TextAreaBase = forwardRef<HTMLTextAreaElement, TextAreaBaseProps>(
           decoration,
           state,
           className,
-        })
+        });
 
     return (
       <textarea
@@ -320,10 +320,10 @@ const TextAreaBase = forwardRef<HTMLTextAreaElement, TextAreaBaseProps>(
         aria-labelledby={ariaLabelledBy}
         {...props}
       />
-    )
+    );
   }
-)
-TextAreaBase.displayName = "TextAreaBase"
+);
+TextAreaBase.displayName = "TextAreaBase";
 
 // Main TextArea component using composition
 const TextArea = forwardRef<HTMLTextAreaElement, TextAreaProps>(
@@ -359,35 +359,35 @@ const TextArea = forwardRef<HTMLTextAreaElement, TextAreaProps>(
     },
     ref
   ) => {
-    const [textareaValue, setTextareaValue] = useState(value || "")
+    const [textareaValue, setTextareaValue] = useState(value || "");
 
     // Generate unique IDs for accessibility
     const textareaId =
-      id || `textarea-${Math.random().toString(36).substr(2, 9)}`
-    const helperTextId = helperText ? `${textareaId}-helper` : undefined
-    const charCountId = showCharCount ? `${textareaId}-char-count` : undefined
+      id || `textarea-${Math.random().toString(36).substr(2, 9)}`;
+    const helperTextId = helperText ? `${textareaId}-helper` : undefined;
+    const charCountId = showCharCount ? `${textareaId}-char-count` : undefined;
 
     // Handle textarea change
     const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-      const newValue = e.target.value
+      const newValue = e.target.value;
 
       // Respect maxLength
       if (maxLength && newValue.length > maxLength) {
-        return
+        return;
       }
 
-      setTextareaValue(newValue)
-      if (onChange) onChange(e)
-    }
+      setTextareaValue(newValue);
+      if (onChange) onChange(e);
+    };
 
     // Current character count
-    const currentValue = value !== undefined ? value : textareaValue
-    const currentLength = currentValue.length
+    const currentValue = value !== undefined ? value : textareaValue;
+    const currentLength = currentValue.length;
 
     // Build aria-describedby
     const describedByIds = [ariaDescribedBy, helperTextId, charCountId]
       .filter(Boolean)
-      .join(" ")
+      .join(" ");
 
     return (
       <TextAreaRoot
@@ -411,7 +411,7 @@ const TextArea = forwardRef<HTMLTextAreaElement, TextAreaProps>(
               currentLength={currentLength}
               maxLength={maxLength}
               id={charCountId}
-              className="ml-auto"
+              className={cn("ml-auto", classes?.charCount)}
             />
           )}
         </div>
@@ -453,32 +453,32 @@ const TextArea = forwardRef<HTMLTextAreaElement, TextAreaProps>(
           </HelperText>
         )}
       </TextAreaRoot>
-    )
+    );
   }
-) as TextAreaComponent
+) as TextAreaComponent;
 
-TextArea.displayName = "TextArea"
+TextArea.displayName = "TextArea";
 
 // Compose TextArea with its atomic components
-TextArea.Root = TextAreaRoot
-TextArea.Label = TextAreaLabel
-TextArea.Wrapper = TextAreaWrapper
-TextArea.Base = TextAreaBase
-TextArea.HelperText = HelperText
-TextArea.CharCount = CharCount
+TextArea.Root = TextAreaRoot;
+TextArea.Label = TextAreaLabel;
+TextArea.Wrapper = TextAreaWrapper;
+TextArea.Base = TextAreaBase;
+TextArea.HelperText = HelperText;
+TextArea.CharCount = CharCount;
 
-export default TextArea
+export default TextArea;
 export {
   TextAreaRoot,
   TextAreaLabel,
   TextAreaWrapper,
   TextAreaBase,
   textareaVariants,
-}
+};
 export type {
   TextAreaProps,
   TextAreaVariant,
   TextAreaComponent,
   TextAreaBaseProps,
   TextAreaDecoration,
-}
+};

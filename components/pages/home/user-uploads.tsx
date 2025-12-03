@@ -266,15 +266,17 @@ function UserUploadsContent() {
             <div className="bg-fm-neutral-0! font-fm-poppins p-4! rounded-xl">
               <TextArea
                 id="script-text"
+                showCharCount
                 minHeight={196}
                 maxHeight={196}
-                maxLength={2000}
+                maxLength={10000}
                 placeholder="Once upon a time, in a world where..."
                 value={scriptText}
                 autoGrow
                 onChange={(e) => setScriptText(e.target.value)}
                 classes={{
                   textarea: "border-0 bg-fm-neutral-0! p-0! font-fm-poppins",
+                  charCount: "font-fm-poppins text-fm-primary/50",
                 }}
               />
             </div>
