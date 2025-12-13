@@ -48,6 +48,8 @@ export default function Story({
 
   const onRegenerate = async () => {
     const { csvUrl, showName, styleId } = taskData!;
+    if (!csvUrl) toast.error("CSV URL NOT FOUND");
+
     if (!csvUrl || !updatedScriptText) return;
 
     const validation_task_id = await validateUploads({
