@@ -48,7 +48,7 @@ export default function Story({
 
   const onRegenerate = async () => {
     const { csvUrl, showName, styleId } = taskData!;
-    if (!csvUrl) toast.error("CSV URL NOT FOUND");
+    if (!csvUrl) toast.error("CSV URL NOT FOUND, REGENERATION NOT POSSIBLE");
 
     if (!csvUrl || !updatedScriptText) return;
 
