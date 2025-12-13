@@ -4,7 +4,7 @@ import Loading from "@/components/loading";
 import Heading from "@/components/heading";
 import TextArea from "@/aural/components/ui/textarea";
 import { useEffect, useState } from "react";
-import type { Story } from "@/lib/hooks/use-user-uploads";
+import type { Story, ValidationResponse } from "@/lib/hooks/use-user-uploads";
 import { Button } from "@/aural/components/ui/button";
 import { cn } from "@/aural/lib/utils";
 import { PencilIcon } from "@/aural/icons/pencil-icon";
@@ -13,6 +13,10 @@ import ArrowRightIcon from "@/aural/icons/arrow-right-icon";
 import { fetchStoryData } from "@/server/queries/fetch-shot-assets";
 import { validateUploads } from "@/server/mutations/validate-uploads";
 import { toast } from "sonner";
+import { API_URLS } from "@/server/constants";
+import usePolling from "@/lib/hooks/use-polling";
+import { addTask } from "@/server/mutations/add-task";
+import { useRouter } from "next/navigation";
 
 export default function Story({
   taskId,
@@ -21,6 +25,8 @@ export default function Story({
   taskId: string;
   onNext: () => void;
 }) {
+  const router = useRouter();
+  const { poll, stopPolling } = usePolling();
   const [updatedScriptText, setUpdatedScriptText] = useState("");
   const [taskData, setTaskData] = useState<Story>();
 
@@ -50,7 +56,7 @@ export default function Story({
     const { csvUrl, showName, styleId } = taskData!;
     if (!csvUrl) toast.error("CSV URL NOT FOUND, REGENERATION NOT POSSIBLE");
 
-    if (!csvUrl || !updatedScriptText) return;
+    if (!csvUrl || !updatedScriptText || !styleId || !showName) return;
 
     const validation_task_id = await validateUploads({
       script_text: updatedScriptText,
@@ -73,7 +79,55 @@ export default function Story({
     const updatedStories = [newStory, ...storedStories];
 
     localStorage.setItem("stories", JSON.stringify(updatedStories));
-    toast.success("Regeneration started ! New task queued.");
+    toast.success("Regeneration started! Taking you there, just a moment.");
+    pollStatus(validation_task_id);
+  };
+
+  const pollStatus = async (taskId: string) => {
+    if (!taskId) return;
+
+    const pollingKey = `validation_task_${taskId}`;
+    poll<ValidationResponse>({
+      url: API_URLS.FETCH_VALIDATION_STATUS({ taskId }),
+      pollingKey,
+      callback: async function (data) {
+        if (data?.status === "SUCCESS" || data?.status === "FAILED") {
+          console.log(data);
+          stopPolling(pollingKey);
+          const storedStories: Story[] = JSON.parse(
+            localStorage.getItem("stories") || "[]"
+          );
+
+          if (!data.result.success) {
+            const updatedStories = storedStories.map((story) =>
+              story.validation_task_id === taskId
+                ? { ...story, status: "FAILED" }
+                : story
+            );
+            localStorage.setItem("stories", JSON.stringify(updatedStories));
+            toast.error("REGENERATION FAILED.");
+            return;
+          }
+
+          if (data.result.success) {
+            const finalShowId = await addTask({
+              validation_task_id: data.validation_task_id,
+              script_text: updatedScriptText,
+              showName: taskData?.showName || "",
+              //@ts-expect-error for now
+              styleId: taskData?.styleId,
+            });
+            const updatedStories = storedStories.map((story) =>
+              story.validation_task_id === taskId
+                ? { ...story, finalShowId, status: "PENDING" }
+                : story
+            );
+            localStorage.setItem("stories", JSON.stringify(updatedStories));
+            router.push(`/studio/${finalShowId}`);
+          }
+        }
+      },
+    });
   };
 
   if (!taskData) {

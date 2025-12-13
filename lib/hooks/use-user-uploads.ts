@@ -9,7 +9,7 @@ import { addTask } from "@/server/mutations/add-task";
 import fetchShotAssets from "@/server/queries/fetch-shot-assets";
 import { ShotAssets } from "@/lib/types";
 
-type ValidationResponse = {
+export type ValidationResponse = {
   validation_task_id: string;
   status: "SUCCESS" | "FAILED" | string;
   result: {
