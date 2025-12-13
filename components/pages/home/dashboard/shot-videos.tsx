@@ -386,7 +386,7 @@ export default function ShotVideos({
                       <ShotHeader
                         hasUrl={!!selectedShotVideoUrl}
                         duration={
-                          selectedShotData.panel_prompt_data?.duration || 5
+                          selectedShotData?.panel_prompt_data?.duration || 5
                         }
                         onDeleteClick={async () => {
                           await editPanel({
@@ -552,6 +552,7 @@ export default function ShotVideos({
         onClose={() => setIsEditModalOpen(false)}
         shotData={selectedShotData}
         shotNumber={selectedShot + 1}
+        onRefetch={onRefetch}
         onSave={(data) => {
           // TODO: Handle save if needed
           console.log("Save video data:", data);

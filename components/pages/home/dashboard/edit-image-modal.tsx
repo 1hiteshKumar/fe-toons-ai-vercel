@@ -11,6 +11,7 @@ import { PanelItem } from "@/lib/types";
 import { convertGoogleDriveUrl } from "@/lib/helpers";
 import { editPanel } from "@/server/mutations/edit-panel";
 import { Trash } from "@/lib/icons";
+import { toast } from "sonner";
 
 const PlusIcon = ({ className }: { className?: string }) => (
   <svg
@@ -67,6 +68,7 @@ interface EditImageModalProps {
   onClose: () => void;
   shotData: PanelItem | null;
   shotNumber: number;
+  onRefetch?: () => void;
   onSave?: (data: {
     panelNumber: number;
     locationTime: string;
@@ -87,6 +89,7 @@ export default function EditImageModal({
   onClose,
   shotData,
   shotNumber,
+  onRefetch,
   onSave,
 }: EditImageModalProps) {
   const [panelNumber, setPanelNumber] = useState(shotNumber);
@@ -481,6 +484,8 @@ export default function EditImageModal({
         panel_data: updatedShotData.panel_data,
         type: "image",
       });
+      toast.info("Regenerating image... This will take some time.")
+      onRefetch?.();
       onClose();
     }
   };

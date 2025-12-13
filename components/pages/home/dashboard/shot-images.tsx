@@ -544,6 +544,7 @@ export default function ShotImages({
         onClose={() => setIsEditModalOpen(false)}
         shotData={selectedShotData}
         shotNumber={selectedShot + 1}
+        onRefetch={onRefetch}
         onSave={(data) => {
           // TODO: Implement save functionality
           console.log("Save image data:", data);

@@ -10,6 +10,7 @@ import { PanelItem } from "@/lib/types";
 import { editPanel } from "@/server/mutations/edit-panel";
 import { convertGoogleDriveUrl } from "@/lib/helpers";
 import { Trash } from "@/lib/icons";
+import { toast } from "sonner";
 
 const PlusIcon = ({ className }: { className?: string }) => (
   <svg
@@ -57,6 +58,7 @@ interface EditVideoModalProps {
   onClose: () => void;
   shotData: PanelItem | null;
   shotNumber: number;
+  onRefetch?: () => void;
   onSave?: (data: {
     videoNumber: number;
     videoDuration: number;
@@ -69,6 +71,7 @@ export default function EditVideoModal({
   onClose,
   shotData,
   shotNumber,
+  onRefetch,
   onSave,
 }: EditVideoModalProps) {
   const [videoNumber, setVideoNumber] = useState(shotNumber);
@@ -414,6 +417,8 @@ export default function EditVideoModal({
         panel_data: updatedShotData.panel_data,
         type: "video",
       });
+      toast.info("Regenerating video... This will take some time.")
+      onRefetch?.();
       onClose();
     }
   };
