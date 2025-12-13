@@ -101,6 +101,9 @@ export default function EditImageModal({
   const [narration, setNarration] = useState("");
   const [emotions, setEmotions] = useState<Emotion[]>([]);
   const [thoughts, setThoughts] = useState<Thought[]>([]);
+  const [updatedShotData, setUpdatedShotData] = useState<PanelItem | null>(
+    null
+  );
 
   // Initialize form data from shotData
   useEffect(() => {
@@ -222,6 +225,109 @@ export default function EditImageModal({
       }
     }
   }, [shotData, shotNumber]);
+
+  // Update updatedShotData whenever any form field changes
+  useEffect(() => {
+    if (shotData) {
+      const startFrame = shotData.panel_data?.start_frame as
+        | Record<string, unknown>
+        | undefined;
+
+      // Convert character framings back to object format
+      const characterFramingObj: Record<
+        string,
+        { shot_size?: string; shot_type?: string }
+      > = {};
+      characterFramings.forEach((framing) => {
+        if (framing.characterName) {
+          characterFramingObj[framing.characterName] = {
+            shot_size: framing.shotSize,
+            shot_type: framing.shotType,
+          };
+        }
+      });
+
+      // Convert poses back to object format
+      const poseObj: Record<string, string> = {};
+      poses.forEach((pose) => {
+        if (pose.characterName && pose.poseDescription) {
+          poseObj[pose.characterName] = pose.poseDescription;
+        }
+      });
+
+      // Convert dialogues back to object format
+      const dialogueObj: Record<string, string> = {};
+      dialogues.forEach((dialogue) => {
+        if (dialogue.characterName && dialogue.dialogueText) {
+          dialogueObj[dialogue.characterName] = dialogue.dialogueText;
+        }
+      });
+
+      // Convert emotions back to object format
+      const emotionObj: Record<string, { label?: string; intensity?: string }> =
+        {};
+      emotions.forEach((emotion) => {
+        if (emotion.characterName) {
+          emotionObj[emotion.characterName] = {
+            label: emotion.label,
+            intensity: emotion.intensity,
+          };
+        }
+      });
+
+      // Convert thoughts back to object format
+      const thoughtObj: Record<string, string> = {};
+      thoughts.forEach((thought) => {
+        if (thought.characterName && thought.thoughtText) {
+          thoughtObj[thought.characterName] = thought.thoughtText;
+        }
+      });
+
+      // Create updated start_frame
+      const updatedStartFrame = {
+        ...startFrame,
+        frame_description: frameDescription,
+        frame_visual: frameVisual,
+        camera_angle: cameraAngle,
+        character_framing: characterFramingObj,
+        pose: poseObj,
+        dialogue: dialogueObj,
+        narration: narration || null,
+        emotion: emotionObj,
+        thought: thoughtObj,
+      };
+
+      // Create updated panel_data
+      const updatedPanelData = {
+        ...shotData.panel_data,
+        location_time: locationTime,
+        start_frame: updatedStartFrame,
+      };
+
+      // Create updated shotData
+      const updated: PanelItem = {
+        ...shotData,
+        panel_number: panelNumber,
+        panel_data: updatedPanelData as PanelItem["panel_data"],
+      };
+
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setUpdatedShotData(updated);
+    }
+  }, [
+    shotData,
+    panelNumber,
+    locationTime,
+    frameDescription,
+    frameVisual,
+    cameraAngle,
+    characterFramings,
+    poses,
+    dialogues,
+    narration,
+    emotions,
+    thoughts,
+  ]);
 
   if (!isOpen || !shotData) return null;
 
@@ -346,7 +452,7 @@ export default function EditImageModal({
   };
 
   const handleSave = () => {
-    if (onSave) {
+    if (onSave && updatedShotData) {
       onSave({
         panelNumber,
         locationTime,
@@ -364,17 +470,7 @@ export default function EditImageModal({
     onClose();
   };
 
-  const handleGenerateNewVideo = () => {
-    // TODO: Implement generate new video functionality
-    console.log("Generate new video", {
-      panelNumber,
-      locationTime,
-      frameDescription,
-      frameVisual,
-      cameraAngle,
-      characterFramings,
-    });
-  };
+  const handleGenerateNewVideo = () => {};
 
   return (
     <div
@@ -391,10 +487,10 @@ export default function EditImageModal({
       {/* Modal */}
       <div className="relative z-10 w-full max-w-5xl mx-4 bg-[#141414] rounded-2xl overflow-hidden border border-fm-divider-primary">
         {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b border-fm-divider-primary bg-[#141414]">
+        <div className="flex items-center justify-between p-6 py-4 border-b border-fm-divider-primary bg-[#141414]">
           <h2 className="text-2xl font-bold text-fm-primary font-fm-poppins">
             Edit Image
-          </h2>
+          </h2> 
           <button
             onClick={onClose}
             className="p-2 hover:bg-fm-surface-tertiary rounded-lg transition-colors"
@@ -407,7 +503,7 @@ export default function EditImageModal({
         {/* Content */}
         <div className="flex h-[calc(100vh-200px)] max-h-[800px]">
           {/* Left Side - Scrollable Form */}
-          <div className="flex-1 overflow-y-auto p-6 space-y-6 border-r border-fm-divider-primary bg-[#141414]">
+          <div className="flex-1 overflow-y-auto p-6 space-y-6 border-fm-divider-primary bg-[#141414]">
             {/* Panel Number */}
             <div className="space-y-3">
               <label className="text-fm-sm font-medium text-[#FFFFFFCC] font-fm-poppins">
@@ -526,7 +622,8 @@ export default function EditImageModal({
                       className="p-1 hover:bg-fm-surface-secondary rounded transition-colors"
                       aria-label={`Remove character ${index + 1}`}
                     >
-                      <TrashIcon className="size-4 text-fm-primary" />
+                      <TrashIcon className="size-5 text-red-500" />
+
                     </button>
                   </div>
 
@@ -637,7 +734,8 @@ export default function EditImageModal({
                       className="p-1 hover:bg-fm-surface-secondary rounded transition-colors"
                       aria-label={`Remove pose ${index + 1}`}
                     >
-                      <TrashIcon className="size-4 text-fm-primary" />
+                      <TrashIcon className="size-5 text-red-500" />
+
                     </button>
                   </div>
 
@@ -721,7 +819,8 @@ export default function EditImageModal({
                       className="p-1 hover:bg-fm-surface-secondary rounded transition-colors"
                       aria-label={`Remove dialogue ${index + 1}`}
                     >
-                      <TrashIcon className="size-4 text-fm-primary" />
+                      <TrashIcon className="size-5 text-red-500" />
+
                     </button>
                   </div>
 
@@ -830,7 +929,8 @@ export default function EditImageModal({
                       className="p-1 hover:bg-fm-surface-secondary rounded transition-colors"
                       aria-label={`Remove emotion ${index + 1}`}
                     >
-                      <TrashIcon className="size-4 text-fm-primary" />
+                      <TrashIcon className="size-5 text-red-500" />
+
                     </button>
                   </div>
 
@@ -930,7 +1030,8 @@ export default function EditImageModal({
                       className="p-1 hover:bg-fm-surface-secondary rounded transition-colors"
                       aria-label={`Remove thought ${index + 1}`}
                     >
-                      <TrashIcon className="size-4 text-fm-primary" />
+                      <TrashIcon className="size-5 text-red-500" />
+
                     </button>
                   </div>
 
@@ -1040,7 +1141,7 @@ export default function EditImageModal({
                 // disableGenerateAnime && "bg-fm-neutral-100"
               )}
             >
-              Generate New Video
+              Generate New Image
             </Button>
           </div>
         </div>
