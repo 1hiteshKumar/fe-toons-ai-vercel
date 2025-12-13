@@ -12,21 +12,6 @@ import Image from "next/image";
 import ArrowRightIcon from "@/aural/icons/arrow-right-icon";
 import { cn } from "@/aural/lib/utils";
 
-interface StartFrame {
-  sfx?: string[];
-  narration?: string | null;
-  frame_visual?: string;
-  dialogue?: Record<string, string | null>;
-  thought?: Record<string, string | null>;
-  [key: string]: unknown;
-}
-
-interface EndFrame {
-  sfx?: string[];
-
-  [key: string]: unknown;
-}
-
 export default function ShotVideos({
   data,
   onNext,
@@ -66,16 +51,6 @@ export default function ShotVideos({
   const getImageUrl = (url: string) => {
     if (!url) return "";
     return convertGoogleDriveUrl(url);
-  };
-
-  const getCombinedSfx = (
-    startFrame: StartFrame | undefined,
-    endFrame: EndFrame | undefined
-  ): string[] => {
-    const startSfx =
-      startFrame && Array.isArray(startFrame.sfx) ? startFrame.sfx : [];
-    const endSfx = endFrame && Array.isArray(endFrame.sfx) ? endFrame.sfx : [];
-    return [...startSfx, ...endSfx].filter(Boolean);
   };
 
   const moveToNextShot = () => {
@@ -275,13 +250,6 @@ export default function ShotVideos({
           >
             {shotsInScene.map((shot, index) => {
               const isSelected = index === selectedShot;
-              const shotStartFrame = shot.panel_data?.start_frame as
-                | StartFrame
-                | undefined;
-              const shotEndFrame = shot.panel_data?.end_frame as
-                | EndFrame
-                | undefined;
-              const shotSfxList = getCombinedSfx(shotStartFrame, shotEndFrame);
 
               // Get audio data from panel_prompt_data.cuts
               type CutAudio = {
@@ -526,28 +494,6 @@ export default function ShotVideos({
                                   </div>
                                 );
                               }
-                            )}
-                          </div>
-                        </div>
-                      )}
-                      {shotSfxList.length > 0 && (
-                        <div className="space-y-0.5">
-                          <p className="text-fm-sm font-medium uppercase text-[#AB79FF] tracking-wider">
-                            SFX:
-                          </p>
-                          <div className="flex flex-wrap gap-1">
-                            {shotSfxList.slice(0, 2).map((sfx, sfxIndex) => (
-                              <span
-                                key={sfxIndex}
-                                className="inline-flex items-center px-2 py-1 rounded text-fm-xs font-medium bg-[#1F1F1F] text-fm-primary "
-                              >
-                                {sfx}
-                              </span>
-                            ))}
-                            {shotSfxList.length > 2 && (
-                              <span className="text-fm-xs text-fm-secondary-600">
-                                +{shotSfxList.length - 2}
-                              </span>
                             )}
                           </div>
                         </div>
