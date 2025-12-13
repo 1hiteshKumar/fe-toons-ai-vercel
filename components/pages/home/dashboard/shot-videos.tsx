@@ -205,10 +205,15 @@ export default function ShotVideos({
         {/* Main Video Display - Middle Column */}
         <div className="w-84">
           <div className="relative w-full">
-            <div className="relative bg-fm-surface-secondary rounded-2xl py-2 px-2.5 overflow-hidden w-max max-w-82 mx-auto">
+            <div
+              className={cn(
+                "relative bg-fm-surface-secondary rounded-2xl p-2.5 overflow-hidden mx-auto",
+                selectedShotVideoUrl && "w-max"
+              )}
+            >
               <div
                 className={cn(
-                  "relative aspect-9/16 w-full shrink-0 max-h-[70vh] rounded-2xl overflow-hidden ",
+                  "relative aspect-9/16 w-full shrink-0 max-h-[70vh] rounded-xl overflow-hidden",
                   !selectedShotVideoUrl &&
                     "bg-fm-surface-tertiary animate-pulse"
                 )}
