@@ -10,6 +10,7 @@ import { CrossCircleIcon } from "@/aural/icons/cross-circle-icon";
 import { cn } from "@/aural/lib/utils";
 import { PanelItem } from "@/lib/types";
 import { convertGoogleDriveUrl } from "@/lib/helpers";
+import { editPanel } from "@/server/mutations/edit-panel";
 
 const PlusIcon = ({ className }: { className?: string }) => (
   <svg
@@ -470,7 +471,17 @@ export default function EditImageModal({
     onClose();
   };
 
-  const handleGenerateNewVideo = () => {};
+  const handleGenerateNewVideo = async () => {
+    if (updatedShotData) {
+      await editPanel({
+        orchestrator_result_task_id: updatedShotData.id,
+        orchestrator_task_id: updatedShotData.orchestrator_task_id,
+        panel_data: updatedShotData.panel_data,
+        type: "image",
+      });
+      onClose()
+    }
+  };
 
   return (
     <div
@@ -490,7 +501,7 @@ export default function EditImageModal({
         <div className="flex items-center justify-between p-6 py-4 border-b border-fm-divider-primary bg-[#141414]">
           <h2 className="text-2xl font-bold text-fm-primary font-fm-poppins">
             Edit Image
-          </h2> 
+          </h2>
           <button
             onClick={onClose}
             className="p-2 hover:bg-fm-surface-tertiary rounded-lg transition-colors"
@@ -623,7 +634,6 @@ export default function EditImageModal({
                       aria-label={`Remove character ${index + 1}`}
                     >
                       <TrashIcon className="size-5 text-red-500" />
-
                     </button>
                   </div>
 
@@ -735,7 +745,6 @@ export default function EditImageModal({
                       aria-label={`Remove pose ${index + 1}`}
                     >
                       <TrashIcon className="size-5 text-red-500" />
-
                     </button>
                   </div>
 
@@ -820,7 +829,6 @@ export default function EditImageModal({
                       aria-label={`Remove dialogue ${index + 1}`}
                     >
                       <TrashIcon className="size-5 text-red-500" />
-
                     </button>
                   </div>
 
@@ -930,7 +938,6 @@ export default function EditImageModal({
                       aria-label={`Remove emotion ${index + 1}`}
                     >
                       <TrashIcon className="size-5 text-red-500" />
-
                     </button>
                   </div>
 
@@ -1031,7 +1038,6 @@ export default function EditImageModal({
                       aria-label={`Remove thought ${index + 1}`}
                     >
                       <TrashIcon className="size-5 text-red-500" />
-
                     </button>
                   </div>
 
