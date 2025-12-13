@@ -16,6 +16,7 @@ interface PollingOptions<T> {
   delay?: number;
   baseUrl?: string;
   failData?: T | null;
+  headers?: Record<string, string>;
 }
 
 interface PollingContextType {
@@ -45,6 +46,7 @@ export const PollingProvider = ({ children }: { children: ReactNode }) => {
       callback,
       delay = 2000,
       failData = null,
+      headers = {},
     }: PollingOptions<T>) => {
       if (pollingRequestsRef.current.has(pollingKey)) {
         return;
@@ -56,6 +58,7 @@ export const PollingProvider = ({ children }: { children: ReactNode }) => {
             url,
             {
               method: "GET",
+              headers,
             },
             baseUrl
           );

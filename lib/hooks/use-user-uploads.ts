@@ -235,6 +235,15 @@ export default function useUserUploads() {
 
   const handleRemoveFile = () => {
     setSelectedFile(null);
+    setCSVurl(undefined);
+  };
+
+  const setCharacterSheetUrl = (spreadsheetUrl: string, taskId: number) => {
+    setCSVurl(spreadsheetUrl);
+    // Create a File-like object for display purposes
+    const fileName = `character-sheet-${taskId}.csv`;
+    const file = new File([""], fileName, { type: "text/csv" });
+    setSelectedFile(file);
   };
 
   return {
@@ -254,5 +263,6 @@ export default function useUserUploads() {
     showName,
     setShowName,
     pollStatus,
+    setCharacterSheetUrl,
   };
 }

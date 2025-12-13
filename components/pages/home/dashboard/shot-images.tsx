@@ -152,7 +152,6 @@ export default function ShotImages({
       }
     }
   };
-  // console.log(shotsInScene)
 
   return (
     <div>

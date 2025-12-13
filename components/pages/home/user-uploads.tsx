@@ -5,22 +5,14 @@ import TextArea from "@/aural/components/ui/textarea";
 import Input from "@/aural/components/ui/input";
 import { PollingProvider } from "@/lib/hooks/use-polling";
 import useUserUploads from "@/lib/hooks/use-user-uploads";
+import useStyleLists from "@/lib/hooks/use-style-lists";
 import UserStories from "./user-stories";
+import CreateArtStyleModal from "./create-art-style-modal";
+import CreateCharacterDescriptionModal from "./create-character-description-modal";
 import { cn } from "@/aural/lib/utils";
 import Image from "next/image";
 import { useState, useRef, useEffect } from "react";
 import ChevronRightIcon from "@/aural/icons/chevron-right-icon";
-
-const STYLE_OPTIONS = [
-  {
-    name: "The Duke's Masked Bride - Flux",
-    code: 87,
-  },
-  {
-    name: "Rekindled Heartache - Flux",
-    code: 116,
-  },
-];
 
 function UserUploadsContent() {
   const {
@@ -38,15 +30,29 @@ function UserUploadsContent() {
     setStyleId,
     showName,
     setShowName,
+    setCharacterSheetUrl,
   } = useUserUploads();
+
+  const {
+    data: styleOptions,
+    loading: stylesLoading,
+    refetch: refetchStyles,
+  } = useStyleLists({
+    userId: 7,
+    accessToken: "c7eb5f9a-e958-4a47-85fe-0b2674a946eb",
+    enabled: true,
+  });
 
   const [isStyleDropdownOpen, setStyleDropdownOpen] = useState(false);
   const [highlightedIndex, setHighlightedIndex] = useState(-1);
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [isCreateCharacterModalOpen, setIsCreateCharacterModalOpen] =
+    useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const triggerRef = useRef<HTMLButtonElement>(null);
   const optionRefs = useRef<(HTMLButtonElement | null)[]>([]);
 
-  const selectedStyle = STYLE_OPTIONS.find((style) => style.code === styleId);
+  const selectedStyle = styleOptions.find((style) => style.id === styleId);
 
   // Handle keyboard navigation
   useEffect(() => {
@@ -57,8 +63,8 @@ function UserUploadsContent() {
           event.preventDefault();
           setStyleDropdownOpen(true);
           // Set initial highlight to selected item or first item
-          const currentIndex = STYLE_OPTIONS.findIndex(
-            (style) => style.code === styleId
+          const currentIndex = styleOptions.findIndex(
+            (style) => style.id === styleId
           );
           setHighlightedIndex(currentIndex >= 0 ? currentIndex : 0);
         }
@@ -69,23 +75,20 @@ function UserUploadsContent() {
         case "ArrowDown":
           event.preventDefault();
           setHighlightedIndex((prev) =>
-            prev < STYLE_OPTIONS.length - 1 ? prev + 1 : 0
+            prev < styleOptions.length - 1 ? prev + 1 : 0
           );
           break;
         case "ArrowUp":
           event.preventDefault();
           setHighlightedIndex((prev) =>
-            prev > 0 ? prev - 1 : STYLE_OPTIONS.length - 1
+            prev > 0 ? prev - 1 : styleOptions.length - 1
           );
           break;
         case "Enter":
           event.preventDefault();
-          if (
-            highlightedIndex >= 0 &&
-            highlightedIndex < STYLE_OPTIONS.length
-          ) {
-            const selectedOption = STYLE_OPTIONS[highlightedIndex];
-            setStyleId(selectedOption.code);
+          if (highlightedIndex >= 0 && highlightedIndex < styleOptions.length) {
+            const selectedOption = styleOptions[highlightedIndex];
+            setStyleId(selectedOption.id);
             setStyleDropdownOpen(false);
             setHighlightedIndex(-1);
           }
@@ -109,7 +112,13 @@ function UserUploadsContent() {
         triggerElement.removeEventListener("keydown", handleKeyDown);
       }
     };
-  }, [isStyleDropdownOpen, highlightedIndex, styleId, setStyleId]);
+  }, [
+    isStyleDropdownOpen,
+    highlightedIndex,
+    styleId,
+    setStyleId,
+    styleOptions,
+  ]);
 
   // Scroll highlighted option into view
   useEffect(() => {
@@ -151,6 +160,8 @@ function UserUploadsContent() {
   const disableGenerateAnime =
     !(scriptText && selectedFile && showName && styleId) || loading;
 
+  // console.log({styleOptions})
+  // console.log(styleOptions[highlightedIndex])
   return (
     <div className="w-full space-y-6 p-5 mx-auto">
       <nav className="flex items-center justify-center">
@@ -189,9 +200,21 @@ function UserUploadsContent() {
               />
 
               <div className="w-full mb-4.5 relative">
-                <p className="font-fm-poppins text-fm-sm mb-2 text-white">
-                  STYLE
-                </p>
+                <div className="flex items-center justify-between mb-2">
+                  <p className="font-fm-poppins text-fm-sm text-white">
+                    Art Style
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() => setIsCreateModalOpen(true)}
+                    className="flex items-center gap-1.5 text-[#833AFF] hover:text-[#6d2fd9] transition-colors font-fm-poppins text-fm-sm"
+                  >
+                    <span className="flex items-center justify-center size-5 rounded-full border border-[#833AFF] text-[#833AFF]">
+                      +
+                    </span>
+                    Create Art Style
+                  </button>
+                </div>
                 <button
                   ref={triggerRef}
                   type="button"
@@ -200,8 +223,8 @@ function UserUploadsContent() {
                     setStyleDropdownOpen(willOpen);
                     if (willOpen) {
                       // Set initial highlight to selected item or first item
-                      const currentIndex = STYLE_OPTIONS.findIndex(
-                        (style) => style.code === styleId
+                      const currentIndex = styleOptions.findIndex(
+                        (style) => style.id === styleId
                       );
                       setHighlightedIndex(currentIndex >= 0 ? currentIndex : 0);
                     }
@@ -233,32 +256,42 @@ function UserUploadsContent() {
                 {isStyleDropdownOpen && (
                   <div
                     ref={dropdownRef}
-                    className="absolute z-50 w-full mt-1 bg-black border border-fm-divider-primary rounded-xl shadow-lg overflow-hidden"
+                    className="absolute z-50 w-full mt-1 bg-black border border-fm-divider-primary rounded-xl shadow-lg max-h-[240px] overflow-y-auto"
                   >
-                    {STYLE_OPTIONS.map((style, index) => (
-                      <button
-                        key={style.code}
-                        ref={(el) => {
-                          optionRefs.current[index] = el;
-                        }}
-                        type="button"
-                        onClick={() => {
-                          setStyleId(style.code);
-                          setStyleDropdownOpen(false);
-                          setHighlightedIndex(-1);
-                        }}
-                        onMouseEnter={() => setHighlightedIndex(index)}
-                        className={cn(
-                          "w-full px-3 py-3 text-left text-white text-fm-md",
-                          "hover:bg-[#141414] transition-colors",
-                          "first:rounded-t-xl last:rounded-b-xl",
-                          highlightedIndex === index && "bg-[#141414]",
-                          styleId === style.code && "bg-[#141414]"
-                        )}
-                      >
-                        {style.name}
-                      </button>
-                    ))}
+                    {stylesLoading ? (
+                      <div className="w-full px-3 py-3 text-center text-white text-fm-md">
+                        Loading styles...
+                      </div>
+                    ) : styleOptions.length === 0 ? (
+                      <div className="w-full px-3 py-3 text-center text-white text-fm-md">
+                        No styles available
+                      </div>
+                    ) : (
+                      styleOptions.map((style, index) => (
+                        <button
+                          key={style.id}
+                          ref={(el) => {
+                            optionRefs.current[index] = el;
+                          }}
+                          type="button"
+                          onClick={() => {
+                            setStyleId(style.id);
+                            setStyleDropdownOpen(false);
+                            setHighlightedIndex(-1);
+                          }}
+                          onMouseEnter={() => setHighlightedIndex(index)}
+                          className={cn(
+                            "w-full px-3 py-3 text-left text-white text-fm-md",
+                            "hover:bg-[#141414] transition-colors",
+                            "first:rounded-t-xl last:rounded-b-xl",
+                            highlightedIndex === index && "bg-[#141414]",
+                            styleId === style.id && "bg-[#141414]"
+                          )}
+                        >
+                          {style.name}
+                        </button>
+                      ))
+                    )}
                   </div>
                 )}
               </div>
@@ -282,9 +315,21 @@ function UserUploadsContent() {
             </div>
 
             <div className="mt-3">
-              <p className="text-fm-md font-fm-poppins mb-2 text-fm-neutral-1100/80">
-                Character Description
-              </p>
+              <div className="flex items-center justify-between mb-2">
+                <p className="text-fm-md font-fm-poppins text-fm-neutral-1100/80">
+                  Character Description
+                </p>
+                <button
+                  type="button"
+                  onClick={() => setIsCreateCharacterModalOpen(true)}
+                  className="flex items-center gap-1.5 text-[#833AFF] hover:text-[#6d2fd9] transition-colors font-fm-poppins text-fm-sm"
+                >
+                  <span className="flex items-center justify-center size-5 rounded-full border border-[#833AFF] text-[#833AFF]">
+                    +
+                  </span>
+                  Create Character Description Sheet
+                </button>
+              </div>
               <div
                 {...getRootProps()}
                 className={cn(
@@ -329,7 +374,7 @@ function UserUploadsContent() {
           </div>
           <div className="flex justify-center mt-4">
             <Button
-              isDisabled={disableGenerateAnime}
+              // isDisabled={disableGenerateAnime}
               variant="outline"
               noise="none"
               className="font-fm-poppins rounded-sm"
@@ -353,6 +398,32 @@ function UserUploadsContent() {
           <UserStories stories={stories} />
         </section>
       </div>
+      <CreateArtStyleModal
+        isOpen={isCreateModalOpen}
+        onClose={async () => {
+          setIsCreateModalOpen(false);
+          // Refetch styles when modal closes
+          await refetchStyles();
+        }}
+        selectedStyleName={selectedStyle?.name || ""}
+        onSuccess={async (createdStyleId: number) => {
+          // Refetch styles to get the newly created style
+          await refetchStyles();
+          // Set the newly created style as selected
+          setStyleId(createdStyleId);
+        }}
+        userId={7}
+        accessToken="c7eb5f9a-e958-4a47-85fe-0b2674a946eb"
+      />
+      <CreateCharacterDescriptionModal
+        isOpen={isCreateCharacterModalOpen}
+        onClose={() => setIsCreateCharacterModalOpen(false)}
+        selectedStyle={selectedStyle || null}
+        onSheetCreated={(spreadsheetUrl, taskId) => {
+          setCharacterSheetUrl(spreadsheetUrl, taskId);
+          setIsCreateCharacterModalOpen(false);
+        }}
+      />
     </div>
   );
 }
