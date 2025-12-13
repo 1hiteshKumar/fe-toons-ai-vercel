@@ -42,7 +42,7 @@ const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
 export type TabId = (typeof TABS)[number]["id"];
 
 function DashboardContent({ taskId }: { taskId: string }) {
-  const [active, setActive] = useState<TabId>("characters");
+  const [active, setActive] = useState<TabId>("shot-images");
   const router = useRouter();
 
   const [shotAssets, setShotAssets] = useState<ShotAssets | null>(null);
