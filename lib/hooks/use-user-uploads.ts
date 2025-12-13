@@ -29,6 +29,8 @@ export type Story = {
   createdAt?: string;
   showName: string;
   finalShowId?: string;
+  csvUrl?: string;
+  styleId?: number;
 };
 
 export default function useUserUploads() {
@@ -41,59 +43,6 @@ export default function useUserUploads() {
   const [showName, setShowName] = useState("TDMB");
 
   const { poll, stopPolling } = usePolling();
-
-  useEffect(() => {
-    const stored = localStorage.getItem("stories");
-    if (stored) {
-      try {
-        const parsedStories = JSON.parse(stored) as Story[];
-        setStories(parsedStories);
-
-        // Fetch shot assets for stories with finalShowId and update status
-        const updateStoryStatuses = async () => {
-          const updatedStories = await Promise.all(
-            parsedStories.map(async (story) => {
-              if (story.finalShowId) {
-                try {
-                  const shotAssets = (await fetchShotAssets(
-                    story.finalShowId
-                  )) as ShotAssets | null;
-
-                  if (shotAssets?.task?.status) {
-                    const taskStatus = shotAssets.task.status;
-                    let newStatus: "PENDING" | "SUCCESS" | "FAILED" = "PENDING";
-
-                    if (taskStatus === "COMPLETED") {
-                      newStatus = "SUCCESS";
-                    } else if (taskStatus === "FAILED") {
-                      newStatus = "FAILED";
-                    }
-
-                    return {
-                      ...story,
-                      status: newStatus,
-                    };
-                  }
-                } catch (error) {
-                  console.error(
-                    `Error fetching shot assets for story ${story.validation_task_id}:`,
-                    error
-                  );
-                }
-              }
-              return story;
-            })
-          );
-
-          setStories(updatedStories);
-        };
-
-        updateStoryStatuses();
-      } catch (error) {
-        console.error("Error parsing stories from localStorage:", error);
-      }
-    }
-  }, []);
 
   const pollStatus = useCallback(
     async (taskId: string) => {
@@ -151,6 +100,69 @@ export default function useUserUploads() {
   );
 
   useEffect(() => {
+    const stored = localStorage.getItem("stories");
+    if (stored) {
+      try {
+        const parsedStories = JSON.parse(stored) as Story[];
+        setStories(parsedStories);
+
+        // Fetch shot assets for stories with finalShowId and update status
+        const updateStoryStatuses = async () => {
+          const updatedStories = await Promise.all(
+            parsedStories.map(async (story) => {
+              if (story.finalShowId) {
+                try {
+                  const shotAssets = (await fetchShotAssets(
+                    story.finalShowId
+                  )) as ShotAssets | null;
+
+                  if (shotAssets?.task?.status) {
+                    const taskStatus = shotAssets.task.status;
+                    let newStatus: "PENDING" | "SUCCESS" | "FAILED" = "PENDING";
+
+                    if (taskStatus === "COMPLETED") {
+                      newStatus = "SUCCESS";
+                    } else if (taskStatus === "FAILED") {
+                      newStatus = "FAILED";
+                    }
+
+                    return {
+                      ...story,
+                      status: newStatus,
+                    };
+                  }
+                } catch (error) {
+                  console.error(
+                    `Error fetching shot assets for story ${story.validation_task_id}:`,
+                    error
+                  );
+                }
+              }
+              return story;
+            })
+          );
+
+          setStories(updatedStories);
+        };
+
+        updateStoryStatuses();
+      } catch (error) {
+        console.error("Error parsing stories from localStorage:", error);
+      }
+    }
+  }, []);
+
+  useEffect(() => {
+    if (stories) {
+      stories.forEach((story) => {
+        if (!story.finalShowId) {
+          pollStatus(story.validation_task_id);
+        }
+      });
+    }
+  }, [pollStatus, stories]);
+
+  useEffect(() => {
     if (stories.length > 0)
       localStorage.setItem("stories", JSON.stringify(stories));
   }, [stories]);
@@ -181,7 +193,7 @@ export default function useUserUploads() {
   };
 
   const onGenerate = async () => {
-    if (!csvUrl || !scriptText) return;
+    if (!csvUrl || !scriptText || !styleId) return;
 
     const validation_task_id = await validateUploads({
       script_text: scriptText,
@@ -197,6 +209,8 @@ export default function useUserUploads() {
         scriptText: scriptText,
         createdAt: new Date().toISOString(),
         showName,
+        styleId,
+        csvUrl,
       },
       ...prev,
     ]);
@@ -239,5 +253,6 @@ export default function useUserUploads() {
     setStyleId,
     showName,
     setShowName,
+    pollStatus,
   };
 }

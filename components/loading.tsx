@@ -1,4 +1,10 @@
-export default function Loading({ text }: { text: string }) {
+export default function Loading({
+  text,
+  isGenerating = true,
+}: {
+  text: string;
+  isGenerating?: boolean;
+}) {
   return (
     <div className="flex items-center justify-center h-96">
       <div className="flex flex-col items-center gap-4">
@@ -7,8 +13,12 @@ export default function Loading({ text }: { text: string }) {
             <div className="w-6 h-6 border-2 border-fm-primary border-t-transparent rounded-full animate-spin"></div>
           </div>
         </div>
-        <p className="text-fm-primary text-lg">Generating {text}...</p>
-        <p className="text-fm-secondary text-sm">We are generating best results for you. This may take some time</p>
+        <p className="text-fm-primary text-lg">
+          {isGenerating ? "Generating" : "Fetching"} {text}...
+        </p>
+        <p className="text-fm-secondary text-sm">
+          We are generating best results for you. This may take some time
+        </p>
       </div>
     </div>
   );
