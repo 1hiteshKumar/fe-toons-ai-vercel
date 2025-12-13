@@ -4,13 +4,23 @@ const nextConfig = {
     remotePatterns: [
       {
         protocol: "https",
+        hostname: "*.cloudfront.net",
+      },
+      {
+        protocol: "https",
         hostname: "drive.google.com",
-        pathname: "/**", // allow all paths
       },
       {
         protocol: "https",
         hostname: "lh3.googleusercontent.com",
-        pathname: "/**", // allow all paths
+      },
+      {
+        protocol: "https",
+        hostname: "**",
+      },
+      {
+        protocol: "http",
+        hostname: "**",
       },
     ],
   },

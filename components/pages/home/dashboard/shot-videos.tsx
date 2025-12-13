@@ -164,6 +164,8 @@ export default function ShotVideos({
     ? getVideoUrl(selectedShotData.single_image_video_url || "")
     : "";
 
+  // console.log(shotsInScene)
+
   return (
     <div>
       <Heading
@@ -280,8 +282,106 @@ export default function ShotVideos({
                 | EndFrame
                 | undefined;
               const shotSfxList = getCombinedSfx(shotStartFrame, shotEndFrame);
+
+              // Get audio data from panel_prompt_data.cuts
+              type CutAudio = {
+                narration?: string | null;
+                dialogue?: Record<string, string | null>;
+                thought?: Record<string, string | null>;
+              };
+
+              type Cut = {
+                audio?: CutAudio;
+                action?: string;
+                cinematography?: string;
+                [key: string]: unknown;
+              };
+
+              const cuts = (
+                Array.isArray(shot.panel_prompt_data?.cuts)
+                  ? shot.panel_prompt_data.cuts
+                  : []
+              ) as Cut[];
+
+              // Combine audio data from all cuts
+              type CombinedAudio = {
+                narrations: string[];
+                dialogue: Record<string, string | null>;
+                thought: Record<string, string[]>;
+                actions: string[];
+                cinematography: string[];
+              };
+
+              const combinedAudio = cuts.reduce<CombinedAudio>(
+                (acc, cut) => {
+                  const audio = cut?.audio;
+                  if (audio) {
+                    // Combine narrations (array of strings)
+                    if (
+                      audio.narration &&
+                      typeof audio.narration === "string" &&
+                      audio.narration.trim()
+                    ) {
+                      acc.narrations.push(audio.narration);
+                    }
+                    // Merge dialogue objects
+                    if (
+                      audio.dialogue &&
+                      typeof audio.dialogue === "object" &&
+                      audio.dialogue !== null
+                    ) {
+                      Object.assign(acc.dialogue, audio.dialogue);
+                    }
+                    // Collect all thoughts for each character (array per character)
+                    if (
+                      audio.thought &&
+                      typeof audio.thought === "object" &&
+                      audio.thought !== null
+                    ) {
+                      Object.entries(audio.thought).forEach(
+                        ([character, text]) => {
+                          if (text && typeof text === "string" && text.trim()) {
+                            if (!acc.thought[character]) {
+                              acc.thought[character] = [];
+                            }
+                            acc.thought[character].push(text);
+                          }
+                        }
+                      );
+                    }
+                  }
+                  // Collect actions from cuts
+                  if (
+                    cut.action &&
+                    typeof cut.action === "string" &&
+                    cut.action.trim()
+                  ) {
+                    acc.actions.push(cut.action);
+                  }
+                  // Collect cinematography from cuts
+                  if (
+                    cut.cinematography &&
+                    typeof cut.cinematography === "string" &&
+                    cut.cinematography.trim()
+                  ) {
+                    acc.cinematography.push(cut.cinematography);
+                  }
+                  return acc;
+                },
+                {
+                  narrations: [] as string[],
+                  dialogue: {} as Record<string, string | null>,
+                  thought: {} as Record<string, string[]>,
+                  actions: [] as string[],
+                  cinematography: [] as string[],
+                }
+              );
+
+              // Use actions from cuts, fallback to frame_description if no actions
               const shotDescription =
-                shot.panel_data?.start_frame?.frame_description || "";
+                combinedAudio.actions.length > 0
+                  ? combinedAudio.actions.join(" ")
+                  : shot.panel_data?.start_frame?.frame_description || "";
 
               return (
                 <div
@@ -314,7 +414,23 @@ export default function ShotVideos({
                         }
                         shotNumber={index + 1}
                       />
-                      {shotDescription && (
+                      {combinedAudio.actions.length > 0 ? (
+                        <div className="space-y-0.5">
+                          <p className="text-fm-sm font-medium uppercase text-[#AB79FF] tracking-wider">
+                            Description:
+                          </p>
+                          <div className="space-y-1">
+                            {combinedAudio.actions.map((action, idx) => (
+                              <p
+                                key={idx}
+                                className="font-fm-poppins text-fm-md"
+                              >
+                                {action}
+                              </p>
+                            ))}
+                          </div>
+                        </div>
+                      ) : shotDescription ? (
                         <div className="space-y-0.5">
                           <p className="text-fm-sm font-medium uppercase text-[#AB79FF] tracking-wider">
                             Description:
@@ -323,69 +439,97 @@ export default function ShotVideos({
                             {shotDescription}
                           </p>
                         </div>
+                      ) : null}
+                      {combinedAudio.cinematography.length > 0 && (
+                        <div className="space-y-0.5">
+                          <p className="text-fm-sm font-medium uppercase text-[#AB79FF] tracking-wider">
+                            Cinematography:
+                          </p>
+                          <div className="space-y-1">
+                            {combinedAudio.cinematography.map(
+                              (cinematography, idx) => (
+                                <p
+                                  key={idx}
+                                  className="font-fm-poppins text-fm-md"
+                                >
+                                  {cinematography}
+                                </p>
+                              )
+                            )}
+                          </div>
+                        </div>
                       )}
 
-                      {shotStartFrame?.narration && (
+                      {combinedAudio.narrations.length > 0 && (
                         <div className="space-y-0.5 w-full">
                           <p className="text-fm-sm font-medium uppercase text-[#AB79FF] tracking-wider">
                             Narration:
                           </p>
-
-                          <p className="font-fm-poppins italic text-fm-md">
-                            {shotStartFrame.narration}
-                          </p>
+                          <div className="space-y-1">
+                            {combinedAudio.narrations.map((narration, idx) => (
+                              <p
+                                key={idx}
+                                className="font-fm-poppins italic text-fm-md"
+                              >
+                                {narration}
+                              </p>
+                            ))}
+                          </div>
                         </div>
                       )}
-                      {shotStartFrame?.dialogue &&
-                        Object.values(shotStartFrame.dialogue).some(
-                          (value) => value !== null && value !== ""
-                        ) && (
-                          <div className="space-y-1.5 w-full">
-                            <p className="text-fm-sm font-medium uppercase text-[#AB79FF] tracking-wider">
-                              Dialogue:
-                            </p>
-                            <div className="space-y-2">
-                              {Object.entries(shotStartFrame.dialogue).map(
-                                ([character, text]) => {
-                                  if (!text) return null;
-                                  return (
-                                    <p
-                                      key={character}
-                                      className="font-fm-poppins italic text-fm-md"
-                                    >
-                                      <span>{character}:</span> {text}
-                                    </p>
-                                  );
-                                }
-                              )}
-                            </div>
+                      {Object.values(combinedAudio.dialogue).some(
+                        (value) => value !== null && value !== ""
+                      ) && (
+                        <div className="space-y-1.5 w-full">
+                          <p className="text-fm-sm font-medium uppercase text-[#AB79FF] tracking-wider">
+                            Dialogue:
+                          </p>
+                          <div className="space-y-2">
+                            {Object.entries(combinedAudio.dialogue).map(
+                              ([character, text]) => {
+                                if (!text) return null;
+                                return (
+                                  <p
+                                    key={character}
+                                    className="font-fm-poppins italic text-fm-md"
+                                  >
+                                    <span>{character}:</span> {text}
+                                  </p>
+                                );
+                              }
+                            )}
                           </div>
-                        )}
-                      {shotStartFrame?.thought &&
-                        Object.values(shotStartFrame.thought).some(
-                          (value) => value !== null && value !== ""
-                        ) && (
-                          <div className="space-y-2 w-full">
-                            <p className="text-fm-sm font-medium uppercase text-[#AB79FF] tracking-wider">
-                              Thought:
-                            </p>
-                            <div className="space-y-2">
-                              {Object.entries(shotStartFrame.thought).map(
-                                ([character, text]) => {
-                                  if (!text) return null;
-                                  return (
-                                    <p
-                                      key={character}
-                                      className="font-fm-poppins italic text-fm-md"
-                                    >
-                                      <span>{character}:</span> {text}
-                                    </p>
-                                  );
-                                }
-                              )}
-                            </div>
+                        </div>
+                      )}
+                      {Object.values(combinedAudio.thought).some(
+                        (thoughts) => thoughts && thoughts.length > 0
+                      ) && (
+                        <div className="space-y-2 w-full">
+                          <p className="text-fm-sm font-medium uppercase text-[#AB79FF] tracking-wider">
+                            Thought:
+                          </p>
+                          <div className="space-y-2">
+                            {Object.entries(combinedAudio.thought).map(
+                              ([character, thoughts]) => {
+                                if (!thoughts || thoughts.length === 0)
+                                  return null;
+                                return (
+                                  <div key={character} className="space-y-1">
+                                    {thoughts.map((thought, idx) => (
+                                      <p
+                                        key={`${character}-${idx}`}
+                                        className="font-fm-poppins italic text-fm-md"
+                                      >
+                                        <span>{character}:</span> {thought}
+                                      </p>
+                                    ))}
+                                  </div>
+                                );
+                              }
+                            )}
                           </div>
-                        )}
+                        </div>
+                      )}
                       {shotSfxList.length > 0 && (
                         <div className="space-y-0.5">
                           <p className="text-fm-sm font-medium uppercase text-[#AB79FF] tracking-wider">
