@@ -54,9 +54,11 @@ export default function Story({
 
   const onRegenerate = async () => {
     const { csvUrl, showName, styleId } = taskData!;
-    if (!csvUrl) toast.error("CSV URL NOT FOUND, REGENERATION NOT POSSIBLE");
 
-    if (!csvUrl || !updatedScriptText || !styleId || !showName) return;
+    if (!csvUrl || !updatedScriptText || !styleId || !showName) {
+      toast.error("REGENERATION NOT POSSIBLE, SOMETHING MISSING");
+      return;
+    }
 
     const validation_task_id = await validateUploads({
       script_text: updatedScriptText,
@@ -72,6 +74,7 @@ export default function Story({
       status: "PENDING",
       scriptText: updatedScriptText,
       createdAt: new Date().toISOString(),
+      styleId,
       showName,
       csvUrl,
     };
