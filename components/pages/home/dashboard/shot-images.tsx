@@ -411,6 +411,8 @@ export default function ShotImages({
                             ? shot.panel_prompt_data.duration
                             : 4
                         }
+                        hasUrl={!!shot.start_frame_url}
+                        onEditClick={() => setIsEditModalOpen(true)}
                         shotNumber={index + 1}
                       />
                       <div className="flex flex-col gap-2">

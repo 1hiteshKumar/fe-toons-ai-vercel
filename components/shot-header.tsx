@@ -1,20 +1,20 @@
-import React from "react";
-import { ClockIcon } from "../aural/icons/clock-icon";
 import { cn } from "../aural/lib/utils";
 import { DurationIcon, Pencil, Trash } from "@/lib/icons";
 
 export interface ShotHeaderProps {
-  type?: string;
+  hasUrl: boolean;
   shotNumber: number | string;
   duration?: number;
   className?: string;
+  onEditClick: () => void;
 }
 
 export default function ShotHeader({
-  type = "Image",
   shotNumber,
   duration,
   className,
+  hasUrl,
+  onEditClick,
 }: ShotHeaderProps) {
   return (
     <div className="flex justify-between">
@@ -26,7 +26,7 @@ export default function ShotHeader({
           </span>
         </div>
 
-        {duration && (
+        {duration && hasUrl && (
           <>
             {/* Duration Indicator Section */}
             <div className="flex items-center justify-center gap-1 p-2 bg-[#1F1F1F] rounded-xl">
@@ -42,7 +42,11 @@ export default function ShotHeader({
         <button className="cursor-not-allowed" disabled>
           <Trash />
         </button>
-        <button className="cursor-not-allowed" disabled>
+        <button
+          className={cn(hasUrl ? "cursor-pointer" : "cursor-not-allowed")}
+          disabled={!hasUrl}
+          onClick={onEditClick}
+        >
           {" "}
           <Pencil />
         </button>

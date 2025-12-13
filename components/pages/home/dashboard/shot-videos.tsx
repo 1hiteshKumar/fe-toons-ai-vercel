@@ -35,6 +35,7 @@ export default function ShotVideos({
   const shotListRef = useRef<HTMLDivElement>(null);
   const shotRefs = useRef<Map<number, HTMLDivElement>>(new Map());
 
+
   // Update selected scene if initial scene changes and current selection is invalid
   const effectiveSelectedScene = useMemo(() => {
     const sceneExists = groupedShots.some(
@@ -270,7 +271,7 @@ export default function ShotVideos({
 
               const cuts = (
                 Array.isArray(shot.panel_prompt_data?.cuts)
-                  ? shot.panel_prompt_data.cuts
+                  ? shot.panel_prompt_data?.cuts
                   : []
               ) as Cut[];
 
@@ -379,7 +380,7 @@ export default function ShotVideos({
                   <div className="flex items-start gap-3 w-full">
                     <div className="flex-1 min-w-0 space-y-4">
                       <ShotHeader
-                        type="Video"
+                        hasUrl={!!selectedShotVideoUrl}
                         duration={
                           selectedShotData.panel_prompt_data?.duration || 5
                         }
