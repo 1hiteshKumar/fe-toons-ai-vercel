@@ -11,6 +11,8 @@ import { PencilIcon } from "@/aural/icons/pencil-icon";
 import { TrashIcon } from "@/aural/icons/trash-icon";
 import ArrowRightIcon from "@/aural/icons/arrow-right-icon";
 import { fetchStoryData } from "@/server/queries/fetch-shot-assets";
+import { validateUploads } from "@/server/mutations/validate-uploads";
+import { toast } from "sonner";
 
 export default function Story({
   taskId,
@@ -19,6 +21,7 @@ export default function Story({
   taskId: string;
   onNext: () => void;
 }) {
+  const [updatedScriptText, setUpdatedScriptText] = useState("");
   const [taskData, setTaskData] = useState<Story>();
 
   useEffect(() => {
@@ -32,13 +35,44 @@ export default function Story({
         )[0];
         if (!taskData) {
           const data = await fetchStoryData(taskId);
-
+          setUpdatedScriptText(data.scriptText || "");
           setTaskData(data);
-        } else setTaskData(taskData);
+        } else {
+          setTaskData(taskData);
+          setUpdatedScriptText(taskData.scriptText || "");
+        }
       }
     }
     getStory();
   }, [taskId]);
+
+  const onRegenerate = async () => {
+    const { csvUrl, showName, styleId } = taskData!;
+    if (!csvUrl || !updatedScriptText) return;
+
+    const validation_task_id = await validateUploads({
+      script_text: updatedScriptText,
+      character_description_file_url: csvUrl,
+      style_id: styleId,
+      show_name: showName,
+    });
+
+    const storedStories = JSON.parse(localStorage.getItem("stories") || "[]");
+
+    const newStory = {
+      validation_task_id,
+      status: "PENDING",
+      scriptText: updatedScriptText,
+      createdAt: new Date().toISOString(),
+      showName,
+      csvUrl,
+    };
+
+    const updatedStories = [newStory, ...storedStories];
+
+    localStorage.setItem("stories", JSON.stringify(updatedStories));
+    toast.success("Regeneration started ! New task queued.");
+  };
 
   if (!taskData) {
     return <Loading text="story" />;
@@ -73,9 +107,9 @@ export default function Story({
               maxHeight={400}
               maxLength={2000}
               placeholder="Once upon a time, in a world where..."
-              value={taskData.scriptText}
+              value={updatedScriptText}
               autoGrow
-              // onChange={(e) => setScriptText(e.target.value)}
+              onChange={(e) => setUpdatedScriptText(e.target.value)}
               classes={{
                 textarea: "border-0 bg-fm-neutral-0! p-0! font-fm-poppins",
               }}
@@ -98,7 +132,8 @@ export default function Story({
             </div>
           </div>
           <Button
-            isDisabled
+            isDisabled={taskData.scriptText === updatedScriptText}
+            onClick={onRegenerate}
             variant="outline"
             noise="none"
             className="font-fm-poppins rounded-sm w-full"

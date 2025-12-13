@@ -7,6 +7,8 @@ import { Button } from "@/aural/components/ui/button";
 import ArrowRightIcon from "@/aural/icons/arrow-right-icon";
 import Image from "next/image";
 import { convertGoogleDriveUrl } from "@/lib/helpers";
+import usePolling from "@/lib/hooks/use-polling";
+import { API_URLS } from "@/server/constants";
 
 interface Scene {
   beat_number: number;
@@ -21,6 +23,11 @@ type ScenesData = {
   [episodeName: string]: Scene[];
 };
 
+interface ScenesResponse {
+  beats?: ScenesData;
+  message?: string;
+}
+
 export default function Scenes({
   onNext,
   characterToAvatarMapping,
@@ -30,29 +37,57 @@ export default function Scenes({
 }) {
   const [scenes, setScenes] = useState<ScenesData>({});
   const [isLoading, setIsLoading] = useState(true);
+  const [isFetchingScenes, setIsFetchingScenes] = useState(true);
   const params = useParams() as { id: string };
+  const { poll, stopPolling } = usePolling();
 
   useEffect(() => {
+    const pollingKey = `scenes-${params.id}`;
+
     const getScenes = async () => {
       setIsLoading(true);
       try {
         const res = await fetchScenes(params.id);
         setScenes(res.beats || {});
-        // toast.info(res.message);
+
         if (res.message === "Beats Generation Completed") {
           setIsLoading(false);
+          stopPolling(pollingKey);
         } else if (res.message === "Generating Beats") {
           setIsLoading(true);
+          setIsFetchingScenes(false);
+          poll({
+            url: API_URLS.FETCH_SCENES({ taskId: params.id }),
+            pollingKey,
+            delay: 2000,
+            callback: (data: ScenesResponse | null) => {
+              if (data) {
+                setScenes(data.beats || {});
+                if (data.message === "Beats Generation Completed") {
+                  setIsLoading(false);
+                  stopPolling(pollingKey);
+                }
+              }
+            },
+          });
+        } else {
+          setIsLoading(false);
         }
-      } finally {
-        // setIsLoading(false);
+      } catch (error) {
+        console.error("Error fetching scenes:", error);
+        setIsLoading(false);
       }
     };
+
     getScenes();
-  }, [params.id]);
+
+    return () => {
+      stopPolling(pollingKey);
+    };
+  }, [params.id, poll, stopPolling]);
 
   if (isLoading) {
-    return <Loading text="scenes" />;
+    return <Loading isGenerating={!isFetchingScenes} text="scenes" />;
   }
 
   if (Object.keys(scenes).length === 0 && !isLoading) {
@@ -113,8 +148,8 @@ export default function Scenes({
                           ? (() => {
                               const chars = scene.characters
                                 .split(",")
-                                .map((c) => c.trim()) ;
-                              const visible = chars.slice(0, 3); 
+                                .map((c) => c.trim());
+                              const visible = chars.slice(0, 3);
                               const remaining = chars.length - visible.length;
 
                               return (
