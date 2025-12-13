@@ -169,7 +169,7 @@ export default function ShotVideos({
             {groupedShots.map(({ scene_beat_id, shots }) => {
               const total = shots.length;
               const completed = shots.filter(
-                (shot) => shot.start_frame_url
+                (shot) => shot.video_status === "completed"
               ).length;
 
               return (
