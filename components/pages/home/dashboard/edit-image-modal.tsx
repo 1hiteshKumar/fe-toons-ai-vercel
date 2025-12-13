@@ -5,12 +5,12 @@ import Image from "next/image";
 import { Button } from "@/aural/components/ui/button";
 import Input from "@/aural/components/ui/input";
 import TextArea from "@/aural/components/ui/textarea";
-import { TrashIcon } from "@/aural/icons/trash-icon";
 import { CrossCircleIcon } from "@/aural/icons/cross-circle-icon";
 import { cn } from "@/aural/lib/utils";
 import { PanelItem } from "@/lib/types";
 import { convertGoogleDriveUrl } from "@/lib/helpers";
 import { editPanel } from "@/server/mutations/edit-panel";
+import { Trash } from "@/lib/icons";
 
 const PlusIcon = ({ className }: { className?: string }) => (
   <svg
@@ -105,10 +105,11 @@ export default function EditImageModal({
   const [updatedShotData, setUpdatedShotData] = useState<PanelItem | null>(
     null
   );
+  const [initialized, setInitialized] = useState(false);
 
   // Initialize form data from shotData
   useEffect(() => {
-    if (shotData) {
+    if (shotData && !initialized) {
       // Set panel number
       // eslint-disable-next-line react-hooks/set-state-in-effect
       setPanelNumber(shotData.panel_number || shotNumber);
@@ -224,8 +225,9 @@ export default function EditImageModal({
       } else {
         setThoughts(thoughtEntries);
       }
+      setInitialized(true);
     }
-  }, [shotData, shotNumber]);
+  }, [shotData, shotNumber, initialized]);
 
   // Update updatedShotData whenever any form field changes
   useEffect(() => {
@@ -479,7 +481,7 @@ export default function EditImageModal({
         panel_data: updatedShotData.panel_data,
         type: "image",
       });
-      onClose()
+      onClose();
     }
   };
 
@@ -633,7 +635,7 @@ export default function EditImageModal({
                       className="p-1 hover:bg-fm-surface-secondary rounded transition-colors"
                       aria-label={`Remove character ${index + 1}`}
                     >
-                      <TrashIcon className="size-5 text-red-500" />
+                      <Trash />
                     </button>
                   </div>
 
@@ -744,7 +746,7 @@ export default function EditImageModal({
                       className="p-1 hover:bg-fm-surface-secondary rounded transition-colors"
                       aria-label={`Remove pose ${index + 1}`}
                     >
-                      <TrashIcon className="size-5 text-red-500" />
+                      <Trash />
                     </button>
                   </div>
 
@@ -828,7 +830,7 @@ export default function EditImageModal({
                       className="p-1 hover:bg-fm-surface-secondary rounded transition-colors"
                       aria-label={`Remove dialogue ${index + 1}`}
                     >
-                      <TrashIcon className="size-5 text-red-500" />
+                      <Trash />
                     </button>
                   </div>
 
@@ -937,7 +939,7 @@ export default function EditImageModal({
                       className="p-1 hover:bg-fm-surface-secondary rounded transition-colors"
                       aria-label={`Remove emotion ${index + 1}`}
                     >
-                      <TrashIcon className="size-5 text-red-500" />
+                      <Trash />
                     </button>
                   </div>
 
@@ -1037,7 +1039,7 @@ export default function EditImageModal({
                       className="p-1 hover:bg-fm-surface-secondary rounded transition-colors"
                       aria-label={`Remove thought ${index + 1}`}
                     >
-                      <TrashIcon className="size-5 text-red-500" />
+                      <Trash />
                     </button>
                   </div>
 

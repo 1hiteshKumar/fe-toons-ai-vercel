@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
@@ -52,7 +52,34 @@ function DashboardContent({ taskId }: { taskId: string }) {
   const [generatingStatus, setGeneratingStatus] =
     useState<GeneratingStatus>("PENDING");
 
-    const [characterToAvatarMapping, setCharacterToAvatarMapping] = useState({});
+  const [characterToAvatarMapping, setCharacterToAvatarMapping] = useState({});
+
+  const refetchShotAssets = useCallback(() => {
+    const pollingKey = `shot_assets_${taskId}`;
+    
+    // Stop any existing polling
+    stopPolling(pollingKey);
+
+    // Start new polling
+    poll({
+      url: API_URLS.FETCH_SHOT_ASSETS({ taskId }),
+      pollingKey,
+      delay: 5000,
+      callback: async (res: ShotAssets | null) => {
+        const status = res?.task?.status;
+        setShotAssets(res);
+        if (status === "COMPLETED" || status === "FAILED") {
+          setGeneratingStatus(status);
+          stopPolling(pollingKey);
+          if (status === "COMPLETED") {
+            toast.success("Shot assets ready");
+          } else {
+            toast.error("Something went wrong while generating shots");
+          }
+        }
+      },
+    });
+  }, [taskId, poll, stopPolling]);
 
   useEffect(() => {
     const isSharedTabs = ["shot-images", "shot-videos", "publish"].includes(
@@ -60,27 +87,9 @@ function DashboardContent({ taskId }: { taskId: string }) {
     );
 
     if (isSharedTabs && !shotAssets) {
-      const pollingKey = `shot_assets_${taskId}`;
-      poll({
-        url: API_URLS.FETCH_SHOT_ASSETS({ taskId }),
-        pollingKey,
-        delay: 5000,
-        callback: async (res: ShotAssets | null) => {
-          const status = res?.task?.status;
-          setShotAssets(res);
-          if (status === "COMPLETED" || status === "FAILED") {
-            setGeneratingStatus(status);
-            stopPolling(pollingKey);
-            if (status === "COMPLETED") {
-              toast.success("Shot assets ready");
-            } else {
-              toast.error("Something went wrong while generating shots");
-            }
-          }
-        },
-      });
+      refetchShotAssets();
     }
-  }, [active, poll, shotAssets, stopPolling, taskId]);
+  }, [active, shotAssets, refetchShotAssets]);
 
   return (
     <div className="flex flex-col h-full w-full">
@@ -158,16 +167,23 @@ function DashboardContent({ taskId }: { taskId: string }) {
           <Story onNext={() => setActive("characters")} taskId={taskId} />
         )}
         {active === "scenes" && (
-          <Scenes onNext={() => setActive("shot-images")} characterToAvatarMapping={characterToAvatarMapping} />
+          <Scenes
+            onNext={() => setActive("shot-images")}
+            characterToAvatarMapping={characterToAvatarMapping}
+          />
         )}
         {active === "characters" && (
-          <Characters onNext={() => setActive("scenes")} setCharacterToAvatarMapping={setCharacterToAvatarMapping} />
+          <Characters
+            onNext={() => setActive("scenes")}
+            setCharacterToAvatarMapping={setCharacterToAvatarMapping}
+          />
         )}
         {active === "shot-images" && (
           <ShotImages
             data={shotAssets}
             onNext={() => setActive("shot-videos")}
             generatingStatus={generatingStatus}
+            onRefetch={refetchShotAssets}
           />
         )}
         {active === "editor" && <Editor onNext={() => setActive("publish")} />}
@@ -176,6 +192,7 @@ function DashboardContent({ taskId }: { taskId: string }) {
             data={shotAssets}
             onNext={() => setActive("editor")}
             generatingStatus={generatingStatus}
+            onRefetch={refetchShotAssets}
           />
         )}
         {active === "publish" && (

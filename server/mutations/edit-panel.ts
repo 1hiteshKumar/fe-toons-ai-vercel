@@ -2,15 +2,15 @@ import { baseFetch } from "@/lib/baseFetchUtil";
 import { API_URLS } from "../constants";
 
 interface EditPanelParams {
-  mode?: string;
+  mode?: "edit" | "delete";
   orchestrator_task_id: number;
-orchestrator_result_task_id: number;
-  panel_data: unknown;
-  type: "image" | "video";
+  orchestrator_result_task_id: number;
+  panel_data?: unknown;
+  type?: "image" | "video";
 }
 
 export async function editPanel({
-  mode = "edit",
+  mode = "edit" ,
   orchestrator_task_id,
   orchestrator_result_task_id,
   panel_data,

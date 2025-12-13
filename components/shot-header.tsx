@@ -7,6 +7,7 @@ export interface ShotHeaderProps {
   duration?: number;
   className?: string;
   onEditClick: () => void;
+  onDeleteClick: () => void;
 }
 
 export default function ShotHeader({
@@ -15,6 +16,7 @@ export default function ShotHeader({
   className,
   hasUrl,
   onEditClick,
+  onDeleteClick
 }: ShotHeaderProps) {
   return (
     <div className="flex justify-between">
@@ -39,7 +41,11 @@ export default function ShotHeader({
         )}
       </div>
       <div className="flex gap-5">
-        <button className="cursor-not-allowed" disabled>
+        <button
+          className={cn(hasUrl ? "cursor-pointer" : "cursor-not-allowed")}
+          disabled={!hasUrl}
+          onClick={onDeleteClick}
+        >
           <Trash />
         </button>
         <button

@@ -11,15 +11,19 @@ import ShotHeader from "@/components/shot-header";
 import Image from "next/image";
 import ArrowRightIcon from "@/aural/icons/arrow-right-icon";
 import { cn } from "@/aural/lib/utils";
+import EditVideoModal from "./edit-video-modal";
+import { editPanel } from "@/server/mutations/edit-panel";
 
 export default function ShotVideos({
   data,
   onNext,
   generatingStatus,
+  onRefetch,
 }: {
   data: ShotAssets | null;
   onNext?: () => void;
   generatingStatus: GeneratingStatus;
+  onRefetch?: () => void;
 }) {
   const groupedShots = useMemo(() => getGroupedShots(data), [data]);
 
@@ -30,11 +34,11 @@ export default function ShotVideos({
 
   const [selectedScene, setSelectedScene] = useState<string>(initialScene);
   const [selectedShot, setSelectedShot] = useState(0);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
   const shouldAutoPlayRef = useRef(false);
   const shotListRef = useRef<HTMLDivElement>(null);
   const shotRefs = useRef<Map<number, HTMLDivElement>>(new Map());
-
 
   // Update selected scene if initial scene changes and current selection is invalid
   const effectiveSelectedScene = useMemo(() => {
@@ -232,7 +236,7 @@ export default function ShotVideos({
                       variant="outline"
                       size="sm"
                       className="absolute top-2 right-2"
-                      disabled
+                      onClick={() => setIsEditModalOpen(true)}
                     >
                       <EditBigIcon className="size-5" />
                     </Button>
@@ -384,7 +388,21 @@ export default function ShotVideos({
                         duration={
                           selectedShotData.panel_prompt_data?.duration || 5
                         }
+                        onDeleteClick={async () => {
+                          await editPanel({
+                            mode: "delete",
+                            orchestrator_task_id:
+                              selectedShotData.orchestrator_task_id,
+                            orchestrator_result_task_id:
+                              selectedShotData.id,
+                          });
+                          onRefetch?.();
+                        }}
                         shotNumber={index + 1}
+                        onEditClick={() => {
+                          setSelectedShot(index);
+                          setIsEditModalOpen(true);
+                        }}
                       />
                       {combinedAudio.actions.length > 0 ? (
                         <div className="space-y-0.5">
@@ -527,6 +545,18 @@ export default function ShotVideos({
           </div>
         </div>
       </div>
+
+      {/* Edit Video Modal */}
+      <EditVideoModal
+        isOpen={isEditModalOpen}
+        onClose={() => setIsEditModalOpen(false)}
+        shotData={selectedShotData}
+        shotNumber={selectedShot + 1}
+        onSave={(data) => {
+          // TODO: Handle save if needed
+          console.log("Save video data:", data);
+        }}
+      />
     </div>
   );
 }

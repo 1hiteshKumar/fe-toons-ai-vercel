@@ -13,15 +13,18 @@ import ArrowRightIcon from "@/aural/icons/arrow-right-icon";
 import { PlayPauseIcon } from "@/aural/icons/play-pause-icon";
 import { cn } from "@/aural/lib/utils";
 import EditImageModal from "./edit-image-modal";
+import { editPanel } from "@/server/mutations/edit-panel";
 
 export default function ShotImages({
   data,
   onNext,
   generatingStatus,
+  onRefetch,
 }: {
   data: ShotAssets | null;
   onNext?: () => void;
   generatingStatus: GeneratingStatus;
+  onRefetch?: () => void;
 }) {
   const groupedShots = useMemo(() => getGroupedShots(data), [data]);
 
@@ -413,6 +416,15 @@ export default function ShotImages({
                         }
                         hasUrl={!!shot.start_frame_url}
                         onEditClick={() => setIsEditModalOpen(true)}
+                        onDeleteClick={async () => {
+                          await editPanel({
+                            mode: "delete",
+                            orchestrator_task_id:
+                              selectedShotData.orchestrator_task_id,
+                            orchestrator_result_task_id: selectedShotData.id,
+                          });
+                          onRefetch?.();
+                        }}
                         shotNumber={index + 1}
                       />
                       <div className="flex flex-col gap-2">
