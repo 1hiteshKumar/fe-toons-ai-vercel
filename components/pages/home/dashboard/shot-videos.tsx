@@ -139,8 +139,6 @@ export default function ShotVideos({
     ? getVideoUrl(selectedShotData.single_image_video_url || "")
     : "";
 
-  // console.log(shotsInScene)
-
   return (
     <div>
       <Heading
@@ -208,7 +206,7 @@ export default function ShotVideos({
             <div
               className={cn(
                 "relative bg-fm-surface-secondary rounded-2xl p-2.5 overflow-hidden mx-auto",
-                selectedShotVideoUrl && "w-max"
+                selectedShotVideoUrl && "w-max max-w-82"
               )}
             >
               <div
