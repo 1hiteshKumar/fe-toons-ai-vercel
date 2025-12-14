@@ -14,6 +14,7 @@ import Image from "next/image";
 import { useState, useRef, useEffect } from "react";
 import ChevronRightIcon from "@/aural/icons/chevron-right-icon";
 import { PlusIcon } from "@/lib/icons";
+import { toast } from "sonner";
 
 function UserUploadsContent() {
   const {
@@ -353,7 +354,13 @@ function UserUploadsContent() {
                 </p>
                 <button
                   type="button"
-                  onClick={() => setIsCreateCharacterModalOpen(true)}
+                  onClick={() => {
+                    if (!scriptText.trim()) {
+                      toast.error("Please fill the show description");
+                      return;
+                    }
+                    setIsCreateCharacterModalOpen(true);
+                  }}
                   className="flex items-center gap-1.5 text-[#AB79FF] transition-colors font-fm-poppins text-fm-md"
                 >
                   <PlusIcon />
@@ -434,8 +441,8 @@ function UserUploadsContent() {
           setIsCreateModalOpen(false);
           await handleRefetchAndSelectFirst();
         }}
-        selectedStyleName={selectedStyle?.name || ""}
-        selectedStylePrompt={selectedStyle?.prompt || ""}
+        selectedStyleName=""
+        selectedStylePrompt=""
         onSuccess={async (createdStyleId: number) => {
           // Set pending style ID first
           setPendingStyleId(createdStyleId);
