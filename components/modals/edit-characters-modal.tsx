@@ -7,6 +7,8 @@ import TextArea from "@/aural/components/ui/textarea";
 import Image from "next/image";
 import { convertGoogleDriveUrl } from "@/lib/helpers";
 import { cn } from "@/aural/lib/utils";
+import { PollingResponse } from "./add-characters-modal";
+import { baseFetch } from "@/lib/baseFetchUtil";
 
 type DisplayCharacter = {
   id: number;
@@ -23,8 +25,8 @@ type EditCharactersModalProps = {
   isOpen: boolean;
   onClose: () => void;
   selectedCharacter?: DisplayCharacter | null;
-  onRegenerateImage?: (selectedCharacter?: DisplayCharacter | null) => void;
-  onSave?: (name: string, description: string, selectedCharacter?: DisplayCharacter | null) => void;
+  onRegenerateImage?: (name: string, description: string, selectedCharacter?: DisplayCharacter | null, pollingResponse?: PollingResponse | null) => void;
+  pollingResponse?: PollingResponse | null;
 };
 
 export default function EditCharactersModal({
@@ -32,11 +34,12 @@ export default function EditCharactersModal({
   onClose,
   selectedCharacter,
   onRegenerateImage,
-  onSave,
+  pollingResponse,
 }: EditCharactersModalProps) {
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [imageLoading, setImageLoading] = useState(true);
+  const [isRegenerating, setIsRegenerating] = useState(false);
 
   // Reset form when modal opens/closes or when selectedCharacter changes
   useEffect(() => {
@@ -47,16 +50,68 @@ export default function EditCharactersModal({
     }
   }, [isOpen, selectedCharacter]);
 
-  const handleRegenerateImage = () => {
-    onRegenerateImage?.(selectedCharacter || null);
-  };
-
-  const handleSave = () => {
-    if (!name.trim()) {
+  const handleRegenerateImage = async () => {
+    if (!name.trim() || !pollingResponse || !selectedCharacter) {
       return;
     }
-    onSave?.(name.trim(), description.trim(), selectedCharacter || null);
-    onClose();
+
+    setIsRegenerating(true);
+
+    try {
+      // Find the character in the polling response and update it
+      const updatedCharacters = pollingResponse.characters.map((char) => {
+        if (char.id === selectedCharacter.id) {
+          return {
+            ...char,
+            name: name.trim(),
+            character_description: {
+              ...char.character_description,
+              description: description.trim(),
+            },
+          };
+        }
+        return char;
+      });
+
+      const modifiedResponse: PollingResponse = {
+        ...pollingResponse,
+        characters: updatedCharacters,
+      };
+
+      // Make API call to sync-characters
+      const taskId = pollingResponse.task_id;
+      await baseFetch(
+        `/api/workers/character-context/${taskId}/sync-characters/`,
+        {
+          method: "POST",
+          body: JSON.stringify(modifiedResponse),
+        },
+        "https://api.blaze.pockettoons.com"
+      );
+
+      // Make API call to regenerate-images
+      await baseFetch(
+        `/api/workers/character-context/regenerate-images/`,
+        {
+          method: "POST",
+          body: JSON.stringify({
+            task_id: taskId,
+            character_ids: [selectedCharacter.id],
+          }),
+        },
+        "https://api.blaze.pockettoons.com"
+      );
+
+      // Call the onRegenerateImage callback with modified response
+      // The parent component will handle the refetch/polling logic
+      onRegenerateImage?.(name.trim(), description.trim(), selectedCharacter || null, modifiedResponse);
+      onClose();
+    } catch (err) {
+      console.error("Error regenerating character:", err);
+      // TODO: Show error toast or message
+    } finally {
+      setIsRegenerating(false);
+    }
   };
 
   const getImageUrl = (url: string | null) => {
@@ -152,9 +207,10 @@ export default function EditCharactersModal({
             <button
               onClick={handleRegenerateImage}
               className="w-full bg-[#833AFF] text-white border-none! disabled:opacity-50 disabled:cursor-not-allowed rounded-lg flex items-center justify-center gap-2 py-3.5 px-3"
+              disabled={!name.trim() || !pollingResponse || isRegenerating}
             >
               <span className="text-sm font-fm-poppins border-none">
-                Regenerate Image
+                {isRegenerating ? "Regenerating..." : "Regenerate Image"}
               </span>
             </button>
           </div>

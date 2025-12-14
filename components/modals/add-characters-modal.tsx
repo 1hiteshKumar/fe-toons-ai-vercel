@@ -40,7 +40,7 @@ type CharacterOrCreature = {
   [key: string]: unknown;
 };
 
-type PollingResponse = {
+export type PollingResponse = {
   characters: CharacterOrCreature[];
   creatures: CharacterOrCreature[];
   backgrounds: Array<unknown>;

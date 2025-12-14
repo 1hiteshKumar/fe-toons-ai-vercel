@@ -1140,13 +1140,51 @@ export default function CreateCharacterDescriptionModal({
         isOpen={isEditCharacterModalOpen}
         onClose={() => setIsEditCharacterModalOpen(false)}
         selectedCharacter={selectedCharacter}
-        onRegenerateImage={(selectedCharacter) => {
-          // TODO: Implement regenerate image functionality
-          
-        }}
-        onSave={(name, description, selectedCharacter) => {
-          // TODO: Implement save character functionality
-          
+        pollingResponse={pollingResponse}
+        onRegenerateImage={(name, description, _selectedCharacter, updatedPollingResponse) => {
+          // After successful sync-characters and regenerate-images, start the refetch sequence
+          if (updatedPollingResponse && taskId && startGenerateImagesRef.current) {
+            // Start polling list-characters API (skip extract API call)
+            const pollingKey = `character-regenerate-${taskId}`;
+
+            poll<PollingResponse>({
+              url: `/api/workers/character-context/list-characters/?user_id=7&task_id=${taskId}`,
+              baseUrl: "https://api.blaze.pockettoons.com",
+              pollingKey,
+              delay: 5000, // Poll every 5 seconds
+              headers: {
+                uid: "7",
+                "access-token": "c7eb5f9a-e958-4a47-85fe-0b2674a946eb",
+              },
+              callback: (data) => {
+                if (!data) {
+                  return;
+                }
+
+                // Check if task has failed
+                if (data.task_status === "failed") {
+                  stopPolling(pollingKey);
+                  return;
+                }
+
+                setPollingResponse(data);
+                setTaskStatus(data.task_status || "");
+
+                // Check if we should stop polling based on task_status
+                // Continue polling if task_status is "extracting"
+                // Stop polling when task_status is not "extracting" (and not "failed" which is already handled above)
+                if (data.task_status !== "extracting") {
+                  stopPolling(pollingKey);
+                  // After polling completes, start generating images for human and creature
+                  if (startGenerateImagesRef.current) {
+                    startGenerateImagesRef.current(taskId);
+                  }
+                }
+                // Continue polling if task_status is "extracting"
+              },
+              failData: null,
+            });
+          }
         }}
       />
     </div>
