@@ -40,6 +40,7 @@ export default function ShotImages({
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const audioRef = useRef<HTMLAudioElement>(null);
   const shouldAutoPlayRef = useRef(false);
+  const isManuallyPausedRef = useRef(false);
   const shotListRef = useRef<HTMLDivElement>(null);
   const shotRefs = useRef<Map<number, HTMLDivElement>>(new Map());
 
@@ -64,9 +65,9 @@ export default function ShotImages({
     }
   }, [selectedShot, effectiveSelectedScene]);
 
-  // Auto-play audio when moving to next shot
+  // Auto-play audio when moving to next shot (only if not manually paused)
   useEffect(() => {
-    if (shouldAutoPlayRef.current) {
+    if (shouldAutoPlayRef.current && !isManuallyPausedRef.current) {
       const selectedSceneGroup = groupedShots.find(
         (group) => group.scene_beat_id === effectiveSelectedScene
       );
@@ -76,15 +77,27 @@ export default function ShotImages({
       if (currentShotData?.audio_url && audioRef.current) {
         // Small delay to ensure audio element is ready
         const timer = setTimeout(() => {
-          audioRef.current?.play().catch(() => {
-            // Ignore autoplay errors
-          });
+          // Only play if not manually paused
+          if (audioRef.current && !isManuallyPausedRef.current) {
+            audioRef.current.play().catch(() => {
+              // Ignore autoplay errors
+            });
+          }
         }, 150);
         return () => clearTimeout(timer);
       }
       shouldAutoPlayRef.current = false;
     }
   }, [selectedShot, effectiveSelectedScene, groupedShots]);
+
+  // Pause audio when edit modal opens
+  useEffect(() => {
+    if (isEditModalOpen && audioRef.current) {
+      audioRef.current.pause();
+      isManuallyPausedRef.current = true;
+      // setIsPlaying(false) will be called by onPause handler
+    }
+  }, [isEditModalOpen]);
 
   // Scroll selected shot into view
   useEffect(() => {
@@ -128,9 +141,11 @@ export default function ShotImages({
     if (isPlaying) {
       audioRef.current.pause();
       setIsPlaying(false);
+      isManuallyPausedRef.current = true;
     } else {
       audioRef.current.play();
       setIsPlaying(true);
+      isManuallyPausedRef.current = false;
     }
   };
 
@@ -203,6 +218,8 @@ export default function ShotImages({
                   onClick={() => {
                     setSelectedScene(scene_beat_id);
                     setSelectedShot(0);
+                    // Reset manual pause when user selects a different scene
+                    isManuallyPausedRef.current = false;
                   }}
                   className={cn(
                     "bg-black w-full p-4 flex items-center gap-2 rounded-xl text-nowrap font-fm-poppins text-fm-lg font-bold cursor-pointer ",
@@ -237,8 +254,19 @@ export default function ShotImages({
                   setIsPlaying(false);
                   moveToNextShot();
                 }}
-                onPause={() => setIsPlaying(false)}
-                onPlay={() => setIsPlaying(true)}
+                onPause={(e) => {
+                  setIsPlaying(false);
+                  // Track when user manually pauses (not when audio ends)
+                  const audio = e.currentTarget;
+                  if (!audio.ended) {
+                    isManuallyPausedRef.current = true;
+                  }
+                }}
+                onPlay={() => {
+                  setIsPlaying(true);
+                  // Reset manual pause flag when user plays
+                  isManuallyPausedRef.current = false;
+                }}
                 onLoadStart={() => setIsPlaying(false)}
                 className="hidden"
               />
@@ -270,7 +298,13 @@ export default function ShotImages({
                         variant="outline"
                         size="sm"
                         className="absolute top-2 right-4"
-                        onClick={() => setIsEditModalOpen(true)}
+                        onClick={() => {
+                          setIsEditModalOpen(true);
+                          // Pause audio when opening modal
+                          audioRef.current?.pause();
+                          isManuallyPausedRef.current = true;
+                          setIsPlaying(false);
+                        }}
                       >
                         <EditBigIcon className="size-5" />
                       </Button>
@@ -403,7 +437,11 @@ export default function ShotImages({
                   tabIndex={0}
                   aria-pressed={isSelected}
                   aria-label={`Select shot ${index + 1}`}
-                  onClick={() => setSelectedShot(index)}
+                  onClick={() => {
+                    setSelectedShot(index);
+                    // Reset manual pause when user selects a different shot
+                    isManuallyPausedRef.current = false;
+                  }}
                   className={cn(
                     "w-full text-left p-5 rounded-xl bg-black shrink-0",
                     {
@@ -420,7 +458,13 @@ export default function ShotImages({
                             : 4
                         }
                         hasUrl={!!shot.start_frame_url}
-                        onEditClick={() => setIsEditModalOpen(true)}
+                        onEditClick={() => {
+                          setIsEditModalOpen(true);
+                          // Pause audio when opening modal
+                          audioRef.current?.pause();
+                          isManuallyPausedRef.current = true;
+                          setIsPlaying(false);
+                        }}
                         onDeleteClick={async () => {
                           await editPanel({
                             mode: "delete",
