@@ -223,7 +223,6 @@ export default function CreateCharacterDescriptionModal({
       ...(pollingResponse.characters || []),
       ...(pollingResponse.creatures || []),
     ];
-    console.log({ allChars });
 
     allChars.forEach((char) => {
       const item = allItems.get(char.name);
@@ -746,10 +745,6 @@ export default function CreateCharacterDescriptionModal({
   }, [isOpen, selectedStyle, poll, stopPolling]);
 
   if (!isOpen) return null;
-
-  console.log(displayCharacters);
-  console.log({ selectedCharacter });
-  console.log({ displayCharacters });
 
   return (
     <div
