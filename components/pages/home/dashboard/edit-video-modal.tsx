@@ -123,7 +123,7 @@ export default function EditVideoModal({
               dialogues?: Dialogue[] | Record<string, string>;
               narration?: string;
             };
-            
+
             let thoughts: Thought[] = [];
             if (Array.isArray(audioData.thoughts)) {
               // New format: already an array
@@ -133,7 +133,9 @@ export default function EditVideoModal({
               }));
             } else {
               // Old format: object with character names as keys
-              const thoughtObj = (audioData.thought || audioData.thoughts || {}) as Record<string, string>;
+              const thoughtObj = (audioData.thought ||
+                audioData.thoughts ||
+                {}) as Record<string, string>;
               thoughts = Object.entries(thoughtObj).map(
                 ([characterName, thoughtText]) => ({
                   characterName,
@@ -155,7 +157,9 @@ export default function EditVideoModal({
               }));
             } else {
               // Old format: object with character names as keys
-              const dialogueObj = (audioData.dialogue || audioData.dialogues || {}) as Record<string, string>;
+              const dialogueObj = (audioData.dialogue ||
+                audioData.dialogues ||
+                {}) as Record<string, string>;
               dialogues = Object.entries(dialogueObj).map(
                 ([characterName, dialogueText]) => ({
                   characterName,
@@ -417,7 +421,7 @@ export default function EditVideoModal({
         panel_data: updatedShotData.panel_data,
         type: "video",
       });
-      toast.info("Regenerating video... This will take some time.")
+      toast.info("Regenerating video... This will take some time.");
       onRefetch?.();
       onClose();
     }
@@ -454,7 +458,7 @@ export default function EditVideoModal({
         {/* Content */}
         <div className="flex h-[calc(100vh-200px)] max-h-[800px]">
           {/* Left Side - Scrollable Form */}
-          <div className="flex-1 overflow-y-auto p-6 space-y-6 border-r border-fm-divider-primary bg-[#141414]">
+          <div className="flex-1 overflow-y-auto p-6 space-y-6 border-fm-divider-primary bg-[#141414]">
             {/* Video Number */}
             <div className="space-y-3">
               <label className="text-fm-sm font-medium text-[#FFFFFFCC] font-fm-poppins">
@@ -596,79 +600,81 @@ export default function EditVideoModal({
                       DIALOGUE
                     </h3>
 
-                    {(cut.audio?.dialogues || []).map((dialogue, dialogueIndex) => (
-                      <div
-                        key={dialogueIndex}
-                        className="bg-[#1a1a1a] rounded-xl p-4 space-y-4 border border-fm-divider-primary"
-                      >
-                        <div className="flex items-center justify-between">
-                          <h4 className="text-fm-md font-semibold text-fm-primary font-fm-poppins">
-                            Dialogue {dialogueIndex + 1}
-                          </h4>
-                          {/* <button
+                    {(cut.audio?.dialogues || []).map(
+                      (dialogue, dialogueIndex) => (
+                        <div
+                          key={dialogueIndex}
+                          className="bg-[#1a1a1a] rounded-xl p-4 space-y-4 border border-fm-divider-primary"
+                        >
+                          <div className="flex items-center justify-between">
+                            <h4 className="text-fm-md font-semibold text-fm-primary font-fm-poppins">
+                              Dialogue {dialogueIndex + 1}
+                            </h4>
+                            {/* <button
                             onClick={() => handleRemoveDialogue(index, dialogueIndex)}
                             className="p-1 hover:bg-fm-surface-secondary rounded transition-colors"
                             aria-label={`Remove dialogue ${dialogueIndex + 1}`}
                           >
                             <Trash />
                           </button> */}
-                        </div>
+                          </div>
 
-                        <div className="space-y-3">
-                          <label className="text-fm-sm font-medium text-[#FFFFFFCC] font-fm-poppins">
-                            Character Name
-                          </label>
-                          <Input
-                            type="text"
-                            value={dialogue.characterName || ""}
-                            onChange={(e) =>
-                              handleDialogueChange(
-                                index,
-                                dialogueIndex,
-                                "characterName",
-                                e.target.value
-                              )
-                            }
-                            decoration="outline"
-                            className="bg-fm-neutral-0! rounded-lg"
-                            classes={{
-                              input:
-                                "bg-fm-neutral-0! text-fm-primary rounded-lg border-0",
-                            }}
-                            placeholder="Character Name"
-                          />
-                        </div>
+                          <div className="space-y-3">
+                            <label className="text-fm-sm font-medium text-[#FFFFFFCC] font-fm-poppins">
+                              Character Name
+                            </label>
+                            <Input
+                              type="text"
+                              value={dialogue.characterName || ""}
+                              onChange={(e) =>
+                                handleDialogueChange(
+                                  index,
+                                  dialogueIndex,
+                                  "characterName",
+                                  e.target.value
+                                )
+                              }
+                              decoration="outline"
+                              className="bg-fm-neutral-0! rounded-lg"
+                              classes={{
+                                input:
+                                  "bg-fm-neutral-0! text-fm-primary rounded-lg border-0",
+                              }}
+                              placeholder="Character Name"
+                            />
+                          </div>
 
-                        <div className="space-y-3">
-                          <label className="text-fm-sm font-medium text-[#FFFFFFCC] font-fm-poppins">
-                            Dialogue Text
-                          </label>
-                          <TextArea
-                            value={dialogue.dialogueText || ""}
-                            onChange={(e) =>
-                              handleDialogueChange(
-                                index,
-                                dialogueIndex,
-                                "dialogueText",
-                                e.target.value
-                              )
-                            }
-                            decoration="filled"
-                            autoGrow
-                            minHeight={100}
-                            maxHeight={200}
-                            className="bg-fm-neutral-0! rounded-lg border-0"
-                            classes={{
-                              textarea:
-                                "bg-fm-neutral-0! text-fm-primary resize-none rounded-lg border-0",
-                            }}
-                            placeholder="Enter dialogue text..."
-                          />
+                          <div className="space-y-3">
+                            <label className="text-fm-sm font-medium text-[#FFFFFFCC] font-fm-poppins">
+                              Dialogue Text
+                            </label>
+                            <TextArea
+                              value={dialogue.dialogueText || ""}
+                              onChange={(e) =>
+                                handleDialogueChange(
+                                  index,
+                                  dialogueIndex,
+                                  "dialogueText",
+                                  e.target.value
+                                )
+                              }
+                              decoration="filled"
+                              autoGrow
+                              minHeight={100}
+                              maxHeight={200}
+                              className="bg-fm-neutral-0! rounded-lg border-0"
+                              classes={{
+                                textarea:
+                                  "bg-fm-neutral-0! text-fm-primary resize-none rounded-lg border-0",
+                              }}
+                              placeholder="Enter dialogue text..."
+                            />
+                          </div>
                         </div>
-                      </div>
-                    ))}
+                      )
+                    )}
 
-                    <div className="flex justify-center">
+                    {/* <div className="flex justify-center">
                       <button
                         onClick={() => handleAddDialogue(index)}
                         className="flex items-center gap-2 bg-black rounded-lg px-4 py-2 font-fm-poppins text-[#833AFF] uppercase text-sm font-medium hover:opacity-80 transition-opacity"
@@ -678,7 +684,7 @@ export default function EditVideoModal({
                         </div>
                         ADD NEW DIALOGUE
                       </button>
-                    </div>
+                    </div> */}
                   </div>
 
                   {/* THOUGHT */}
@@ -687,79 +693,81 @@ export default function EditVideoModal({
                       THOUGHT
                     </h3>
 
-                    {(cut.audio?.thoughts || []).map((thought, thoughtIndex) => (
-                      <div
-                        key={thoughtIndex}
-                        className="bg-[#1a1a1a] rounded-xl p-4 space-y-4 border border-fm-divider-primary"
-                      >
-                        <div className="flex items-center justify-between">
-                          <h4 className="text-fm-md font-semibold text-fm-primary font-fm-poppins">
-                            Thought {thoughtIndex + 1}
-                          </h4>
-                          {/* <button
+                    {(cut.audio?.thoughts || []).map(
+                      (thought, thoughtIndex) => (
+                        <div
+                          key={thoughtIndex}
+                          className="bg-[#1a1a1a] rounded-xl p-4 space-y-4 border border-fm-divider-primary"
+                        >
+                          <div className="flex items-center justify-between">
+                            <h4 className="text-fm-md font-semibold text-fm-primary font-fm-poppins">
+                              Thought {thoughtIndex + 1}
+                            </h4>
+                            {/* <button
                             onClick={() => handleRemoveThought(index, thoughtIndex)}
                             className="p-1 hover:bg-fm-surface-secondary rounded transition-colors"
                             aria-label={`Remove thought ${thoughtIndex + 1}`}
                           >
                             <Trash />
                           </button> */}
-                        </div>
+                          </div>
 
-                        <div className="space-y-3">
-                          <label className="text-fm-sm font-medium text-[#FFFFFFCC] font-fm-poppins">
-                            Character Name
-                          </label>
-                          <Input
-                            type="text"
-                            value={thought.characterName || ""}
-                            onChange={(e) =>
-                              handleThoughtChange(
-                                index,
-                                thoughtIndex,
-                                "characterName",
-                                e.target.value
-                              )
-                            }
-                            decoration="outline"
-                            className="bg-fm-neutral-0! rounded-lg"
-                            classes={{
-                              input:
-                                "bg-fm-neutral-0! text-fm-primary rounded-lg border-0",
-                            }}
-                            placeholder="Character Name"
-                          />
-                        </div>
+                          <div className="space-y-3">
+                            <label className="text-fm-sm font-medium text-[#FFFFFFCC] font-fm-poppins">
+                              Character Name
+                            </label>
+                            <Input
+                              type="text"
+                              value={thought.characterName || ""}
+                              onChange={(e) =>
+                                handleThoughtChange(
+                                  index,
+                                  thoughtIndex,
+                                  "characterName",
+                                  e.target.value
+                                )
+                              }
+                              decoration="outline"
+                              className="bg-fm-neutral-0! rounded-lg"
+                              classes={{
+                                input:
+                                  "bg-fm-neutral-0! text-fm-primary rounded-lg border-0",
+                              }}
+                              placeholder="Character Name"
+                            />
+                          </div>
 
-                        <div className="space-y-3">
-                          <label className="text-fm-sm font-medium text-[#FFFFFFCC] font-fm-poppins">
-                            Thought Text
-                          </label>
-                          <TextArea
-                            value={thought.thoughtText || ""}
-                            onChange={(e) =>
-                              handleThoughtChange(
-                                index,
-                                thoughtIndex,
-                                "thoughtText",
-                                e.target.value
-                              )
-                            }
-                            decoration="filled"
-                            autoGrow
-                            minHeight={100}
-                            maxHeight={200}
-                            className="bg-fm-neutral-0! rounded-lg border-0"
-                            classes={{
-                              textarea:
-                                "bg-fm-neutral-0! text-fm-primary resize-none rounded-lg border-0",
-                            }}
-                            placeholder="Enter thought text..."
-                          />
+                          <div className="space-y-3">
+                            <label className="text-fm-sm font-medium text-[#FFFFFFCC] font-fm-poppins">
+                              Thought Text
+                            </label>
+                            <TextArea
+                              value={thought.thoughtText || ""}
+                              onChange={(e) =>
+                                handleThoughtChange(
+                                  index,
+                                  thoughtIndex,
+                                  "thoughtText",
+                                  e.target.value
+                                )
+                              }
+                              decoration="filled"
+                              autoGrow
+                              minHeight={100}
+                              maxHeight={200}
+                              className="bg-fm-neutral-0! rounded-lg border-0"
+                              classes={{
+                                textarea:
+                                  "bg-fm-neutral-0! text-fm-primary resize-none rounded-lg border-0",
+                              }}
+                              placeholder="Enter thought text..."
+                            />
+                          </div>
                         </div>
-                      </div>
-                    ))}
+                      )
+                    )}
 
-                    <div className="flex justify-center">
+                    {/* <div className="flex justify-center">
                       <button
                         onClick={() => handleAddThought(index)}
                         className="flex items-center gap-2 bg-black rounded-lg px-4 py-2 font-fm-poppins text-[#833AFF] uppercase text-sm font-medium hover:opacity-80 transition-opacity"
@@ -769,7 +777,7 @@ export default function EditVideoModal({
                         </div>
                         ADD NEW THOUGHT
                       </button>
-                    </div>
+                    </div> */}
                   </div>
 
                   {/* NARRATION */}
@@ -779,7 +787,9 @@ export default function EditVideoModal({
                     </label>
                     <TextArea
                       value={cut.audio?.narration || ""}
-                      onChange={(e) => handleNarrationChange(index, e.target.value)}
+                      onChange={(e) =>
+                        handleNarrationChange(index, e.target.value)
+                      }
                       decoration="filled"
                       autoGrow
                       minHeight={100}
@@ -810,8 +820,8 @@ export default function EditVideoModal({
           </div>
 
           {/* Right Side - Non-scrollable Preview */}
-          <div className="w-96 flex flex-col p-6 space-y-4 bg-[#141414] overflow-hidden">
-            <div className="relative flex-1 min-h-0 rounded-xl overflow-hidden bg-fm-surface-tertiary border border-fm-divider-primary">
+          <div className="w-72 flex flex-col p-6 space-y-4 bg-[#141414] overflow-hidden">
+            <div className="relative flex-1 min-h-0 rounded-xl overflow-hidden  border-none ">
               {videoUrl ? (
                 <video
                   src={videoUrl}

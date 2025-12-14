@@ -484,7 +484,7 @@ export default function EditImageModal({
         panel_data: updatedShotData.panel_data,
         type: "image",
       });
-      toast.info("Regenerating image... This will take some time.")
+      toast.info("Regenerating image... This will take some time.");
       onRefetch?.();
       onClose();
     }
@@ -1114,29 +1114,17 @@ export default function EditImageModal({
           </div>
 
           {/* Right Side - Non-scrollable Image Preview */}
-          <div className="w-96 flex flex-col p-6 space-y-4 bg-[#141414] overflow-hidden">
-            <div className="relative flex-1 min-h-0 rounded-xl overflow-hidden bg-fm-surface-tertiary border border-fm-divider-primary">
+          <div className="w-72 flex flex-col p-6 space-y-4 bg-[#141414] overflow-hidden">
+            <div className="relative flex-1 min-h-0 rounded-xl overflow-hidden ">
               {imageUrl ? (
                 <>
                   <Image
                     src={imageUrl}
                     alt={`Shot ${shotNumber} preview`}
                     fill
-                    className="object-contain"
+                    className="h-42 w-auto object-contain"
                     unoptimized
                   />
-                  {/* <Button
-                    variant="outline"
-                    size="sm"
-                    className="absolute top-4 right-4 font-fm-poppins"
-                    onClick={() => {
-                      // TODO: Implement edit image functionality
-                      console.log("Edit image clicked");
-                    }}
-                  >
-                    <EditBigIcon className="size-5 mr-2" />
-                    Edit Image
-                  </Button> */}
                 </>
               ) : (
                 <div className="w-full h-full flex items-center justify-center">
