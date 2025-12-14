@@ -11,6 +11,8 @@ import { cn } from "@/aural/lib/utils";
 import { convertGoogleDriveUrl } from "@/lib/helpers";
 import { toast } from "sonner";
 import { Pencil, PlusIcon, Trash } from "@/lib/icons";
+import AddCharactersModal from "@/components/modals/add-characters-modal";
+import EditCharactersModal from "@/components/modals/edit-characters-modal";
 const DEFAULT_ERROR_MESSAGE = "Something went wrong. Please try again.";
 
 type StyleOption = {
@@ -86,6 +88,7 @@ type CreateCharacterDescriptionModalProps = {
   onClose: () => void;
   selectedStyle?: StyleOption | null;
   onSheetCreated?: (spreadsheetUrl: string, taskId: number) => void;
+  scriptText: string;
 };
 
 export default function CreateCharacterDescriptionModal({
@@ -93,6 +96,7 @@ export default function CreateCharacterDescriptionModal({
   onClose,
   selectedStyle,
   onSheetCreated,
+  scriptText,
 }: CreateCharacterDescriptionModalProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [isPolling, setIsPolling] = useState(false);
@@ -103,6 +107,8 @@ export default function CreateCharacterDescriptionModal({
     useState(false);
   const [isPollingImages, setIsPollingImages] = useState(false);
   const [isPollingAltViews, setIsPollingAltViews] = useState(false);
+  const [isAddCharacterModalOpen, setIsAddCharacterModalOpen] = useState(false);
+  const [isEditCharacterModalOpen, setIsEditCharacterModalOpen] = useState(false);
   const [taskId, setTaskId] = useState<number | null>(null);
   const [taskStatus, setTaskStatus] = useState<string>("");
   const [humanStatus, setHumanStatus] = useState<string>("");
@@ -136,12 +142,14 @@ export default function CreateCharacterDescriptionModal({
   );
   const imagePollingStartTimeRef = useRef<number | null>(null);
   const altViewsPollingStartTimeRef = useRef<number | null>(null);
+  const startGenerateImagesRef = useRef<((taskId: number) => void) | null>(null);
   const { poll, stopPolling } = usePolling();
   const {
     getCharacterSheet,
     loading: isGettingSheet,
     error: sheetError,
   } = useGetCharacterSheet();
+  
 
   // Track current taskId for cleanup
   const currentTaskIdRef = useRef<number | null>(null);
@@ -301,7 +309,7 @@ export default function CreateCharacterDescriptionModal({
               "Content-Type": "application/json",
             },
             body: JSON.stringify({
-              text: selectedStyle.prompt,
+              text: scriptText,
               user_id: 7,
               style_id: "",
               e2e_style_id: selectedStyle.id.toString(),
@@ -644,7 +652,8 @@ export default function CreateCharacterDescriptionModal({
       }
     };
 
-    // Store the function in ref so it can be called from polling callbacks
+    // Store the functions in refs so they can be called from polling callbacks and external callbacks
+    startGenerateImagesRef.current = startGenerateImages;
     startGenerateAltViewsRef.current = startGenerateAltViews;
 
     makeApiCall();
@@ -769,9 +778,7 @@ export default function CreateCharacterDescriptionModal({
                           Characters
                         </h2>
                         <button
-                          onClick={() => {
-                            // TODO: Implement add character functionality
-                          }}
+                          onClick={() => setIsAddCharacterModalOpen(true)}
                           className="text-[#AB79FF] transition-colors font-fm-poppins text-fm-lg font-bold flex items-center gap-1"
                         >
                           <PlusIcon />
@@ -881,9 +888,7 @@ export default function CreateCharacterDescriptionModal({
                                   <Trash />
                                 </button>
                                 <button
-                                  onClick={() => {
-                                    // TODO: Implement edit functionality
-                                  }}
+                                  onClick={() => setIsEditCharacterModalOpen(true)}
                                   className="p-2 rounded-lg hover:bg-[#333333] transition-colors"
                                   aria-label="Edit character"
                                 >
@@ -1076,6 +1081,74 @@ export default function CreateCharacterDescriptionModal({
           </button>
         )}
       </div>
+
+      {/* Add Character Modal */}
+      <AddCharactersModal
+        isOpen={isAddCharacterModalOpen}
+        onClose={() => setIsAddCharacterModalOpen(false)}
+        selectedCharacter={selectedCharacter}
+        pollingResponse={pollingResponse}
+        onGenerate={(name, description, selectedCharacter, updatedPollingResponse) => {
+          // After successful sync-characters, start the refetch sequence
+          if (updatedPollingResponse && taskId && startGenerateImagesRef.current) {
+            // Start polling list-characters API (skip extract API call)
+            const pollingKey = `character-refetch-${taskId}`;
+
+            poll<PollingResponse>({
+              url: `/api/workers/character-context/list-characters/?user_id=7&task_id=${taskId}`,
+              baseUrl: "https://api.blaze.pockettoons.com",
+              pollingKey,
+              delay: 5000, // Poll every 5 seconds
+              headers: {
+                uid: "7",
+                "access-token": "c7eb5f9a-e958-4a47-85fe-0b2674a946eb",
+              },
+              callback: (data) => {
+                if (!data) {
+                  return;
+                }
+
+                // Check if task has failed
+                if (data.task_status === "failed") {
+                  stopPolling(pollingKey);
+                  return;
+                }
+
+                setPollingResponse(data);
+                setTaskStatus(data.task_status || "");
+
+                // Check if we should stop polling based on task_status
+                // Continue polling if task_status is "extracting"
+                // Stop polling when task_status is not "extracting" (and not "failed" which is already handled above)
+                if (data.task_status !== "extracting") {
+                  stopPolling(pollingKey);
+                  // After polling completes, start generating images for human and creature
+                  if (startGenerateImagesRef.current) {
+                    startGenerateImagesRef.current(taskId);
+                  }
+                }
+                // Continue polling if task_status is "extracting"
+              },
+              failData: null,
+            });
+          }
+        }}
+      />
+
+      {/* Edit Character Modal */}
+      <EditCharactersModal
+        isOpen={isEditCharacterModalOpen}
+        onClose={() => setIsEditCharacterModalOpen(false)}
+        selectedCharacter={selectedCharacter}
+        onRegenerateImage={(selectedCharacter) => {
+          // TODO: Implement regenerate image functionality
+          
+        }}
+        onSave={(name, description, selectedCharacter) => {
+          // TODO: Implement save character functionality
+          
+        }}
+      />
     </div>
   );
 }
