@@ -248,7 +248,7 @@ export default function EditCharactersModal({
               className={cn(
                 "relative  shrink-0 max-h-[70vh] rounded-xl flex justify-end",
                 (!imageUrl || imageLoading) &&
-                  "bg-fm-surface-tertiary animate-pulse"
+                  "bg-fm-surface-tertiary animate-pulse w-[310px]"
               )}
             >
               {imageUrl ? (

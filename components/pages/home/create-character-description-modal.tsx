@@ -909,8 +909,9 @@ export default function CreateCharacterDescriptionModal({
                                   onClick={() => {
                                     // TODO: Implement delete functionality
                                   }}
-                                  className="p-2 rounded-lg hover:bg-[#333333] transition-colors"
+                                  className="p-2 rounded-lg cursor-not-allowed transition-colors"
                                   aria-label="Delete character"
+                                  disabled={true}
                                 >
                                   <Trash />
                                 </button>
