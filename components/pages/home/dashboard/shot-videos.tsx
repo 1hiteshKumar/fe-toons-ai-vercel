@@ -37,6 +37,7 @@ export default function ShotVideos({
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
   const shouldAutoPlayRef = useRef(false);
+  const isManuallyPausedRef = useRef(false);
   const shotListRef = useRef<HTMLDivElement>(null);
   const shotRefs = useRef<Map<number, HTMLDivElement>>(new Map());
 
@@ -83,9 +84,9 @@ export default function ShotVideos({
     }
   };
 
-  // Auto-play video when moving to next shot
+  // Auto-play video when moving to next shot (only if not manually paused)
   useEffect(() => {
-    if (shouldAutoPlayRef.current && videoRef.current && data) {
+    if (shouldAutoPlayRef.current && videoRef.current && data && !isManuallyPausedRef.current) {
       const selectedSceneGroup = groupedShots.find(
         (group) => group.scene_beat_id === effectiveSelectedScene
       );
@@ -98,15 +99,26 @@ export default function ShotVideos({
       if (videoUrl) {
         // Small delay to ensure video element is ready
         const timer = setTimeout(() => {
-          videoRef.current?.play().catch(() => {
-            // Ignore autoplay errors
-          });
+          // Only play if not manually paused
+          if (videoRef.current && !isManuallyPausedRef.current) {
+            videoRef.current.play().catch(() => {
+              // Ignore autoplay errors
+            });
+          }
         }, 150);
         return () => clearTimeout(timer);
       }
     }
     shouldAutoPlayRef.current = false;
   }, [selectedShot, effectiveSelectedScene, groupedShots, data]);
+
+  // Pause video when edit modal opens
+  useEffect(() => {
+    if (isEditModalOpen && videoRef.current) {
+      videoRef.current.pause();
+      isManuallyPausedRef.current = true;
+    }
+  }, [isEditModalOpen]);
 
   // Scroll selected shot into view
   useEffect(() => {
@@ -183,6 +195,8 @@ export default function ShotVideos({
                   onClick={() => {
                     setSelectedScene(scene_beat_id);
                     setSelectedShot(0);
+                    // Reset manual pause when user selects a different scene
+                    isManuallyPausedRef.current = false;
                   }}
                   className={cn(
                     "bg-black w-full p-4 flex items-center gap-2 rounded-xl text-nowrap font-fm-poppins text-fm-lg font-bold cursor-pointer ",
@@ -231,12 +245,28 @@ export default function ShotVideos({
                       onEnded={() => {
                         moveToNextShot();
                       }}
+                      onPause={(e) => {
+                        // Track when user manually pauses (not when video ends)
+                        const video = e.currentTarget;
+                        if (!video.ended) {
+                          isManuallyPausedRef.current = true;
+                        }
+                      }}
+                      onPlay={() => {
+                        // Reset manual pause flag when user plays
+                        isManuallyPausedRef.current = false;
+                      }}
                     />
                     <Button
                       variant="outline"
                       size="sm"
                       className="absolute top-2 right-2"
-                      onClick={() => setIsEditModalOpen(true)}
+                      onClick={() => {
+                        setIsEditModalOpen(true);
+                        // Pause video when opening modal
+                        videoRef.current?.pause();
+                        isManuallyPausedRef.current = true;
+                      }}
                     >
                       <EditBigIcon className="size-5" />
                     </Button>
@@ -373,7 +403,11 @@ export default function ShotVideos({
                   tabIndex={0}
                   aria-pressed={isSelected}
                   aria-label={`Select shot ${index + 1}`}
-                  onClick={() => setSelectedShot(index)}
+                  onClick={() => {
+                    setSelectedShot(index);
+                    // Reset manual pause when user selects a different shot
+                    isManuallyPausedRef.current = false;
+                  }}
                   className={cn(
                     "w-full text-left p-5 rounded-xl bg-black  shrink-0",
                     {
@@ -401,6 +435,9 @@ export default function ShotVideos({
                         onEditClick={() => {
                           setSelectedShot(index);
                           setIsEditModalOpen(true);
+                          // Pause video when opening modal
+                          videoRef.current?.pause();
+                          isManuallyPausedRef.current = true;
                         }}
                       />
                       {combinedAudio.actions.length > 0 ? (
