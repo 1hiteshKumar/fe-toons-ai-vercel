@@ -13,6 +13,7 @@ import { cn } from "@/aural/lib/utils";
 import Image from "next/image";
 import { useState, useRef, useEffect } from "react";
 import ChevronRightIcon from "@/aural/icons/chevron-right-icon";
+import { PlusIcon } from "@/lib/icons";
 
 function UserUploadsContent() {
   const {
@@ -207,11 +208,9 @@ function UserUploadsContent() {
                   <button
                     type="button"
                     onClick={() => setIsCreateModalOpen(true)}
-                    className="flex items-center gap-1.5 text-[#833AFF] hover:text-[#6d2fd9] transition-colors font-fm-poppins text-fm-sm"
+                    className="flex items-center gap-1.5 text-[#AB79FF]  transition-colors font-fm-poppins text-fm-md"
                   >
-                    <span className="flex items-center justify-center size-5 rounded-full border border-[#833AFF] text-[#833AFF]">
-                      +
-                    </span>
+                    <PlusIcon />
                     Create Art Style
                   </button>
                 </div>
@@ -322,11 +321,9 @@ function UserUploadsContent() {
                 <button
                   type="button"
                   onClick={() => setIsCreateCharacterModalOpen(true)}
-                  className="flex items-center gap-1.5 text-[#833AFF] hover:text-[#6d2fd9] transition-colors font-fm-poppins text-fm-sm"
+                  className="flex items-center gap-1.5 text-[#AB79FF] transition-colors font-fm-poppins text-fm-md"
                 >
-                  <span className="flex items-center justify-center size-5 rounded-full border border-[#833AFF] text-[#833AFF]">
-                    +
-                  </span>
+                  <PlusIcon />
                   Create Character Description Sheet
                 </button>
               </div>
@@ -374,7 +371,7 @@ function UserUploadsContent() {
           </div>
           <div className="flex justify-center mt-4">
             <Button
-              // isDisabled={disableGenerateAnime}
+              isDisabled={disableGenerateAnime}
               variant="outline"
               noise="none"
               className="font-fm-poppins rounded-sm"

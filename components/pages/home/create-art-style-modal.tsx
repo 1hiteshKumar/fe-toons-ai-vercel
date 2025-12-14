@@ -191,7 +191,7 @@ export default function CreateArtStyleModal({
       onClick={onClose}
     >
       <div
-        className="relative w-full max-w-2xl mx-4 bg-[#1A1A1A] rounded-xl shadow-lg p-6 max-h-[90vh] overflow-y-auto"
+        className="relative w-full max-w-2xl mx-4 bg-[#141414] rounded-xl shadow-lg p-6 max-h-[90vh] overflow-y-auto"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Close Button */}
@@ -205,10 +205,10 @@ export default function CreateArtStyleModal({
 
         {/* Header */}
         <div className="mb-6">
-          <h2 className="text-2xl font-bold text-white mb-2">
+          <h2 className="text-2xl font-bold text-white mb-2 font-fm-poppins">
             Create your art style
           </h2>
-          <p className="text-[#E0E0E0] text-sm">
+          <p className="text-[#FFFFFFCC] text-sm font-fm-poppins">
             Create a style that reflects your imagination
           </p>
         </div>
@@ -219,7 +219,7 @@ export default function CreateArtStyleModal({
           <div>
             <label
               htmlFor="style-name"
-              className="block text-sm font-medium text-white mb-2"
+              className="block text-sm text-[#FFFFFFCC] mb-2 font-fm-poppins"
             >
               Style Name
             </label>
@@ -241,7 +241,7 @@ export default function CreateArtStyleModal({
           <div>
             <label
               htmlFor="style-description"
-              className="block text-sm font-medium text-white mb-2"
+              className="block text-sm text-[#FFFFFFCC] mb-2 font-fm-poppins"
             >
               Style Description
             </label>
@@ -250,24 +250,24 @@ export default function CreateArtStyleModal({
               value={styleDescription}
               onChange={(e) => setStyleDescription(e.target.value)}
               placeholder="Enter style description"
+              maxHeight={100}
               minHeight={100}
-              autoGrow
               classes={{
                 textarea:
-                  "bg-black text-white rounded-lg border-0 placeholder:text-white/70",
+                  "bg-black! text-white rounded-lg border-0 placeholder:text-white/70",
               }}
             />
           </div>
 
           {/* Upload Reference Images */}
           <div>
-            <label className="block text-sm font-medium text-white mb-2">
+            <label className="block text-sm text-[#FFFFFFCC] mb-2 font-fm-poppins">
               Upload Reference Images
             </label>
             <div
               {...getRootProps()}
               className={cn(
-                "border border-dotted rounded-lg p-8 text-center cursor-pointer transition-all",
+                "border border-dashed rounded-lg p-8 text-center cursor-pointer transition-all",
                 isDragActive
                   ? "border-[#9B59B6] bg-black/50"
                   : "border-[#A0A0A0] bg-black hover:border-[#B0B0B0]"
@@ -275,10 +275,10 @@ export default function CreateArtStyleModal({
             >
               <input {...getInputProps()} />
               <div className="space-y-2">
-                <p className="text-[#A0A0A0] font-medium">
+                <p className="text-white text-sm font-fm-poppins">
                   Drag and drop reference style images or click to upload
                 </p>
-                <p className="text-xs text-[#C0C0C0]">
+                <p className="text-fm-xs text-[#FFFFFFCC] font-fm-poppins">
                   Upto 9 images. 1.5mb per file. Only .png files accepted
                 </p>
               </div>
@@ -320,7 +320,8 @@ export default function CreateArtStyleModal({
               disabled={isSubmitting}
               variant="outline"
               noise="none"
-              className="w-full bg-[#9B59B6] text-white border-none hover:bg-[#8E44AD] disabled:opacity-50 disabled:cursor-not-allowed rounded-lg flex items-center justify-center gap-2"
+              className="w-full bg-[#833AFF] text-white border-none! disabled:opacity-50 disabled:cursor-not-allowed rounded-lg flex items-center justify-center gap-2"
+              innerClassName="border-none!"
             >
               {isSubmitting && (
                 <svg
@@ -344,7 +345,9 @@ export default function CreateArtStyleModal({
                   ></path>
                 </svg>
               )}
-              {isSubmitting ? "Creating..." : "Create Style"}
+              <span className="text-sm font-fm-poppins border-none">
+                {isSubmitting ? "Creating..." : "Create Style"}
+              </span>
             </Button>
           </div>
         </div>
