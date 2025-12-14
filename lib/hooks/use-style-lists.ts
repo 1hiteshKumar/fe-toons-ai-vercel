@@ -74,7 +74,7 @@ export default function useStyleLists({
       // The API response has a results array
       if (response?.results && Array.isArray(response.results)) {
         // Append hardcoded styles to the fetched results
-        setData([...HARDCODED_STYLES, ...response.results]);
+        setData([...response.results]);
       } else {
         // If no results, still include hardcoded styles
         setData(HARDCODED_STYLES);

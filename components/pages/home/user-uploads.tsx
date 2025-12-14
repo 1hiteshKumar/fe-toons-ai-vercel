@@ -45,16 +45,23 @@ function UserUploadsContent() {
   });
 
   const [isStyleDropdownOpen, setStyleDropdownOpen] = useState(false);
-  const [highlightedIndex, setHighlightedIndex] = useState(-1);
+  const [highlightedIndex, setHighlightedIndex] = useState(0);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isCreateCharacterModalOpen, setIsCreateCharacterModalOpen] =
     useState(false);
   const [pendingStyleId, setPendingStyleId] = useState<number | null>(null);
+  const [shouldSelectFirstAfterRefetch, setShouldSelectFirstAfterRefetch] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const triggerRef = useRef<HTMLButtonElement>(null);
   const optionRefs = useRef<(HTMLButtonElement | null)[]>([]);
 
   const selectedStyle = styleOptions.find((style) => style.id === styleId);
+
+  // Common function to handle refetch and select first style
+  const handleRefetchAndSelectFirst = async () => {
+    await refetchStyles();
+    setShouldSelectFirstAfterRefetch(true);
+  };
 
   // Set the styleId when the pending style appears in the options after refetch
   useEffect(() => {
@@ -62,10 +69,22 @@ function UserUploadsContent() {
       const styleExists = styleOptions.some((style) => style.id === pendingStyleId);
       if (styleExists) {
         setStyleId(pendingStyleId);
+        setShouldSelectFirstAfterRefetch(false);
         // setPendingStyleId(null);
       }
     }
   }, [styleOptions, pendingStyleId, setStyleId]);
+
+  // Select the 0th index element after refetch
+  useEffect(() => {
+    if (shouldSelectFirstAfterRefetch && styleOptions.length > 0) {
+      // Only select first if there's no pending style ID
+      if (!pendingStyleId) {
+        setStyleId(styleOptions[0].id);
+        setShouldSelectFirstAfterRefetch(false);
+      }
+    }
+  }, [styleOptions, shouldSelectFirstAfterRefetch, pendingStyleId, setStyleId]);
 
   // Handle keyboard navigation
   useEffect(() => {
@@ -413,16 +432,15 @@ function UserUploadsContent() {
         isOpen={isCreateModalOpen}
         onClose={async () => {
           setIsCreateModalOpen(false);
-          // Refetch styles when modal closes
-          await refetchStyles();
+          await handleRefetchAndSelectFirst();
         }}
         selectedStyleName={selectedStyle?.name || ""}
         selectedStylePrompt={selectedStyle?.prompt || ""}
         onSuccess={async (createdStyleId: number) => {
           // Set pending style ID first
           setPendingStyleId(createdStyleId);
-          // Refetch styles to get the newly created style
-          await refetchStyles();
+          // Refetch styles and select first (if pending style doesn't exist)
+          await handleRefetchAndSelectFirst();
           // The useEffect will handle setting the styleId when the style appears in options
         }}
         userId={7}
