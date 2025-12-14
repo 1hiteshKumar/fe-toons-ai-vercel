@@ -75,7 +75,7 @@ interface TextAreaComponent
 
 // CVA for textarea variants with decoration support
 const textareaVariants = cva(
-  "block w-full focus:outline-none transition-all duration-200 border-solid resize-none overflow-hidden tracking-wide placeholder:text-fm-placeholder font-fm-text text-fm-primary",
+  "block w-full focus:outline-none transition-all duration-200 border-solid resize-none overflow-hidden tracking-wide placeholder:text-fm-placeholder font-fm-text text-fm-primary font-fm-poppins",
   {
     variants: {
       variant: {
