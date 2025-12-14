@@ -12,15 +12,19 @@ import ShotHeader from "@/components/shot-header";
 import ArrowRightIcon from "@/aural/icons/arrow-right-icon";
 import { PlayPauseIcon } from "@/aural/icons/play-pause-icon";
 import { cn } from "@/aural/lib/utils";
+import EditImageModal from "./edit-image-modal";
+import { editPanel } from "@/server/mutations/edit-panel";
 
 export default function ShotImages({
   data,
   onNext,
   generatingStatus,
+  onRefetch,
 }: {
   data: ShotAssets | null;
   onNext?: () => void;
   generatingStatus: GeneratingStatus;
+  onRefetch?: () => void;
 }) {
   const groupedShots = useMemo(() => getGroupedShots(data), [data]);
 
@@ -32,6 +36,7 @@ export default function ShotImages({
   const [selectedScene, setSelectedScene] = useState<string>(initialScene);
   const [selectedShot, setSelectedShot] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const audioRef = useRef<HTMLAudioElement>(null);
   const shouldAutoPlayRef = useRef(false);
   const shotListRef = useRef<HTMLDivElement>(null);
@@ -259,6 +264,7 @@ export default function ShotImages({
                         variant="outline"
                         size="sm"
                         className="absolute top-2 right-4"
+                        onClick={() => setIsEditModalOpen(true)}
                       >
                         <EditBigIcon className="size-5" />
                       </Button>
@@ -317,7 +323,8 @@ export default function ShotImages({
               };
 
               const cuts = (
-                Array.isArray(shot.panel_prompt_data?.cuts)
+                shot.panel_prompt_data &&
+                Array.isArray(shot.panel_prompt_data.cuts)
                   ? shot.panel_prompt_data.cuts
                   : []
               ) as Cut[];
@@ -406,6 +413,17 @@ export default function ShotImages({
                             ? shot.panel_prompt_data.duration
                             : 4
                         }
+                        hasUrl={!!shot.start_frame_url}
+                        onEditClick={() => setIsEditModalOpen(true)}
+                        onDeleteClick={async () => {
+                          await editPanel({
+                            mode: "delete",
+                            orchestrator_task_id:
+                              selectedShotData.orchestrator_task_id,
+                            orchestrator_result_task_id: selectedShotData.id,
+                          });
+                          onRefetch?.();
+                        }}
                         shotNumber={index + 1}
                       />
                       <div className="flex flex-col gap-2">
@@ -518,6 +536,19 @@ export default function ShotImages({
           </div>
         </div>
       </div>
+
+      {/* Edit Image Modal */}
+      <EditImageModal
+        isOpen={isEditModalOpen}
+        onClose={() => setIsEditModalOpen(false)}
+        shotData={selectedShotData}
+        shotNumber={selectedShot + 1}
+        onRefetch={onRefetch}
+        onSave={(data) => {
+          // TODO: Implement save functionality
+          console.log("Save image data:", data);
+        }}
+      />
     </div>
   );
 }
