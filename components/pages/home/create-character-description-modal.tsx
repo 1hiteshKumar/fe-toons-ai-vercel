@@ -752,7 +752,7 @@ export default function CreateCharacterDescriptionModal({
       onClick={onClose}
     >
       <div
-        className="relative w-full max-w-7xl mx-4 bg-[#1A1A1A] rounded-xl shadow-lg p-6 max-h-[90vh] overflow-y-auto"
+        className="relative w-full max-w-7xl mx-4 bg-[#1A1A1A] rounded-xl shadow-lg p-6 min-h-[700px] max-h-[1300px] overflow-y-auto"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Close Button */}
@@ -777,7 +777,9 @@ export default function CreateCharacterDescriptionModal({
                   isPollingHuman ||
                   isPollingCreature ||
                   isPollingHumanAltViews ||
-                  isPollingCreatureAltViews) && <Loading text="characters" />}
+                  isPollingCreatureAltViews) && (
+                  <Loading text="characters" className="h-[70vh]" />
+                )}
 
               {/* Error State */}
               {error &&
@@ -797,7 +799,12 @@ export default function CreateCharacterDescriptionModal({
               {hasCharactersWithImages &&
                 displayCharacters.length > 0 &&
                 pollingResponse && (
-                  <div className="flex gap-6 h-[calc(90vh-200px)] bg-[#171717]">
+                  <div
+                    className="flex gap-6 h-[calc(90vh-200px)] bg-[#171717]"
+                    style={{
+                      height: "75vh",
+                    }}
+                  >
                     {/* Left Sidebar - Character Thumbnails */}
                     <div className="w-72 shrink-0 border-r border-[#333333] p-4 flex flex-col h-full">
                       <div className="flex items-center justify-between mb-4 shrink-0">
@@ -939,7 +946,7 @@ export default function CreateCharacterDescriptionModal({
                           </div>
 
                           {/* Main Image Display - All 3 views */}
-                          <div className="flex-1 flex flex-col p-6 relative overflow-hidden min-h-0">
+                          <div className="flex-1 flex flex-col p-6 relative overflow-hidden min-h-0 max-h-[700px]">
                             <div className="flex-1 w-full flex gap-4 items-center justify-center min-h-0">
                               {/* Close Up View */}
                               {selectedCharacter.close_up ? (

@@ -1,12 +1,14 @@
 export default function Loading({
   text,
   isGenerating = true,
+  className,
 }: {
   text: string;
   isGenerating?: boolean;
+  className?: string;
 }) {
   return (
-    <div className="flex items-center justify-center h-96">
+    <div className={`flex items-center justify-center h-96 ${className}`}>
       <div className="flex flex-col items-center gap-4">
         <div className="animate-pulse">
           <div className="w-12 h-12 bg-fm-primary/40 rounded-full flex items-center justify-center">
