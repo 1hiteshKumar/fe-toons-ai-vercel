@@ -9,6 +9,7 @@ import { convertGoogleDriveUrl } from "@/lib/helpers";
 import { cn } from "@/aural/lib/utils";
 import { PollingResponse } from "./add-characters-modal";
 import { baseFetch } from "@/lib/baseFetchUtil";
+import { toast } from "sonner";
 
 type DisplayCharacter = {
   id: number;
@@ -111,17 +112,24 @@ export default function EditCharactersModal({
       );
 
       // Make API call to regenerate-images
-      await baseFetch(
-        `/api/workers/character-context/regenerate-images/`,
-        {
-          method: "POST",
-          body: JSON.stringify({
-            task_id: taskId,
-            character_ids: [selectedCharacter.id],
-          }),
-        },
-        "https://api.blaze.pockettoons.com"
-      );
+      try {
+        await baseFetch(
+          `/api/workers/character-context/regenerate-images/`,
+          {
+            method: "POST",
+            body: JSON.stringify({
+              task_id: taskId,
+              character_ids: [selectedCharacter.id],
+            }),
+          },
+          "https://api.blaze.pockettoons.com"
+        );
+      } catch (regenerateError) {
+        console.error("Error regenerating images:", regenerateError);
+        toast.error("Something went wrong. Please try again");
+        setIsRegenerating(false);
+        return;
+      }
 
       // Call the onRegenerateImage callback with modified response
       // The parent component will handle the refetch/polling logic
@@ -134,7 +142,7 @@ export default function EditCharactersModal({
       onClose();
     } catch (err) {
       console.error("Error regenerating character:", err);
-      // TODO: Show error toast or message
+      toast.error("Something went wrong. Please try again");
     } finally {
       setIsRegenerating(false);
     }
