@@ -81,6 +81,30 @@ export default function EditVideoModal({
     null
   );
   const [initialized, setInitialized] = useState(false);
+  const [editingField, setEditingField] = useState<
+    Record<number, "dialogue" | "thought" | "narration" | null>
+  >({});
+
+  // Helper to check if a field is disabled for a cut
+  // Initially all fields are enabled, only disabled when another field is being edited
+  const isFieldDisabled = (
+    cutIndex: number,
+    field: "dialogue" | "thought" | "narration"
+  ) => {
+    const currentField = editingField[cutIndex];
+    // If no field is being edited, all are enabled
+    if (!currentField) return false;
+    // If a different field is being edited, this one is disabled
+    return currentField !== field;
+  };
+
+  // Helper to set the active editing field when user interacts
+  const setActiveField = (
+    cutIndex: number,
+    field: "dialogue" | "thought" | "narration"
+  ) => {
+    setEditingField((prev) => ({ ...prev, [cutIndex]: field }));
+  };
 
   // Initialize form data from shotData
   useEffect(() => {
@@ -626,14 +650,16 @@ export default function EditVideoModal({
                             <Input
                               type="text"
                               value={dialogue.characterName || ""}
-                              onChange={(e) =>
+                              onChange={(e) => {
+                                setActiveField(index, "dialogue");
                                 handleDialogueChange(
                                   index,
                                   dialogueIndex,
                                   "characterName",
                                   e.target.value
-                                )
-                              }
+                                );
+                              }}
+                              disabled={isFieldDisabled(index, "dialogue")}
                               decoration="outline"
                               className="bg-fm-neutral-0! rounded-lg"
                               classes={{
@@ -650,14 +676,16 @@ export default function EditVideoModal({
                             </label>
                             <TextArea
                               value={dialogue.dialogueText || ""}
-                              onChange={(e) =>
+                              onChange={(e) => {
+                                setActiveField(index, "dialogue");
                                 handleDialogueChange(
                                   index,
                                   dialogueIndex,
                                   "dialogueText",
                                   e.target.value
-                                )
-                              }
+                                );
+                              }}
+                              disabled={isFieldDisabled(index, "dialogue")}
                               decoration="filled"
                               autoGrow
                               minHeight={100}
@@ -719,14 +747,16 @@ export default function EditVideoModal({
                             <Input
                               type="text"
                               value={thought.characterName || ""}
-                              onChange={(e) =>
+                              onChange={(e) => {
+                                setActiveField(index, "thought");
                                 handleThoughtChange(
                                   index,
                                   thoughtIndex,
                                   "characterName",
                                   e.target.value
-                                )
-                              }
+                                );
+                              }}
+                              disabled={isFieldDisabled(index, "thought")}
                               decoration="outline"
                               className="bg-fm-neutral-0! rounded-lg"
                               classes={{
@@ -743,14 +773,16 @@ export default function EditVideoModal({
                             </label>
                             <TextArea
                               value={thought.thoughtText || ""}
-                              onChange={(e) =>
+                              onChange={(e) => {
+                                setActiveField(index, "thought");
                                 handleThoughtChange(
                                   index,
                                   thoughtIndex,
                                   "thoughtText",
                                   e.target.value
-                                )
-                              }
+                                );
+                              }}
+                              disabled={isFieldDisabled(index, "thought")}
                               decoration="filled"
                               autoGrow
                               minHeight={100}
@@ -787,9 +819,11 @@ export default function EditVideoModal({
                     </label>
                     <TextArea
                       value={cut.audio?.narration || ""}
-                      onChange={(e) =>
-                        handleNarrationChange(index, e.target.value)
-                      }
+                      onChange={(e) => {
+                        setActiveField(index, "narration");
+                        handleNarrationChange(index, e.target.value);
+                      }}
+                      disabled={isFieldDisabled(index, "narration")}
                       decoration="filled"
                       autoGrow
                       minHeight={100}
