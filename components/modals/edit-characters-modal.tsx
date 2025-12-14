@@ -25,7 +25,12 @@ type EditCharactersModalProps = {
   isOpen: boolean;
   onClose: () => void;
   selectedCharacter?: DisplayCharacter | null;
-  onRegenerateImage?: (name: string, description: string, selectedCharacter?: DisplayCharacter | null, pollingResponse?: PollingResponse | null) => void;
+  onRegenerateImage?: (
+    name: string,
+    description: string,
+    selectedCharacter?: DisplayCharacter | null,
+    pollingResponse?: PollingResponse | null
+  ) => void;
   pollingResponse?: PollingResponse | null;
 };
 
@@ -104,7 +109,12 @@ export default function EditCharactersModal({
 
       // Call the onRegenerateImage callback with modified response
       // The parent component will handle the refetch/polling logic
-      onRegenerateImage?.(name.trim(), description.trim(), selectedCharacter || null, modifiedResponse);
+      onRegenerateImage?.(
+        name.trim(),
+        description.trim(),
+        selectedCharacter || null,
+        modifiedResponse
+      );
       onClose();
     } catch (err) {
       console.error("Error regenerating character:", err);
@@ -121,11 +131,7 @@ export default function EditCharactersModal({
 
   // Get the best available image (prefer close_up, then image, then front_view)
   const imageUrl = selectedCharacter
-    ? getImageUrl(
-        selectedCharacter.close_up ||
-          selectedCharacter.image ||
-          selectedCharacter.front_view
-      )
+    ? getImageUrl(selectedCharacter.front_view)
     : null;
 
   if (!isOpen) return null;
@@ -136,7 +142,7 @@ export default function EditCharactersModal({
       onClick={onClose}
     >
       <div
-        className="relative w-full max-w-5xl mx-4 bg-[#141414] rounded-xl shadow-lg p-6 max-h-[90vh] overflow-y-auto"
+        className="relative w-full max-w-5xl mx-4 bg-[#141414] rounded-xl shadow-lg p-6 px-8 max-h-[90vh] overflow-y-auto"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Close Button */}
@@ -158,7 +164,7 @@ export default function EditCharactersModal({
         {/* Content */}
         <div className="flex gap-6 justify-between">
           {/* Left Section - Form */}
-          <div className="w-[50%] space-y-6">
+          <div className="w-[55%] space-y-6">
             {/* Name Input */}
             <div>
               <label
@@ -216,28 +222,25 @@ export default function EditCharactersModal({
           </div>
 
           {/* Right Section - Image Display */}
-          <div className="w-[40%]">
+          <div className="w-[35%]">
             <div
               className={cn(
-                "relative  shrink-0 max-h-[70vh] rounded-xl",
+                "relative  shrink-0 max-h-[70vh] rounded-xl flex justify-end",
                 (!imageUrl || imageLoading) &&
                   "bg-fm-surface-tertiary animate-pulse"
               )}
             >
               {imageUrl ? (
-              
-                  <Image
-                    src={imageUrl}
-                    alt={selectedCharacter?.name || "Character"}
-                    width={400}
-                    height={700}
-                    className="object-contain rounded-xl max-w-90"
-                    unoptimized
-                    onLoad={() => setImageLoading(false)}
-                    onError={() => setImageLoading(false)}
-                  />
-                
-              
+                <Image
+                  src={imageUrl}
+                  alt={selectedCharacter?.name || "Character"}
+                  width={310}
+                  height={500}
+                  className="object-contain rounded-xl max-h-[600px]!"
+                  unoptimized
+                  onLoad={() => setImageLoading(false)}
+                  onError={() => setImageLoading(false)}
+                />
               ) : (
                 <div className="w-full h-full flex items-center justify-center">
                   <p className="text-gray-500 text-sm">No image available</p>
@@ -250,4 +253,3 @@ export default function EditCharactersModal({
     </div>
   );
 }
-
