@@ -393,8 +393,7 @@ export default function ShotVideos({
                             mode: "delete",
                             orchestrator_task_id:
                               selectedShotData.orchestrator_task_id,
-                            orchestrator_result_task_id:
-                              selectedShotData.id,
+                            orchestrator_result_task_id: selectedShotData.id,
                           });
                           onRefetch?.();
                         }}
@@ -547,17 +546,19 @@ export default function ShotVideos({
       </div>
 
       {/* Edit Video Modal */}
-      <EditVideoModal
-        isOpen={isEditModalOpen}
-        onClose={() => setIsEditModalOpen(false)}
-        shotData={selectedShotData}
-        shotNumber={selectedShot + 1}
-        onRefetch={onRefetch}
-        onSave={(data) => {
-          // TODO: Handle save if needed
-          console.log("Save video data:", data);
-        }}
-      />
+      {isEditModalOpen && (
+        <EditVideoModal
+          isOpen={isEditModalOpen}
+          onClose={() => setIsEditModalOpen(false)}
+          shotData={selectedShotData}
+          shotNumber={selectedShot + 1}
+          onRefetch={onRefetch}
+          onSave={(data) => {
+            // TODO: Handle save if needed
+            console.log("Save video data:", data);
+          }}
+        />
+      )}
     </div>
   );
 }

@@ -538,17 +538,19 @@ export default function ShotImages({
       </div>
 
       {/* Edit Image Modal */}
-      <EditImageModal
-        isOpen={isEditModalOpen}
-        onClose={() => setIsEditModalOpen(false)}
-        shotData={selectedShotData}
-        shotNumber={selectedShot + 1}
-        onRefetch={onRefetch}
-        onSave={(data) => {
-          // TODO: Implement save functionality
-          console.log("Save image data:", data);
-        }}
-      />
+      {isEditModalOpen && (
+        <EditImageModal
+          isOpen={isEditModalOpen}
+          onClose={() => setIsEditModalOpen(false)}
+          shotData={selectedShotData}
+          shotNumber={selectedShot + 1}
+          onRefetch={onRefetch}
+          onSave={(data) => {
+            // TODO: Implement save functionality
+            console.log("Save image data:", data);
+          }}
+        />
+      )}
     </div>
   );
 }
