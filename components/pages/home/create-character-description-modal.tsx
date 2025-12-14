@@ -51,6 +51,7 @@ type DisplayCharacter = {
   front_view: string | null;
   back_view: string | null;
   close_up: string | null;
+  side_view: string | null;
   image: string | null;
 };
 
@@ -71,6 +72,7 @@ type GenerateImagesItem = {
   image: string | null;
   close_up: string | null;
   back_view: string | null;
+  side_view: string | null;
   [key: string]: unknown;
 };
 
@@ -108,7 +110,8 @@ export default function CreateCharacterDescriptionModal({
   const [isPollingImages, setIsPollingImages] = useState(false);
   const [isPollingAltViews, setIsPollingAltViews] = useState(false);
   const [isAddCharacterModalOpen, setIsAddCharacterModalOpen] = useState(false);
-  const [isEditCharacterModalOpen, setIsEditCharacterModalOpen] = useState(false);
+  const [isEditCharacterModalOpen, setIsEditCharacterModalOpen] =
+    useState(false);
   const [taskId, setTaskId] = useState<number | null>(null);
   const [taskStatus, setTaskStatus] = useState<string>("");
   const [humanStatus, setHumanStatus] = useState<string>("");
@@ -142,14 +145,15 @@ export default function CreateCharacterDescriptionModal({
   );
   const imagePollingStartTimeRef = useRef<number | null>(null);
   const altViewsPollingStartTimeRef = useRef<number | null>(null);
-  const startGenerateImagesRef = useRef<((taskId: number) => void) | null>(null);
+  const startGenerateImagesRef = useRef<((taskId: number) => void) | null>(
+    null
+  );
   const { poll, stopPolling } = usePolling();
   const {
     getCharacterSheet,
     loading: isGettingSheet,
     error: sheetError,
   } = useGetCharacterSheet();
-  
 
   // Track current taskId for cleanup
   const currentTaskIdRef = useRef<number | null>(null);
@@ -195,6 +199,7 @@ export default function CreateCharacterDescriptionModal({
             ...existing,
             close_up: item.close_up || existing.close_up,
             back_view: item.back_view || existing.back_view,
+            side_view: item.side_view || existing.side_view,
           });
         }
       });
@@ -207,6 +212,7 @@ export default function CreateCharacterDescriptionModal({
             ...existing,
             close_up: item.close_up || existing.close_up,
             back_view: item.back_view || existing.back_view,
+            side_view: item.side_view || existing.side_view,
           });
         }
       });
@@ -217,6 +223,7 @@ export default function CreateCharacterDescriptionModal({
       ...(pollingResponse.characters || []),
       ...(pollingResponse.creatures || []),
     ];
+    console.log({ allChars });
 
     allChars.forEach((char) => {
       const item = allItems.get(char.name);
@@ -225,6 +232,7 @@ export default function CreateCharacterDescriptionModal({
       // Access properties with type assertion since they might exist on the object
       const charCloseUp = (char as CharacterOrCreature).close_up;
       const charBackView = (char as CharacterOrCreature).back_view;
+      const charSideView = (char as CharacterOrCreature).side_view;
 
       characters.push({
         id: char.id,
@@ -237,6 +245,7 @@ export default function CreateCharacterDescriptionModal({
         front_view: char.image || item?.image || null, // Use char.image as front_view
         back_view: charBackView || item?.back_view || null, // Check char.back_view first
         close_up: charCloseUp || item?.close_up || null, // Check char.close_up first
+        side_view: charSideView || item?.side_view || null, // Check char.side_view first
       });
     });
 
@@ -265,7 +274,7 @@ export default function CreateCharacterDescriptionModal({
   useEffect(() => {
     if (
       displayCharacters.length > 0 &&
-      !selectedCharacter 
+      !selectedCharacter
       // !hasInitializedCharacterRef.current
     ) {
       hasInitializedCharacterRef.current = true;
@@ -477,8 +486,7 @@ export default function CreateCharacterDescriptionModal({
 
             // Check timeout (10 minutes)
             if (imagePollingStartTimeRef.current) {
-              const elapsed =
-                Date.now() - imagePollingStartTimeRef.current;
+              const elapsed = Date.now() - imagePollingStartTimeRef.current;
               if (elapsed > 5 * 60 * 1000) {
                 // 10 minutes = 600000ms
                 stopPolling(pollingKey);
@@ -601,8 +609,7 @@ export default function CreateCharacterDescriptionModal({
 
             // Check timeout (10 minutes)
             if (altViewsPollingStartTimeRef.current) {
-              const elapsed =
-                Date.now() - altViewsPollingStartTimeRef.current;
+              const elapsed = Date.now() - altViewsPollingStartTimeRef.current;
               if (elapsed > 5 * 60 * 1000) {
                 // 10 minutes = 600000ms
                 stopPolling(pollingKey);
@@ -654,7 +661,10 @@ export default function CreateCharacterDescriptionModal({
             );
 
             // Stop polling if all characters and creatures have all required alt-views
-            if (!hasCharactersWithNullAltViews && !hasCreaturesWithNullAltViews) {
+            if (
+              !hasCharactersWithNullAltViews &&
+              !hasCreaturesWithNullAltViews
+            ) {
               stopPolling(pollingKey);
               setIsPollingAltViews(false);
               // All alt-views are generated, process is complete
@@ -736,6 +746,10 @@ export default function CreateCharacterDescriptionModal({
   }, [isOpen, selectedStyle, poll, stopPolling]);
 
   if (!isOpen) return null;
+
+  console.log(displayCharacters);
+  console.log({ selectedCharacter });
+  console.log({ displayCharacters });
 
   return (
     <div
@@ -906,7 +920,9 @@ export default function CreateCharacterDescriptionModal({
                                   <Trash />
                                 </button>
                                 <button
-                                  onClick={() => setIsEditCharacterModalOpen(true)}
+                                  onClick={() =>
+                                    setIsEditCharacterModalOpen(true)
+                                  }
                                   className="p-2 rounded-lg hover:bg-[#333333] transition-colors"
                                   aria-label="Edit character"
                                 >
@@ -947,14 +963,35 @@ export default function CreateCharacterDescriptionModal({
                                     unoptimized
                                   />
                                 </div>
+                              ) : selectedCharacter.side_view ? (
+                                <div className="flex-1 h-full max-h-full relative rounded-lg overflow-hidden bg-gray-200">
+                                  <div className="absolute top-2 left-2 z-10 px-2 py-1 rounded-md bg-black/70 backdrop-blur-sm text-xs font-semibold text-white">
+                                    Side View
+                                  </div>
+                                  <Image
+                                    src={getImageUrl(
+                                      selectedCharacter.side_view
+                                    )}
+                                    alt={`${selectedCharacter.name} - side view`}
+                                    fill
+                                    className="object-cover"
+                                    sizes="(max-width: 400px) 100vw, 400px"
+                                    priority
+                                    unoptimized
+                                  />
+                                </div>
                               ) : (
                                 <div className="flex-1 h-full max-h-full relative rounded-lg overflow-hidden bg-gray-200">
                                   <div className="absolute top-2 left-2 z-10 px-2 py-1 rounded-md bg-black/70 backdrop-blur-sm text-xs font-semibold text-white">
-                                    Close Up
+                                    {selectedCharacter.category === "creature"
+                                      ? "Side View"
+                                      : "Close Up"}
                                   </div>
                                   <div className="w-full h-full bg-gray-300 flex items-center justify-center">
                                     <p className="text-gray-500 text-sm">
-                                      No close up available
+                                      {selectedCharacter.category === "creature"
+                                        ? "No side view available"
+                                        : " No close up available"}
                                     </p>
                                   </div>
                                 </div>
@@ -1106,9 +1143,18 @@ export default function CreateCharacterDescriptionModal({
         onClose={() => setIsAddCharacterModalOpen(false)}
         selectedCharacter={selectedCharacter}
         pollingResponse={pollingResponse}
-        onGenerate={(name, description, selectedCharacter, updatedPollingResponse) => {
+        onGenerate={(
+          name,
+          description,
+          selectedCharacter,
+          updatedPollingResponse
+        ) => {
           // After successful sync-characters, start the refetch sequence
-          if (updatedPollingResponse && taskId && startGenerateImagesRef.current) {
+          if (
+            updatedPollingResponse &&
+            taskId &&
+            startGenerateImagesRef.current
+          ) {
             // Start polling list-characters API (skip extract API call)
             const pollingKey = `character-refetch-${taskId}`;
 
@@ -1159,9 +1205,18 @@ export default function CreateCharacterDescriptionModal({
         onClose={() => setIsEditCharacterModalOpen(false)}
         selectedCharacter={selectedCharacter}
         pollingResponse={pollingResponse}
-        onRegenerateImage={(name, description, _selectedCharacter, updatedPollingResponse) => {
+        onRegenerateImage={(
+          name,
+          description,
+          _selectedCharacter,
+          updatedPollingResponse
+        ) => {
           // After successful sync-characters and regenerate-images, start the refetch sequence
-          if (updatedPollingResponse && taskId && startGenerateImagesRef.current) {
+          if (
+            updatedPollingResponse &&
+            taskId &&
+            startGenerateImagesRef.current
+          ) {
             // Start polling list-characters API (skip extract API call)
             const pollingKey = `character-regenerate-${taskId}`;
 

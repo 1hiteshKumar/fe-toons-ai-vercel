@@ -18,6 +18,7 @@ type DisplayCharacter = {
   front_view: string | null;
   back_view: string | null;
   close_up: string | null;
+  side_view: string | null;
   image: string | null;
 };
 
