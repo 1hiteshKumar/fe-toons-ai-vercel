@@ -546,7 +546,6 @@ export default function EditImageModal({
                 Location and Time *
               </label>
               <Input
-                disabled
                 type="text"
                 value={locationTime}
                 onChange={(e) => setLocationTime(e.target.value)}
@@ -555,6 +554,7 @@ export default function EditImageModal({
                 classes={{
                   input: "bg-fm-neutral-0! text-fm-primary rounded-lg border-0",
                 }}
+                placeholder="Enter location and time..."
               />
             </div>
 
@@ -816,7 +816,7 @@ export default function EditImageModal({
             </div>
 
             {/* DIALOGUE Section */}
-            <div className="space-y-4">
+            {/* <div className="space-y-4">
               <h3 className="text-fm-lg font-semibold text-fm-primary font-fm-poppins">
                 DIALOGUE
               </h3>
@@ -901,10 +901,10 @@ export default function EditImageModal({
                   ADD NEW DIALOGUE
                 </button>
               </div>
-            </div>
+            </div> */}
 
             {/* NARRATION Section */}
-            <div className="space-y-3">
+            {/* <div className="space-y-3">
               <label className="text-fm-sm font-medium text-[#FFFFFFCC] font-fm-poppins">
                 Narration
               </label>
@@ -922,7 +922,7 @@ export default function EditImageModal({
                 }}
                 placeholder="Enter narration..."
               />
-            </div>
+            </div> */}
 
             {/* EMOTION Section */}
             <div className="space-y-4">
@@ -1025,7 +1025,7 @@ export default function EditImageModal({
             </div>
 
             {/* THOUGHT Section */}
-            <div className="space-y-4">
+            {/* <div className="space-y-4">
               <h3 className="text-fm-lg font-semibold text-fm-primary font-fm-poppins">
                 THOUGHT
               </h3>
@@ -1110,7 +1110,7 @@ export default function EditImageModal({
                   ADD NEW THOUGHT
                 </button>
               </div>
-            </div>
+            </div> */}
           </div>
 
           {/* Right Side - Non-scrollable Image Preview */}

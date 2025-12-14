@@ -476,17 +476,24 @@ export default function EditVideoModal({
             {/* Video Duration */}
             <div className="space-y-3">
               <label className="text-fm-sm font-medium text-[#FFFFFFCC] font-fm-poppins">
-                Video Duration *
+                Video Duration (seconds) *
               </label>
               <Input
-                disabled
-                value={videoDuration + " s"}
-                onChange={(e) => setVideoDuration(Number(e.target.value))}
+                type="number"
+                value={videoDuration}
+                onChange={(e) => {
+                  const value = Number(e.target.value);
+                  if (!isNaN(value) && value > 0) {
+                    setVideoDuration(value);
+                  }
+                }}
                 decoration="outline"
                 className="bg-fm-neutral-0! rounded-lg"
                 classes={{
                   input: "bg-fm-neutral-0! text-fm-primary rounded-lg border-0",
                 }}
+                placeholder="Enter duration in seconds..."
+                min={1}
               />
             </div>
 
@@ -583,97 +590,6 @@ export default function EditVideoModal({
                     />
                   </div>
 
-                  {/* THOUGHT */}
-                  <div className="space-y-4">
-                    <h3 className="text-fm-lg font-semibold text-fm-primary font-fm-poppins">
-                      THOUGHT
-                    </h3>
-
-                    {(cut.audio?.thoughts || []).map((thought, thoughtIndex) => (
-                      <div
-                        key={thoughtIndex}
-                        className="bg-[#1a1a1a] rounded-xl p-4 space-y-4 border border-fm-divider-primary"
-                      >
-                        <div className="flex items-center justify-between">
-                          <h4 className="text-fm-md font-semibold text-fm-primary font-fm-poppins">
-                            Thought {thoughtIndex + 1}
-                          </h4>
-                          {/* <button
-                            onClick={() => handleRemoveThought(index, thoughtIndex)}
-                            className="p-1 hover:bg-fm-surface-secondary rounded transition-colors"
-                            aria-label={`Remove thought ${thoughtIndex + 1}`}
-                          >
-                            <Trash />
-                          </button> */}
-                        </div>
-
-                        <div className="space-y-3">
-                          <label className="text-fm-sm font-medium text-[#FFFFFFCC] font-fm-poppins">
-                            Character Name
-                          </label>
-                          <Input
-                            type="text"
-                            value={thought.characterName || ""}
-                            onChange={(e) =>
-                              handleThoughtChange(
-                                index,
-                                thoughtIndex,
-                                "characterName",
-                                e.target.value
-                              )
-                            }
-                            decoration="outline"
-                            className="bg-fm-neutral-0! rounded-lg"
-                            classes={{
-                              input:
-                                "bg-fm-neutral-0! text-fm-primary rounded-lg border-0",
-                            }}
-                            placeholder="Character Name"
-                          />
-                        </div>
-
-                        <div className="space-y-3">
-                          <label className="text-fm-sm font-medium text-[#FFFFFFCC] font-fm-poppins">
-                            Thought Text
-                          </label>
-                          <TextArea
-                            value={thought.thoughtText || ""}
-                            onChange={(e) =>
-                              handleThoughtChange(
-                                index,
-                                thoughtIndex,
-                                "thoughtText",
-                                e.target.value
-                              )
-                            }
-                            decoration="filled"
-                            autoGrow
-                            minHeight={100}
-                            maxHeight={200}
-                            className="bg-fm-neutral-0! rounded-lg border-0"
-                            classes={{
-                              textarea:
-                                "bg-fm-neutral-0! text-fm-primary resize-none rounded-lg border-0",
-                            }}
-                            placeholder="Enter thought text..."
-                          />
-                        </div>
-                      </div>
-                    ))}
-
-                    <div className="flex justify-center">
-                      <button
-                        onClick={() => handleAddThought(index)}
-                        className="flex items-center gap-2 bg-black rounded-lg px-4 py-2 font-fm-poppins text-[#833AFF] uppercase text-sm font-medium hover:opacity-80 transition-opacity"
-                      >
-                        <div className="w-6 h-6 rounded-full bg-[#833AFF] flex items-center justify-center">
-                          <PlusIcon className="text-white w-3 h-3" />
-                        </div>
-                        ADD NEW THOUGHT
-                      </button>
-                    </div>
-                  </div>
-
                   {/* DIALOGUE */}
                   <div className="space-y-4">
                     <h3 className="text-fm-lg font-semibold text-fm-primary font-fm-poppins">
@@ -761,6 +677,97 @@ export default function EditVideoModal({
                           <PlusIcon className="text-white w-3 h-3" />
                         </div>
                         ADD NEW DIALOGUE
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* THOUGHT */}
+                  <div className="space-y-4">
+                    <h3 className="text-fm-lg font-semibold text-fm-primary font-fm-poppins">
+                      THOUGHT
+                    </h3>
+
+                    {(cut.audio?.thoughts || []).map((thought, thoughtIndex) => (
+                      <div
+                        key={thoughtIndex}
+                        className="bg-[#1a1a1a] rounded-xl p-4 space-y-4 border border-fm-divider-primary"
+                      >
+                        <div className="flex items-center justify-between">
+                          <h4 className="text-fm-md font-semibold text-fm-primary font-fm-poppins">
+                            Thought {thoughtIndex + 1}
+                          </h4>
+                          {/* <button
+                            onClick={() => handleRemoveThought(index, thoughtIndex)}
+                            className="p-1 hover:bg-fm-surface-secondary rounded transition-colors"
+                            aria-label={`Remove thought ${thoughtIndex + 1}`}
+                          >
+                            <Trash />
+                          </button> */}
+                        </div>
+
+                        <div className="space-y-3">
+                          <label className="text-fm-sm font-medium text-[#FFFFFFCC] font-fm-poppins">
+                            Character Name
+                          </label>
+                          <Input
+                            type="text"
+                            value={thought.characterName || ""}
+                            onChange={(e) =>
+                              handleThoughtChange(
+                                index,
+                                thoughtIndex,
+                                "characterName",
+                                e.target.value
+                              )
+                            }
+                            decoration="outline"
+                            className="bg-fm-neutral-0! rounded-lg"
+                            classes={{
+                              input:
+                                "bg-fm-neutral-0! text-fm-primary rounded-lg border-0",
+                            }}
+                            placeholder="Character Name"
+                          />
+                        </div>
+
+                        <div className="space-y-3">
+                          <label className="text-fm-sm font-medium text-[#FFFFFFCC] font-fm-poppins">
+                            Thought Text
+                          </label>
+                          <TextArea
+                            value={thought.thoughtText || ""}
+                            onChange={(e) =>
+                              handleThoughtChange(
+                                index,
+                                thoughtIndex,
+                                "thoughtText",
+                                e.target.value
+                              )
+                            }
+                            decoration="filled"
+                            autoGrow
+                            minHeight={100}
+                            maxHeight={200}
+                            className="bg-fm-neutral-0! rounded-lg border-0"
+                            classes={{
+                              textarea:
+                                "bg-fm-neutral-0! text-fm-primary resize-none rounded-lg border-0",
+                            }}
+                            placeholder="Enter thought text..."
+                          />
+                        </div>
+                      </div>
+                    ))}
+
+                    <div className="flex justify-center">
+                      <button
+                        onClick={() => handleAddThought(index)}
+                        className="flex items-center gap-2 bg-black rounded-lg px-4 py-2 font-fm-poppins text-[#833AFF] uppercase text-sm font-medium hover:opacity-80 transition-opacity"
+                      >
+                        <div className="w-6 h-6 rounded-full bg-[#833AFF] flex items-center justify-center">
+                          <PlusIcon className="text-white w-3 h-3" />
+                        </div>
+                        ADD NEW THOUGHT
                       </button>
                     </div>
                   </div>
