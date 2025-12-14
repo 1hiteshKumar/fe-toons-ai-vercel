@@ -34,13 +34,13 @@ export type Story = {
 };
 
 export default function useUserUploads() {
-  const [scriptText, setScriptText] = useState(PROMPT);
+  const [scriptText, setScriptText] = useState("");
   const [csvUrl, setCSVurl] = useState<string>();
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [stories, setStories] = useState<Story[]>([]);
   const [loading, setLoading] = useState(false);
   const [styleId, setStyleId] = useState<number | null>(87);
-  const [showName, setShowName] = useState("TDMB");
+  const [showName, setShowName] = useState("");
 
   const { poll, stopPolling } = usePolling();
 

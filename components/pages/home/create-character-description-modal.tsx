@@ -265,12 +265,30 @@ export default function CreateCharacterDescriptionModal({
   useEffect(() => {
     if (
       displayCharacters.length > 0 &&
-      !selectedCharacter &&
-      !hasInitializedCharacterRef.current
+      !selectedCharacter 
+      // !hasInitializedCharacterRef.current
     ) {
       hasInitializedCharacterRef.current = true;
       // eslint-disable-next-line react-hooks/exhaustive-deps
       setSelectedCharacter(displayCharacters[0]);
+    }
+  }, [displayCharacters, selectedCharacter]);
+
+  // Update selectedCharacter when displayCharacters updates (e.g., when close_up changes)
+  useEffect(() => {
+    if (selectedCharacter && displayCharacters.length > 0) {
+      const updatedCharacter = displayCharacters.find(
+        (char) => char.id === selectedCharacter.id
+      );
+      if (
+        updatedCharacter &&
+        (updatedCharacter.close_up !== selectedCharacter.close_up ||
+          updatedCharacter.back_view !== selectedCharacter.back_view ||
+          updatedCharacter.image !== selectedCharacter.image ||
+          updatedCharacter.front_view !== selectedCharacter.front_view)
+      ) {
+        setSelectedCharacter(updatedCharacter);
+      }
     }
   }, [displayCharacters, selectedCharacter]);
 
@@ -371,7 +389,7 @@ export default function CreateCharacterDescriptionModal({
                 }
               }
 
-              setPollingResponse(data);
+              setPollingResponse(data ? { ...data } : null);
               setTaskStatus(data.task_status || "");
 
               // Check if we should stop polling based on task_status
@@ -480,7 +498,7 @@ export default function CreateCharacterDescriptionModal({
               return;
             }
 
-            setPollingResponse(data);
+            setPollingResponse(data ? { ...data } : null);
             setTaskStatus(data.task_status || "");
 
             // Check if all characters and creatures have non-null images
@@ -604,7 +622,7 @@ export default function CreateCharacterDescriptionModal({
               return;
             }
 
-            setPollingResponse(data);
+            setPollingResponse(data ? { ...data } : null);
             setTaskStatus(data.task_status || "");
 
             // Check if all characters have non-null image, close_up, and back_view
@@ -725,7 +743,7 @@ export default function CreateCharacterDescriptionModal({
       onClick={onClose}
     >
       <div
-        className="relative w-full max-w-6xl mx-4 bg-[#1A1A1A] rounded-xl shadow-lg p-6 max-h-[90vh] overflow-y-auto"
+        className="relative w-full max-w-7xl mx-4 bg-[#1A1A1A] rounded-xl shadow-lg p-6 max-h-[90vh] overflow-y-auto"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Close Button */}
@@ -1114,7 +1132,7 @@ export default function CreateCharacterDescriptionModal({
                   return;
                 }
 
-                setPollingResponse(data);
+                setPollingResponse(data ? { ...data } : null);
                 setTaskStatus(data.task_status || "");
 
                 // Check if we should stop polling based on task_status
@@ -1167,7 +1185,7 @@ export default function CreateCharacterDescriptionModal({
                   return;
                 }
 
-                setPollingResponse(data);
+                setPollingResponse(data ? { ...data } : null);
                 setTaskStatus(data.task_status || "");
 
                 // Check if we should stop polling based on task_status
