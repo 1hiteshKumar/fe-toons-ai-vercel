@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { CrossCircleIcon } from "@/aural/icons/cross-circle-icon";
 import Input from "@/aural/components/ui/input";
 import TextArea from "@/aural/components/ui/textarea";
@@ -46,15 +46,30 @@ export default function EditCharactersModal({
   const [description, setDescription] = useState("");
   const [imageLoading, setImageLoading] = useState(true);
   const [isRegenerating, setIsRegenerating] = useState(false);
+  const originalValuesRef = useRef<{ name: string; description: string }>({
+    name: "",
+    description: "",
+  });
 
   // Reset form when modal opens/closes or when selectedCharacter changes
   useEffect(() => {
     if (isOpen && selectedCharacter) {
-      setName(selectedCharacter.name || "");
-      setDescription(selectedCharacter.description || "");
+      const originalName = selectedCharacter.name || "";
+      const originalDescription = selectedCharacter.description || "";
+      setName(originalName);
+      setDescription(originalDescription);
+      originalValuesRef.current = {
+        name: originalName,
+        description: originalDescription,
+      };
       setImageLoading(true);
     }
   }, [isOpen, selectedCharacter]);
+
+  // Check if values have changed
+  const hasChanges =
+    name.trim() !== originalValuesRef.current.name.trim() ||
+    description.trim() !== originalValuesRef.current.description.trim();
 
   const handleRegenerateImage = async () => {
     if (!name.trim() || !pollingResponse || !selectedCharacter) {
@@ -214,7 +229,12 @@ export default function EditCharactersModal({
             <button
               onClick={handleRegenerateImage}
               className="w-full bg-[#833AFF] text-white border-none! disabled:opacity-50 disabled:cursor-not-allowed rounded-lg flex items-center justify-center gap-2 py-3.5 px-3"
-              disabled={!name.trim() || !pollingResponse || isRegenerating}
+              disabled={
+                !name.trim() ||
+                !pollingResponse ||
+                isRegenerating ||
+                !hasChanges
+              }
             >
               <span className="text-sm font-fm-poppins border-none">
                 {isRegenerating ? "Regenerating..." : "Regenerate Image"}
