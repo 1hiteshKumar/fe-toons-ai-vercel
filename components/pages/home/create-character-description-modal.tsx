@@ -88,6 +88,7 @@ type CreateCharacterDescriptionModalProps = {
   onClose: () => void;
   selectedStyle?: StyleOption | null;
   onSheetCreated?: (spreadsheetUrl: string, taskId: number) => void;
+  scriptText: string;
 };
 
 export default function CreateCharacterDescriptionModal({
@@ -95,6 +96,7 @@ export default function CreateCharacterDescriptionModal({
   onClose,
   selectedStyle,
   onSheetCreated,
+  scriptText,
 }: CreateCharacterDescriptionModalProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [isPolling, setIsPolling] = useState(false);
@@ -147,6 +149,7 @@ export default function CreateCharacterDescriptionModal({
     loading: isGettingSheet,
     error: sheetError,
   } = useGetCharacterSheet();
+  
 
   // Track current taskId for cleanup
   const currentTaskIdRef = useRef<number | null>(null);
@@ -306,7 +309,7 @@ export default function CreateCharacterDescriptionModal({
               "Content-Type": "application/json",
             },
             body: JSON.stringify({
-              text: selectedStyle.prompt,
+              text: scriptText,
               user_id: 7,
               style_id: "",
               e2e_style_id: selectedStyle.id.toString(),
@@ -318,8 +321,7 @@ export default function CreateCharacterDescriptionModal({
         )) as ExtractTaskResponse;
 
         if (apiResponse?.task_id) {
-          let receivedTaskId = apiResponse.task_id;
-          receivedTaskId = 229;
+          const receivedTaskId = apiResponse.task_id;
           setTaskId(receivedTaskId);
           currentTaskIdRef.current = receivedTaskId;
           // setIsLoading(false);
@@ -716,7 +718,7 @@ export default function CreateCharacterDescriptionModal({
   }, [isOpen, selectedStyle, poll, stopPolling]);
 
   if (!isOpen) return null;
-console.log({displayCharacters})
+
   return (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm"
@@ -1140,11 +1142,11 @@ console.log({displayCharacters})
         selectedCharacter={selectedCharacter}
         onRegenerateImage={(selectedCharacter) => {
           // TODO: Implement regenerate image functionality
-          console.log("Regenerate image:", { selectedCharacter });
+          
         }}
         onSave={(name, description, selectedCharacter) => {
           // TODO: Implement save character functionality
-          console.log("Save character:", { name, description, selectedCharacter });
+          
         }}
       />
     </div>

@@ -454,6 +454,7 @@ function UserUploadsContent() {
           setCharacterSheetUrl(spreadsheetUrl, taskId);
           setIsCreateCharacterModalOpen(false);
         }}
+        scriptText={scriptText}
       />
     </div>
   );
