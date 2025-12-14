@@ -8,6 +8,8 @@ import { convertGoogleDriveUrl } from "@/lib/helpers";
 import Loading from "@/components/loading";
 import Heading from "@/components/heading";
 import ArrowRightIcon from "@/aural/icons/arrow-right-icon";
+import { Pencil, PlusIcon, Trash } from "@/lib/icons";
+import AddCharactersModal from "@/components/modals/add-characters-modal";
 
 interface Character {
   name: string;
@@ -29,6 +31,10 @@ export default function Characters({
   );
 
   const [loading, setLoading] = useState(true);
+  const [isAddCharacterModalOpen, setIsAddCharacterModalOpen] = useState(false);
+  const [editingCharacter, setEditingCharacter] = useState<Character | null>(
+    null
+  );
   const params = useParams() as { id: string };
 
   useEffect(() => {
@@ -96,9 +102,16 @@ export default function Characters({
       <div className="flex gap-6 h-[calc(100vh-240px)]">
         {/* Left Sidebar - Character Thumbnails */}
         <div className="w-72 shrink-0 bg-fm-surface-secondary border-r border-fm-divider-primary p-4 flex flex-col h-full">
-          <h2 className="text-lg font-bold text-fm-primary mb-4 shrink-0">
-            Characters
-          </h2>
+          <div className="flex items-center justify-between mb-4 shrink-0">
+            <h2 className="text-lg font-bold text-fm-primary">Characters</h2>
+            <button
+             
+              className="text-[#AB79FF] font-bold transition-colors font-fm-poppins text-fm-lg flex items-center gap-1"
+            >
+              <PlusIcon />
+              ADD
+            </button>
+          </div>
           <div className="space-y-3 flex-1 overflow-y-auto min-h-0">
             {characters.map((character, index) => {
               const isSelected = selectedCharacter?.name === character.name;
@@ -171,9 +184,34 @@ export default function Characters({
               {/* Main Image Display - All 3 views at once */}
               <div className="flex-1 flex flex-col p-6 relative overflow-hidden min-h-0">
                 {/* Character Name at top left */}
-                <p className="text-2xl font-bold text-white mb-6 shrink-0">
-                  {selectedCharacter.name}
-                </p>
+               
+                <div className="flex items-center justify-between mb-4">
+                  <p className="text-2xl font-bold text-white font-fm-poppins">
+                    {selectedCharacter.name}
+                  </p>
+                  <div className="flex items-center gap-3">
+                    <button
+                      onClick={() => {
+                        // TODO: Implement delete functionality
+                      }}
+                      className="p-2 rounded-lg hover:bg-[#333333] transition-colors"
+                      aria-label="Delete character"
+                    >
+                      <Trash />
+                    </button>
+                    <button
+                  
+                      onClick={() => {
+                        setEditingCharacter(null);
+                        setIsAddCharacterModalOpen(true);
+                      }}
+                      className="p-2 rounded-lg hover:bg-[#333333] transition-colors"
+                      aria-label="Edit character"
+                    >
+                      <Pencil />
+                    </button>
+                  </div>
+                </div>
 
                 <div className="flex-1 w-full flex gap-4 items-center justify-center min-h-0">
                   {/* Close Up View */}
@@ -264,6 +302,42 @@ export default function Characters({
           )}
         </div>
       </div>
+
+      {/* Add Character Modal */}
+      <AddCharactersModal
+        isOpen={isAddCharacterModalOpen}
+        onClose={() => {
+          setIsAddCharacterModalOpen(false);
+          setEditingCharacter(null);
+        }}
+        mode={editingCharacter ? "edit" : "add"}
+        initialName={editingCharacter?.name || ""}
+        initialDescription="" // TODO: Add description field to Character interface if available
+        initialImageUrl={
+          editingCharacter
+            ? editingCharacter.close_up
+              ? getImageUrl(editingCharacter.close_up)
+              : editingCharacter.front_view
+              ? getImageUrl(editingCharacter.front_view)
+              : null
+            : null
+        }
+        onSave={(name, description) => {
+          // TODO: Implement save functionality
+          console.log("Save character:", {
+            name,
+            description,
+            character: editingCharacter,
+            mode: editingCharacter ? "edit" : "add",
+          });
+          setIsAddCharacterModalOpen(false);
+          setEditingCharacter(null);
+        }}
+        onRegenerateImage={() => {
+          // TODO: Implement regenerate image functionality
+          console.log("Regenerate image", { character: editingCharacter });
+        }}
+      />
     </div>
   );
 }

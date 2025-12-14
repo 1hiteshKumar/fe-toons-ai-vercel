@@ -49,11 +49,23 @@ function UserUploadsContent() {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isCreateCharacterModalOpen, setIsCreateCharacterModalOpen] =
     useState(false);
+  const [pendingStyleId, setPendingStyleId] = useState<number | null>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const triggerRef = useRef<HTMLButtonElement>(null);
   const optionRefs = useRef<(HTMLButtonElement | null)[]>([]);
 
   const selectedStyle = styleOptions.find((style) => style.id === styleId);
+
+  // Set the styleId when the pending style appears in the options after refetch
+  useEffect(() => {
+    if (pendingStyleId && styleOptions.length > 0) {
+      const styleExists = styleOptions.some((style) => style.id === pendingStyleId);
+      if (styleExists) {
+        setStyleId(pendingStyleId);
+        // setPendingStyleId(null);
+      }
+    }
+  }, [styleOptions, pendingStyleId, setStyleId]);
 
   // Handle keyboard navigation
   useEffect(() => {
@@ -214,6 +226,8 @@ function UserUploadsContent() {
                     Create Art Style
                   </button>
                 </div>
+
+                {/* dropdown */}
                 <button
                   ref={triggerRef}
                   type="button"
@@ -403,11 +417,13 @@ function UserUploadsContent() {
           await refetchStyles();
         }}
         selectedStyleName={selectedStyle?.name || ""}
+        selectedStylePrompt={selectedStyle?.prompt || ""}
         onSuccess={async (createdStyleId: number) => {
+          // Set pending style ID first
+          setPendingStyleId(createdStyleId);
           // Refetch styles to get the newly created style
           await refetchStyles();
-          // Set the newly created style as selected
-          setStyleId(createdStyleId);
+          // The useEffect will handle setting the styleId when the style appears in options
         }}
         userId={7}
         accessToken="c7eb5f9a-e958-4a47-85fe-0b2674a946eb"

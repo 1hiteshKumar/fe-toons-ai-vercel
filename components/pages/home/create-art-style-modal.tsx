@@ -13,6 +13,7 @@ type CreateArtStyleModalProps = {
   isOpen: boolean;
   onClose: () => void;
   selectedStyleName?: string;
+  selectedStylePrompt?: string;
   onSuccess?: (createdStyleId: number) => void;
   userId?: number;
   accessToken?: string;
@@ -22,6 +23,7 @@ export default function CreateArtStyleModal({
   isOpen,
   onClose,
   selectedStyleName = "",
+  selectedStylePrompt = "",
   onSuccess,
   userId = 7,
   accessToken = "c7eb5f9a-e958-4a47-85fe-0b2674a946eb",
@@ -31,12 +33,15 @@ export default function CreateArtStyleModal({
   const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Update style name when selectedStyleName changes
+  // Update style name and description when selectedStyleName or selectedStylePrompt changes
   useEffect(() => {
     if (selectedStyleName) {
       setStyleName(selectedStyleName);
     }
-  }, [selectedStyleName]);
+    if (selectedStylePrompt) {
+      setStyleDescription(selectedStylePrompt);
+    }
+  }, [selectedStyleName, selectedStylePrompt]);
 
   const onDrop = useCallback(
     (acceptedFiles: File[], rejectedFiles: unknown[]) => {
@@ -174,14 +179,23 @@ export default function CreateArtStyleModal({
     }
   };
 
-  // Reset form when modal closes
+  // Reset form when modal closes or opens
   useEffect(() => {
     if (!isOpen) {
-      setStyleName(selectedStyleName || "");
+      // Reset to empty when modal closes
+      setStyleName("");
       setStyleDescription("");
       setUploadedFiles([]);
+    } else {
+      // Pre-fill with selected style data when modal opens
+      if (selectedStyleName) {
+        setStyleName(selectedStyleName);
+      }
+      if (selectedStylePrompt) {
+        setStyleDescription(selectedStylePrompt);
+      }
     }
-  }, [isOpen, selectedStyleName]);
+  }, [isOpen, selectedStyleName, selectedStylePrompt]);
 
   if (!isOpen) return null;
 

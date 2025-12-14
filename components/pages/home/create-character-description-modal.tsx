@@ -11,6 +11,7 @@ import { cn } from "@/aural/lib/utils";
 import { convertGoogleDriveUrl } from "@/lib/helpers";
 import { toast } from "sonner";
 import { Pencil, PlusIcon, Trash } from "@/lib/icons";
+const DEFAULT_ERROR_MESSAGE = "Something went wrong. Please try again.";
 
 type StyleOption = {
   id: number;
@@ -32,6 +33,7 @@ type CharacterOrCreature = {
   image: string | null;
   close_up?: string | null;
   back_view?: string | null;
+  side_view?: string | null;
   character_description?: {
     description?: string;
     [key: string]: unknown;
@@ -99,6 +101,8 @@ export default function CreateCharacterDescriptionModal({
   const [isPollingHumanAltViews, setIsPollingHumanAltViews] = useState(false);
   const [isPollingCreatureAltViews, setIsPollingCreatureAltViews] =
     useState(false);
+  const [isPollingImages, setIsPollingImages] = useState(false);
+  const [isPollingAltViews, setIsPollingAltViews] = useState(false);
   const [taskId, setTaskId] = useState<number | null>(null);
   const [taskStatus, setTaskStatus] = useState<string>("");
   const [humanStatus, setHumanStatus] = useState<string>("");
@@ -130,6 +134,8 @@ export default function CreateCharacterDescriptionModal({
   const creatureAltViewsPollingIntervalRef = useRef<NodeJS.Timeout | null>(
     null
   );
+  const imagePollingStartTimeRef = useRef<number | null>(null);
+  const altViewsPollingStartTimeRef = useRef<number | null>(null);
   const { poll, stopPolling } = usePolling();
   const {
     getCharacterSheet,
@@ -273,7 +279,7 @@ export default function CreateCharacterDescriptionModal({
 
     const makeApiCall = async () => {
       if (!selectedStyle.prompt) {
-        setError(new Error("Selected style does not have a prompt"));
+        setError(new Error(DEFAULT_ERROR_MESSAGE));
         return;
       }
 
@@ -310,7 +316,7 @@ export default function CreateCharacterDescriptionModal({
           const receivedTaskId = apiResponse.task_id;
           setTaskId(receivedTaskId);
           currentTaskIdRef.current = receivedTaskId;
-          setIsLoading(false);
+          // setIsLoading(false);
           setIsPolling(true);
           pollingStartTimeRef.current = Date.now();
 
@@ -335,7 +341,7 @@ export default function CreateCharacterDescriptionModal({
               if (data.task_status === "failed") {
                 stopPolling(pollingKey);
                 setIsPolling(false);
-                const errorMessage = data.error || "Task failed";
+                const errorMessage = data.error || DEFAULT_ERROR_MESSAGE;
                 setError(new Error(errorMessage));
                 toast.error(errorMessage);
                 // Close modal after a short delay
@@ -348,15 +354,11 @@ export default function CreateCharacterDescriptionModal({
               // Check if 10 minutes have passed
               if (pollingStartTimeRef.current) {
                 const elapsed = Date.now() - pollingStartTimeRef.current;
-                if (elapsed > 10 * 60 * 1000) {
+                if (elapsed > 5 * 60 * 1000) {
                   // 10 minutes = 600000ms
                   stopPolling(pollingKey);
                   setIsPolling(false);
-                  setError(
-                    new Error(
-                      "Polling timeout: Task took longer than 10 minutes"
-                    )
-                  );
+                  setError(new Error(DEFAULT_ERROR_MESSAGE));
                   return;
                 }
               }
@@ -364,67 +366,35 @@ export default function CreateCharacterDescriptionModal({
               setPollingResponse(data);
               setTaskStatus(data.task_status || "");
 
-              // Check if we should stop polling
-              // Stop when: we have characters/creatures entries AND all have non-null images
-              const characters = Array.isArray(data.characters)
-                ? data.characters
-                : [];
-              const creatures = Array.isArray(data.creatures)
-                ? data.creatures
-                : [];
+              // Check if we should stop polling based on task_status
+              // Continue polling if task_status is "image_pending"
+              // Stop polling when task_status is not "image_pending" (and not "failed" which is already handled above)
+              if (data.task_status !== "extracting") {
+                stopPolling(pollingKey);
+                setIsPolling(false);
 
-              // Check if we have any entries
-              const hasEntries = characters.length > 0 || creatures.length > 0;
-
-              if (hasEntries) {
-                // Check if all characters have images
-                const allCharactersHaveImages =
-                  characters.length === 0 ||
-                  characters.every(
-                    (char: CharacterOrCreature) =>
-                      char.image !== null && char.image !== undefined
-                  );
-
-                // Check if all creatures have images
-                const allCreaturesHaveImages =
-                  creatures.length === 0 ||
-                  creatures.every(
-                    (creature: CharacterOrCreature) =>
-                      creature.image !== null && creature.image !== undefined
-                  );
-
-                // Stop polling if all characters and creatures have images
-                if (allCharactersHaveImages && allCreaturesHaveImages) {
-                  stopPolling(pollingKey);
-                  setIsPolling(false);
-
-                  // After first polling completes, start generating images for human and creature
-                  startGenerateImages(receivedTaskId);
-                }
+                // After polling completes, start generating images for human and creature
+                startGenerateImages(receivedTaskId);
               }
-              // Continue polling if no entries yet or if any image is null
+              // Continue polling if task_status is "image_pending"
             },
             failData: null,
           });
         } else {
-          setError(new Error("No task_id received from API"));
+          setError(new Error(DEFAULT_ERROR_MESSAGE));
           setIsLoading(false);
         }
       } catch (err) {
         console.error("Error creating character description sheet:", err);
-        setError(
-          err instanceof Error
-            ? err
-            : new Error("Failed to create character description sheet")
-        );
+        setError(new Error(DEFAULT_ERROR_MESSAGE));
         setIsLoading(false);
       }
     };
 
     const startGenerateImages = async (taskId: number) => {
       try {
-        // Make API call for human
-        const humanResponse = (await baseFetch(
+        // Make API call for human - fire and forget
+        baseFetch(
           "/api/workers/character-context/generate-images/",
           {
             method: "POST",
@@ -437,110 +407,12 @@ export default function CreateCharacterDescriptionModal({
             }),
           },
           "https://api.blaze.pockettoons.com"
-        )) as GenerateImagesResponse;
+        ).catch((err) => {
+          console.error("Error calling generate-images for human:", err);
+        });
 
-        if (humanResponse?.task_id) {
-          setIsPollingHuman(true);
-          humanPollingStartTimeRef.current = Date.now();
-
-          // Custom polling for human images (POST request with body)
-          const pollHumanImages = async () => {
-            try {
-              // Check timeout (10 minutes)
-              if (humanPollingStartTimeRef.current) {
-                const elapsed = Date.now() - humanPollingStartTimeRef.current;
-                if (elapsed > 10 * 60 * 1000) {
-                  if (humanPollingIntervalRef.current) {
-                    clearInterval(humanPollingIntervalRef.current);
-                    humanPollingIntervalRef.current = null;
-                  }
-                  setIsPollingHuman(false);
-                  setError(
-                    new Error(
-                      "Human image generation timeout: Task took longer than 10 minutes"
-                    )
-                  );
-                  return;
-                }
-              }
-
-              const data = (await baseFetch(
-                "/api/workers/character-context/generate-images/",
-                {
-                  method: "POST",
-                  headers: {
-                    "Content-Type": "application/json",
-                  },
-                  body: JSON.stringify({
-                    task_id: taskId,
-                    generate_type: "human",
-                  }),
-                },
-                "https://api.blaze.pockettoons.com"
-              )) as GenerateImagesResponse;
-
-              setHumanResponse(data);
-              setHumanStatus(data.status || "");
-
-              // Stop polling when status is not "pending" AND all items have images
-              const hasItems =
-                Array.isArray(data.items) && data.items.length > 0;
-              if (hasItems) {
-                const allItemsHaveImages = data.items.every(
-                  (item: GenerateImagesItem) =>
-                    item.image !== null && item.image !== undefined
-                );
-                const isNotPending = data.status !== "pending";
-
-                if (isNotPending && allItemsHaveImages) {
-                  if (humanPollingIntervalRef.current) {
-                    clearInterval(humanPollingIntervalRef.current);
-                    humanPollingIntervalRef.current = null;
-                  }
-                  setIsPollingHuman(false);
-                  humanImagesDoneRef.current = true;
-                  // Check if both human and creature are done, then start alt-views
-                  if (
-                    humanImagesDoneRef.current &&
-                    creatureImagesDoneRef.current &&
-                    !altViewsStartedRef.current &&
-                    startGenerateAltViewsRef.current
-                  ) {
-                    altViewsStartedRef.current = true;
-                    startGenerateAltViewsRef.current(taskId);
-                  }
-                }
-              } else if (data.status !== "pending") {
-                // If no items but status is not pending, stop polling
-                if (humanPollingIntervalRef.current) {
-                  clearInterval(humanPollingIntervalRef.current);
-                  humanPollingIntervalRef.current = null;
-                }
-                setIsPollingHuman(false);
-                humanImagesDoneRef.current = true;
-                // Check if both human and creature are done, then start alt-views
-                if (
-                  humanImagesDoneRef.current &&
-                  creatureImagesDoneRef.current &&
-                  !altViewsStartedRef.current &&
-                  startGenerateAltViewsRef.current
-                ) {
-                  altViewsStartedRef.current = true;
-                  startGenerateAltViewsRef.current(taskId);
-                }
-              }
-            } catch (err) {
-              console.error("Error polling human images:", err);
-            }
-          };
-
-          // Start polling immediately and then every 5 seconds
-          pollHumanImages();
-          humanPollingIntervalRef.current = setInterval(pollHumanImages, 5000);
-        }
-
-        // Make API call for creature
-        const creatureResponse = (await baseFetch(
+        // Make API call for creature - fire and forget
+        baseFetch(
           "/api/workers/character-context/generate-images/",
           {
             method: "POST",
@@ -553,118 +425,91 @@ export default function CreateCharacterDescriptionModal({
             }),
           },
           "https://api.blaze.pockettoons.com"
-        )) as GenerateImagesResponse;
+        ).catch((err) => {
+          console.error("Error calling generate-images for creature:", err);
+        });
 
-        if (creatureResponse?.task_id) {
-          setIsPollingCreature(true);
-          creaturePollingStartTimeRef.current = Date.now();
+        // Start polling list-characters API to check for image generation completion
+        setIsPollingImages(true);
+        imagePollingStartTimeRef.current = Date.now();
 
-          // Custom polling for creature images (POST request with body)
-          const pollCreatureImages = async () => {
-            try {
-              // Check timeout (10 minutes)
-              if (creaturePollingStartTimeRef.current) {
-                const elapsed =
-                  Date.now() - creaturePollingStartTimeRef.current;
-                if (elapsed > 10 * 60 * 1000) {
-                  if (creaturePollingIntervalRef.current) {
-                    clearInterval(creaturePollingIntervalRef.current);
-                    creaturePollingIntervalRef.current = null;
-                  }
-                  setIsPollingCreature(false);
-                  setError(
-                    new Error(
-                      "Creature image generation timeout: Task took longer than 10 minutes"
-                    )
-                  );
-                  return;
-                }
-              }
+        const pollingKey = `image-generation-${taskId}`;
 
-              const data = (await baseFetch(
-                "/api/workers/character-context/generate-images/",
-                {
-                  method: "POST",
-                  headers: {
-                    "Content-Type": "application/json",
-                  },
-                  body: JSON.stringify({
-                    task_id: taskId,
-                    generate_type: "creature",
-                  }),
-                },
-                "https://api.blaze.pockettoons.com"
-              )) as GenerateImagesResponse;
-
-              setCreatureResponse(data);
-              setCreatureStatus(data.status || "");
-
-              // Stop polling when status is not "pending" AND all items have images
-              const hasItems =
-                Array.isArray(data.items) && data.items.length > 0;
-              if (hasItems) {
-                const allItemsHaveImages = data.items.every(
-                  (item: GenerateImagesItem) =>
-                    item.image !== null && item.image !== undefined
-                );
-                const isNotPending = data.status !== "pending";
-
-                if (isNotPending && allItemsHaveImages) {
-                  if (creaturePollingIntervalRef.current) {
-                    clearInterval(creaturePollingIntervalRef.current);
-                    creaturePollingIntervalRef.current = null;
-                  }
-                  setIsPollingCreature(false);
-                  creatureImagesDoneRef.current = true;
-                  // Check if both human and creature are done, then start alt-views
-                  if (
-                    humanImagesDoneRef.current &&
-                    creatureImagesDoneRef.current &&
-                    !altViewsStartedRef.current &&
-                    startGenerateAltViewsRef.current
-                  ) {
-                    altViewsStartedRef.current = true;
-                    startGenerateAltViewsRef.current(taskId);
-                  }
-                }
-              } else if (data.status !== "pending") {
-                // If no items but status is not pending, stop polling
-                if (creaturePollingIntervalRef.current) {
-                  clearInterval(creaturePollingIntervalRef.current);
-                  creaturePollingIntervalRef.current = null;
-                }
-                setIsPollingCreature(false);
-                creatureImagesDoneRef.current = true;
-                // Check if both human and creature are done, then start alt-views
-                if (
-                  humanImagesDoneRef.current &&
-                  creatureImagesDoneRef.current &&
-                  !altViewsStartedRef.current &&
-                  startGenerateAltViewsRef.current
-                ) {
-                  altViewsStartedRef.current = true;
-                  startGenerateAltViewsRef.current(taskId);
-                }
-              }
-            } catch (err) {
-              console.error("Error polling creature images:", err);
+        poll<PollingResponse>({
+          url: `/api/workers/character-context/list-characters/?user_id=7&task_id=${taskId}`,
+          baseUrl: "https://api.blaze.pockettoons.com",
+          pollingKey,
+          delay: 5000, // Poll every 5 seconds
+          headers: {
+            uid: "7",
+            "access-token": "c7eb5f9a-e958-4a47-85fe-0b2674a946eb",
+          },
+          callback: (data) => {
+            if (!data) {
+              return;
             }
-          };
 
-          // Start polling immediately and then every 5 seconds
-          pollCreatureImages();
-          creaturePollingIntervalRef.current = setInterval(
-            pollCreatureImages,
-            5000
-          );
-        }
+            // Check timeout (10 minutes)
+            if (imagePollingStartTimeRef.current) {
+              const elapsed =
+                Date.now() - imagePollingStartTimeRef.current;
+              if (elapsed > 5 * 60 * 1000) {
+                // 10 minutes = 600000ms
+                stopPolling(pollingKey);
+                setIsPollingImages(false);
+                setError(new Error(DEFAULT_ERROR_MESSAGE));
+                return;
+              }
+            }
+
+            // Check if task has failed
+            if (data.task_status === "failed") {
+              stopPolling(pollingKey);
+              setIsPollingImages(false);
+              const errorMessage = data.error || DEFAULT_ERROR_MESSAGE;
+              setError(new Error(errorMessage));
+              toast.error(errorMessage);
+              return;
+            }
+
+            setPollingResponse(data);
+            setTaskStatus(data.task_status || "");
+
+            // Check if all characters and creatures have non-null images
+            const characters = Array.isArray(data.characters)
+              ? data.characters
+              : [];
+            const creatures = Array.isArray(data.creatures)
+              ? data.creatures
+              : [];
+
+            // Check if any character has null image
+            const hasCharactersWithNullImages = characters.some(
+              (char: CharacterOrCreature) =>
+                char.image === null || char.image === undefined
+            );
+
+            // Check if any creature has null image
+            const hasCreaturesWithNullImages = creatures.some(
+              (creature: CharacterOrCreature) =>
+                creature.image === null || creature.image === undefined
+            );
+
+            // Stop polling if all characters and creatures have images (non-null)
+            if (!hasCharactersWithNullImages && !hasCreaturesWithNullImages) {
+              stopPolling(pollingKey);
+              setIsPollingImages(false);
+              // All images are generated, start generating alt-views
+              startGenerateAltViews(taskId);
+            }
+            // Continue polling if any character or creature still has null image
+          },
+          failData: null,
+        });
       } catch (err) {
         console.error("Error starting image generation:", err);
-        setError(
-          err instanceof Error
-            ? err
-            : new Error("Failed to start image generation")
-        );
+        setIsPollingImages(false);
+        setError(new Error(DEFAULT_ERROR_MESSAGE));
       }
     };
 
@@ -672,8 +517,8 @@ export default function CreateCharacterDescriptionModal({
       try {
         currentTaskIdForAltViewsRef.current = taskId;
 
-        // Make API call for human alt-views
-        const humanAltViewsResponse = (await baseFetch(
+        // Make API call for human alt-views - fire and forget
+        baseFetch(
           "/api/workers/character-context/generate-alt-views/",
           {
             method: "POST",
@@ -686,92 +531,12 @@ export default function CreateCharacterDescriptionModal({
             }),
           },
           "https://api.blaze.pockettoons.com"
-        )) as GenerateImagesResponse;
+        ).catch((err) => {
+          console.error("Error calling generate-alt-views for human:", err);
+        });
 
-        if (humanAltViewsResponse?.task_id) {
-          setIsPollingHumanAltViews(true);
-          humanAltViewsPollingStartTimeRef.current = Date.now();
-
-          // Custom polling for human alt-views (POST request with body)
-          const pollHumanAltViews = async () => {
-            try {
-              // Check timeout (10 minutes)
-              if (humanAltViewsPollingStartTimeRef.current) {
-                const elapsed =
-                  Date.now() - humanAltViewsPollingStartTimeRef.current;
-                if (elapsed > 10 * 60 * 1000) {
-                  if (humanAltViewsPollingIntervalRef.current) {
-                    clearInterval(humanAltViewsPollingIntervalRef.current);
-                    humanAltViewsPollingIntervalRef.current = null;
-                  }
-                  setIsPollingHumanAltViews(false);
-                  setError(
-                    new Error(
-                      "Human alt-views generation timeout: Task took longer than 10 minutes"
-                    )
-                  );
-                  return;
-                }
-              }
-
-              const data = (await baseFetch(
-                "/api/workers/character-context/generate-alt-views/",
-                {
-                  method: "POST",
-                  headers: {
-                    "Content-Type": "application/json",
-                  },
-                  body: JSON.stringify({
-                    task_id: taskId,
-                    generate_type: "human",
-                  }),
-                },
-                "https://api.blaze.pockettoons.com"
-              )) as GenerateImagesResponse;
-
-              setHumanAltViewsResponse(data);
-              setHumanAltViewsStatus(data.status || "");
-
-              // Stop polling when status is not "pending" AND all items have images
-              const hasItems =
-                Array.isArray(data.items) && data.items.length > 0;
-              if (hasItems) {
-                const allItemsHaveImages = data.items.every(
-                  (item: GenerateImagesItem) =>
-                    item.image !== null && item.image !== undefined
-                );
-                const isNotPending = data.status !== "pending";
-
-                if (isNotPending && allItemsHaveImages) {
-                  if (humanAltViewsPollingIntervalRef.current) {
-                    clearInterval(humanAltViewsPollingIntervalRef.current);
-                    humanAltViewsPollingIntervalRef.current = null;
-                  }
-                  setIsPollingHumanAltViews(false);
-                }
-              } else if (data.status !== "pending") {
-                // If no items but status is not pending, stop polling
-                if (humanAltViewsPollingIntervalRef.current) {
-                  clearInterval(humanAltViewsPollingIntervalRef.current);
-                  humanAltViewsPollingIntervalRef.current = null;
-                }
-                setIsPollingHumanAltViews(false);
-              }
-            } catch (err) {
-              console.error("Error polling human alt-views:", err);
-            }
-          };
-
-          // Start polling immediately and then every 5 seconds
-          pollHumanAltViews();
-          humanAltViewsPollingIntervalRef.current = setInterval(
-            pollHumanAltViews,
-            5000
-          );
-        }
-
-        // Make API call for creature alt-views
-        const creatureAltViewsResponse = (await baseFetch(
+        // Make API call for creature alt-views - fire and forget
+        baseFetch(
           "/api/workers/character-context/generate-alt-views/",
           {
             method: "POST",
@@ -784,96 +549,98 @@ export default function CreateCharacterDescriptionModal({
             }),
           },
           "https://api.blaze.pockettoons.com"
-        )) as GenerateImagesResponse;
+        ).catch((err) => {
+          console.error("Error calling generate-alt-views for creature:", err);
+        });
 
-        if (creatureAltViewsResponse?.task_id) {
-          setIsPollingCreatureAltViews(true);
-          creatureAltViewsPollingStartTimeRef.current = Date.now();
+        // Start polling list-characters API to check for alt-views generation completion
+        setIsPollingAltViews(true);
+        altViewsPollingStartTimeRef.current = Date.now();
 
-          // Custom polling for creature alt-views (POST request with body)
-          const pollCreatureAltViews = async () => {
-            try {
-              // Check timeout (10 minutes)
-              if (creatureAltViewsPollingStartTimeRef.current) {
-                const elapsed =
-                  Date.now() - creatureAltViewsPollingStartTimeRef.current;
-                if (elapsed > 10 * 60 * 1000) {
-                  if (creatureAltViewsPollingIntervalRef.current) {
-                    clearInterval(creatureAltViewsPollingIntervalRef.current);
-                    creatureAltViewsPollingIntervalRef.current = null;
-                  }
-                  setIsPollingCreatureAltViews(false);
-                  setError(
-                    new Error(
-                      "Creature alt-views generation timeout: Task took longer than 10 minutes"
-                    )
-                  );
-                  return;
-                }
-              }
+        const pollingKey = `alt-views-generation-${taskId}`;
 
-              const data = (await baseFetch(
-                "/api/workers/character-context/generate-alt-views/",
-                {
-                  method: "POST",
-                  headers: {
-                    "Content-Type": "application/json",
-                  },
-                  body: JSON.stringify({
-                    task_id: taskId,
-                    generate_type: "creature",
-                  }),
-                },
-                "https://api.blaze.pockettoons.com"
-              )) as GenerateImagesResponse;
-
-              setCreatureAltViewsResponse(data);
-              setCreatureAltViewsStatus(data.status || "");
-
-              // Stop polling when status is not "pending" AND all items have images
-              const hasItems =
-                Array.isArray(data.items) && data.items.length > 0;
-              if (hasItems) {
-                const allItemsHaveImages = data.items.every(
-                  (item: GenerateImagesItem) =>
-                    item.image !== null && item.image !== undefined
-                );
-                const isNotPending = data.status !== "pending";
-
-                if (isNotPending && allItemsHaveImages) {
-                  if (creatureAltViewsPollingIntervalRef.current) {
-                    clearInterval(creatureAltViewsPollingIntervalRef.current);
-                    creatureAltViewsPollingIntervalRef.current = null;
-                  }
-                  setIsPollingCreatureAltViews(false);
-                }
-              } else if (data.status !== "pending") {
-                // If no items but status is not pending, stop polling
-                if (creatureAltViewsPollingIntervalRef.current) {
-                  clearInterval(creatureAltViewsPollingIntervalRef.current);
-                  creatureAltViewsPollingIntervalRef.current = null;
-                }
-                setIsPollingCreatureAltViews(false);
-              }
-            } catch (err) {
-              console.error("Error polling creature alt-views:", err);
+        poll<PollingResponse>({
+          url: `/api/workers/character-context/list-characters/?user_id=7&task_id=${taskId}`,
+          baseUrl: "https://api.blaze.pockettoons.com",
+          pollingKey,
+          delay: 5000, // Poll every 5 seconds
+          headers: {
+            uid: "7",
+            "access-token": "c7eb5f9a-e958-4a47-85fe-0b2674a946eb",
+          },
+          callback: (data) => {
+            if (!data) {
+              return;
             }
-          };
 
-          // Start polling immediately and then every 5 seconds
-          pollCreatureAltViews();
-          creatureAltViewsPollingIntervalRef.current = setInterval(
-            pollCreatureAltViews,
-            5000
-          );
-        }
+            // Check timeout (10 minutes)
+            if (altViewsPollingStartTimeRef.current) {
+              const elapsed =
+                Date.now() - altViewsPollingStartTimeRef.current;
+              if (elapsed > 5 * 60 * 1000) {
+                // 10 minutes = 600000ms
+                stopPolling(pollingKey);
+                setIsPollingAltViews(false);
+                setError(new Error(DEFAULT_ERROR_MESSAGE));
+                return;
+              }
+            }
+
+            // Check if task has failed
+            if (data.task_status === "failed") {
+              stopPolling(pollingKey);
+              setIsPollingAltViews(false);
+              const errorMessage = data.error || DEFAULT_ERROR_MESSAGE;
+              setError(new Error(errorMessage));
+              toast.error(errorMessage);
+              return;
+            }
+
+            setPollingResponse(data);
+            setTaskStatus(data.task_status || "");
+
+            // Check if all characters have non-null image, close_up, and back_view
+            const characters = Array.isArray(data.characters)
+              ? data.characters
+              : [];
+            const creatures = Array.isArray(data.creatures)
+              ? data.creatures
+              : [];
+
+            // Helper function to check if value is null or undefined
+            const isNullOrUndefined = (value: unknown) =>
+              value === null || value === undefined;
+
+            // Check if any character has null image, close_up, or back_view
+            const hasCharactersWithNullAltViews = characters.some(
+              (char: CharacterOrCreature) =>
+                isNullOrUndefined(char.image) ||
+                isNullOrUndefined(char.close_up) ||
+                isNullOrUndefined(char.back_view)
+            );
+
+            // Check if any creature has null image, back_view, or side_view
+            const hasCreaturesWithNullAltViews = creatures.some(
+              (creature: CharacterOrCreature) =>
+                isNullOrUndefined(creature.image) ||
+                isNullOrUndefined(creature.back_view) ||
+                isNullOrUndefined(creature.side_view)
+            );
+
+            // Stop polling if all characters and creatures have all required alt-views
+            if (!hasCharactersWithNullAltViews && !hasCreaturesWithNullAltViews) {
+              stopPolling(pollingKey);
+              setIsPollingAltViews(false);
+              // All alt-views are generated, process is complete
+            }
+            // Continue polling if any character or creature still has null alt-views
+          },
+          failData: null,
+        });
       } catch (err) {
         console.error("Error starting alt-views generation:", err);
-        setError(
-          err instanceof Error
-            ? err
-            : new Error("Failed to start alt-views generation")
-        );
+        setIsPollingAltViews(false);
+        setError(new Error(DEFAULT_ERROR_MESSAGE));
       }
     };
 
@@ -1270,11 +1037,7 @@ export default function CreateCharacterDescriptionModal({
                   toast.success("Character sheet created successfully");
                 }
               } catch (err) {
-                toast.error(
-                  err instanceof Error
-                    ? err.message
-                    : "Failed to get character sheet"
-                );
+                toast.error(DEFAULT_ERROR_MESSAGE);
               }
             }}
             disabled={isGettingSheet || !taskId}
