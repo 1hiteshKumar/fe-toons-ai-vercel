@@ -14,6 +14,7 @@ import { PlayPauseIcon } from "@/aural/icons/play-pause-icon";
 import { cn } from "@/aural/lib/utils";
 import EditImageModal from "./edit-image-modal";
 import { editPanel } from "@/server/mutations/edit-panel";
+import { triggerVideoGeneration } from "@/server/mutations/trigger-video-generation";
 
 export default function ShotImages({
   data,
@@ -166,7 +167,12 @@ export default function ShotImages({
         rightElement={
           onNext && (
             <Button
-              onClick={onNext}
+              onClick={async () => {
+                onNext();
+                await triggerVideoGeneration({
+                  taskId: selectedShotData.orchestrator_task_id,
+                });
+              }}
               variant="outline"
               rightIcon={<ArrowRightIcon className="text-white" />}
               noise="none"

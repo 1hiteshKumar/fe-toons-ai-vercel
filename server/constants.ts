@@ -16,6 +16,8 @@ export const API_URLS = {
     `/api/workers/orchestrator/${taskId}/get_results/`,
   ADD_TASK: "/api/workers/orchestrator/",
   EDIT_PANEL: "/api/workers/orchestrator/experimental_panel/",
+  TRIGGER_VIDEO_GENERATION:
+    "/api/workers/orchestrator/experimental_trigger_video_generation/",
 };
 
 export const TABS = [
