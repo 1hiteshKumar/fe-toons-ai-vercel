@@ -25,6 +25,7 @@ export async function addTask({
         dimensions: "576x1024",
         aspect_ratio: "9:16",
         keep_qc: false,
+        is_e2e_style: true,
       },
     }),
   })) as { id: string };
