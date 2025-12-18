@@ -312,7 +312,7 @@ export default function ShotVideos({
               // Combine audio data from all cuts
               type CombinedAudio = {
                 narrations: string[];
-                dialogue: Record<string, string | null>;
+                dialogue: Record<string, string[]>;
                 thought: Record<string, string[]>;
                 actions: string[];
                 cinematography: string[];
@@ -330,13 +330,22 @@ export default function ShotVideos({
                     ) {
                       acc.narrations.push(audio.narration);
                     }
-                    // Merge dialogue objects
+                    // Collect all dialogues for each character (array per character)
                     if (
                       audio.dialogue &&
                       typeof audio.dialogue === "object" &&
                       audio.dialogue !== null
                     ) {
-                      Object.assign(acc.dialogue, audio.dialogue);
+                      Object.entries(audio.dialogue).forEach(
+                        ([character, text]) => {
+                          if (text && typeof text === "string" && text.trim()) {
+                            if (!acc.dialogue[character]) {
+                              acc.dialogue[character] = [];
+                            }
+                            acc.dialogue[character].push(text);
+                          }
+                        }
+                      );
                     }
                     // Collect all thoughts for each character (array per character)
                     if (
@@ -376,7 +385,7 @@ export default function ShotVideos({
                 },
                 {
                   narrations: [] as string[],
-                  dialogue: {} as Record<string, string | null>,
+                  dialogue: {} as Record<string, string[]>,
                   thought: {} as Record<string, string[]>,
                   actions: [] as string[],
                   cinematography: [] as string[],
@@ -504,23 +513,28 @@ export default function ShotVideos({
                         </div>
                       )}
                       {Object.values(combinedAudio.dialogue).some(
-                        (value) => value !== null && value !== ""
+                        (dialogues) => dialogues && dialogues.length > 0
                       ) && (
-                        <div className="space-y-1.5 w-full">
+                        <div className="space-y-2 w-full">
                           <p className="text-fm-sm font-medium uppercase text-[#AB79FF] tracking-wider">
                             Dialogue:
                           </p>
                           <div className="space-y-2">
                             {Object.entries(combinedAudio.dialogue).map(
-                              ([character, text]) => {
-                                if (!text) return null;
+                              ([character, dialogues]) => {
+                                if (!dialogues || dialogues.length === 0)
+                                  return null;
                                 return (
-                                  <p
-                                    key={character}
-                                    className="font-fm-poppins italic text-fm-md"
-                                  >
-                                    <span>{character}:</span> {text}
-                                  </p>
+                                  <div key={character} className="space-y-1">
+                                    {dialogues.map((dialogue, idx) => (
+                                      <p
+                                        key={`${character}-${idx}`}
+                                        className="font-fm-poppins italic text-fm-md"
+                                      >
+                                        <span>{character}:</span> {dialogue}
+                                      </p>
+                                    ))}
+                                  </div>
                                 );
                               }
                             )}
