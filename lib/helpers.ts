@@ -197,7 +197,130 @@ export function getIdFromGoogleDoc(url: string) {
     const filename = url.substring(url.lastIndexOf("/") + 1); // get last part
     const id = filename.replace(/\.[^/.]+$/, ""); // remove extension if any
     return id;
-  } catch (err) {
+  } catch {
     throw new Error("Cannot extract ID from URL");
   }
+}
+
+/**
+ * Escape CSV values (handle commas, quotes, newlines)
+ */
+function escapeCsvValue(value: string): string {
+  if (value === null || value === undefined || value === "") return "null";
+  const stringValue = String(value);
+  // If value contains comma, quote, or newline, wrap in quotes and escape quotes
+  if (stringValue.includes(",") || stringValue.includes('"') || stringValue.includes("\n")) {
+    return `"${stringValue.replace(/"/g, '""')}"`;
+  }
+  return stringValue;
+}
+
+/**
+ * Generate CSV content for shot videos
+ */
+export function generateShotVideosCSV(data: ShotAssets): string {
+  if (!data || !data.results || !Array.isArray(data.results)) {
+    throw new Error("Invalid data format");
+  }
+
+  // Sort results by panel_number to ensure proper order
+  const sortedResults = [...data.results].sort(
+    (a, b) => a.panel_number - b.panel_number
+  );
+
+  // CSV Headers
+  const headers = [
+    "panel_number",
+    "panel_data",
+    "start frame",
+    "end frame",
+    "single image video",
+    "start end video",
+    "panel_prompt_data",
+    "audio_url",
+  ];
+
+  // Generate CSV rows
+  const rows = sortedResults.map((shot) => {
+    const panelData = shot.panel_data ? JSON.stringify(shot.panel_data) : "null";
+    const panelPromptData = shot.panel_prompt_data ? JSON.stringify(shot.panel_prompt_data) : "null";
+
+    return [
+      shot.panel_number?.toString() || "null",
+      panelData,
+      shot.start_frame_url || "null",
+      shot.end_frame_url || "null",
+      shot.single_image_video_url || "null",
+      shot.start_end_video_url || "null",
+      panelPromptData,
+      shot.audio_url || "null",
+    ];
+  });
+
+  // Build CSV content
+  const csvContent = [
+    headers.join(","),
+    ...rows.map((row) => row.map(escapeCsvValue).join(",")),
+  ].join("\n");
+
+  return csvContent;
+}
+
+/**
+ * Generate CSV content for shot images
+ */
+export function generateShotImagesCSV(data: ShotAssets): string {
+  if (!data || !data.results || !Array.isArray(data.results)) {
+    throw new Error("Invalid data format");
+  }
+
+  // Sort results by panel_number to ensure proper order
+  const sortedResults = [...data.results].sort(
+    (a, b) => a.panel_number - b.panel_number
+  );
+
+  // CSV Headers
+  const headers = [
+    "panel_number",
+    "panel_data",
+    "start frame",
+    "end frame",
+    "audio_url",
+  ];
+
+  // Generate CSV rows
+  const rows = sortedResults.map((shot) => {
+    const panelData = shot.panel_data ? JSON.stringify(shot.panel_data) : "null";
+
+    return [
+      shot.panel_number?.toString() || "null",
+      panelData,
+      shot.start_frame_url || "null",
+      shot.end_frame_url || "null",
+      shot.audio_url || "null",
+    ];
+  });
+
+  // Build CSV content
+  const csvContent = [
+    headers.join(","),
+    ...rows.map((row) => row.map(escapeCsvValue).join(",")),
+  ].join("\n");
+
+  return csvContent;
+}
+
+/**
+ * Download CSV file from CSV content string
+ */
+export function downloadCSV(csvContent: string, filename: string): void {
+  const blob = new Blob([csvContent], { type: "text/csv" });
+  const url = window.URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  window.URL.revokeObjectURL(url);
+  document.body.removeChild(a);
 }

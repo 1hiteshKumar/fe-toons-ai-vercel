@@ -2,7 +2,7 @@
 
 import { GeneratingStatus, ShotAssets } from "@/lib/types";
 import Image from "next/image";
-import { convertGoogleDriveUrl, getGroupedShots } from "@/lib/helpers";
+import { convertGoogleDriveUrl, getGroupedShots, generateShotImagesCSV, downloadCSV } from "@/lib/helpers";
 import Loading from "@/components/loading";
 import { useMemo, useState, useRef, useEffect } from "react";
 import { Button } from "@/aural/components/ui/button";
@@ -11,6 +11,7 @@ import { EditBigIcon } from "@/aural/icons/edit-big-icon";
 import ShotHeader from "@/components/shot-header";
 import ArrowRightIcon from "@/aural/icons/arrow-right-icon";
 import { PlayPauseIcon } from "@/aural/icons/play-pause-icon";
+import { DownloadIcon } from "@/aural/icons/download-icon";
 import { cn } from "@/aural/lib/utils";
 import EditImageModal from "./edit-image-modal";
 import { editPanel } from "@/server/mutations/edit-panel";
@@ -174,29 +175,53 @@ export default function ShotImages({
     }
   };
 
+  const handleDownloadCSV = () => {
+    if (!data || generatingStatus !== "COMPLETED") return;
+
+    try {
+      const csvContent = generateShotImagesCSV(data);
+      downloadCSV(csvContent, "shot-images.csv");
+    } catch (error) {
+      console.error("Error downloading CSV:", error);
+    }
+  };
+
   return (
     <div>
       <Heading
         heading="Shot Images"
         subHeading="View and edit your shot images, dialogue, actions, and narration."
         rightElement={
-          onNext && (
+          <div className="flex items-center gap-3">
             <Button
-              onClick={async () => {
-                onNext();
-                await triggerVideoGeneration({
-                  taskId: selectedShotData.orchestrator_task_id,
-                });
-              }}
+              onClick={handleDownloadCSV}
               variant="outline"
-              rightIcon={<ArrowRightIcon className="text-white" />}
+              leftIcon={<DownloadIcon className="text-white" />}
               noise="none"
               className="font-fm-poppins rounded-lg"
               innerClassName="rounded-lg"
+              isDisabled={generatingStatus !== "COMPLETED"}
             >
-              Continue
+              Download CSV
             </Button>
-          )
+            {onNext && (
+              <Button
+                onClick={async () => {
+                  onNext();
+                  await triggerVideoGeneration({
+                    taskId: selectedShotData.orchestrator_task_id,
+                  });
+                }}
+                variant="outline"
+                rightIcon={<ArrowRightIcon className="text-white" />}
+                noise="none"
+                className="font-fm-poppins rounded-lg"
+                innerClassName="rounded-lg"
+              >
+                Continue
+              </Button>
+            )}
+          </div>
         }
       />
       <div className="flex gap-6 w-full min-h-0 h-full">
