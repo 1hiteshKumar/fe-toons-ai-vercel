@@ -132,6 +132,12 @@ export default function ShotVideos({
     }
   }, [selectedShot, effectiveSelectedScene]);
 
+  // Check if all shots have the required data (single_image_video_url)
+  const allShotsHaveSingleImageVideo_url = useMemo(() => {
+    if (!data?.results.length) return false;
+    return data.results.every((shot) => shot.single_image_video_url);
+  }, [data]);
+
   if (
     !data?.results.length &&
     (generatingStatus === "IN_PROGRESS" || generatingStatus === "PENDING")
@@ -158,7 +164,7 @@ export default function ShotVideos({
     : "";
 
   const handleDownloadCSV = () => {
-    if (!data || generatingStatus !== "COMPLETED") return;
+    if (!data || !allShotsHaveSingleImageVideo_url) return;
 
     try {
       const csvContent = generateShotVideosCSV(data);
@@ -178,13 +184,19 @@ export default function ShotVideos({
             <Button
               onClick={handleDownloadCSV}
               variant="outline"
-              leftIcon={<DownloadIcon className="text-white" />}
+              leftIcon={<DownloadIcon className="text-white size-5" />}
               noise="none"
               className="font-fm-poppins rounded-lg"
               innerClassName="rounded-lg"
-              isDisabled={generatingStatus !== "COMPLETED"}
+              isDisabled={!allShotsHaveSingleImageVideo_url}
+              tooltip={
+                <p className="font-poppins">{`Download as CSV ${
+                  !allShotsHaveSingleImageVideo_url
+                    ? "will be available once all shots have videos"
+                    : ""
+                }`}</p>
+              }
             >
-              Download CSV
             </Button>
             {onNext && (
               <Button

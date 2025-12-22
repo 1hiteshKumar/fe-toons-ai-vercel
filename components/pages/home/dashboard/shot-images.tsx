@@ -2,7 +2,12 @@
 
 import { GeneratingStatus, ShotAssets } from "@/lib/types";
 import Image from "next/image";
-import { convertGoogleDriveUrl, getGroupedShots, generateShotImagesCSV, downloadCSV } from "@/lib/helpers";
+import {
+  convertGoogleDriveUrl,
+  getGroupedShots,
+  generateShotImagesCSV,
+  downloadCSV,
+} from "@/lib/helpers";
 import Loading from "@/components/loading";
 import { useMemo, useState, useRef, useEffect } from "react";
 import { Button } from "@/aural/components/ui/button";
@@ -111,6 +116,12 @@ export default function ShotImages({
     }
   }, [selectedShot, effectiveSelectedScene]);
 
+  // Check if all shots have the required data (start_frame_url)
+  const allShotsHaveStartFrameUrl = useMemo(() => {
+    if (!data?.results.length) return false;
+    return data.results.every((shot) => shot.start_frame_url);
+  }, [data]);
+
   if (
     !data?.results.length &&
     (generatingStatus === "IN_PROGRESS" || generatingStatus === "PENDING")
@@ -176,7 +187,7 @@ export default function ShotImages({
   };
 
   const handleDownloadCSV = () => {
-    if (!data || generatingStatus !== "COMPLETED") return;
+    if (!data || !allShotsHaveStartFrameUrl) return;
 
     try {
       const csvContent = generateShotImagesCSV(data);
@@ -196,13 +207,20 @@ export default function ShotImages({
             <Button
               onClick={handleDownloadCSV}
               variant="outline"
-              leftIcon={<DownloadIcon className="text-white" />}
+              leftIcon={<DownloadIcon className="text-white size-5" />}
               noise="none"
               className="font-fm-poppins rounded-lg"
               innerClassName="rounded-lg"
-              isDisabled={generatingStatus !== "COMPLETED"}
+              isDisabled={!allShotsHaveStartFrameUrl}
+              tooltip={
+                <p className="font-poppins">{`Download as CSV ${
+                  !allShotsHaveStartFrameUrl
+                    ? "will be available once all shots have images"
+                    : ""
+                }`}</p>
+              }
             >
-              Download CSV
+              {""}
             </Button>
             {onNext && (
               <Button
