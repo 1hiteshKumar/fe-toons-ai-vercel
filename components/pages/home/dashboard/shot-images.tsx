@@ -233,6 +233,8 @@ export default function ShotImages({
       if (fileInputRef.current) {
         fileInputRef.current.value = "";
       }
+    }
+  };
 
   const handleDownloadCSV = () => {
     if (!data || !allShotsHaveStartFrameUrl) return;
