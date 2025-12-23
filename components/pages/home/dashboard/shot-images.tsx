@@ -15,6 +15,9 @@ import { cn } from "@/aural/lib/utils";
 import EditImageModal from "./edit-image-modal";
 import { editPanel } from "@/server/mutations/edit-panel";
 import { triggerVideoGeneration } from "@/server/mutations/trigger-video-generation";
+import { uploadImage } from "@/server/mutations/upload-image";
+import { UploadIcon } from "@/aural/icons/upload-icon";
+import { toast } from "sonner";
 
 export default function ShotImages({
   data,
@@ -38,11 +41,13 @@ export default function ShotImages({
   const [selectedShot, setSelectedShot] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
   const audioRef = useRef<HTMLAudioElement>(null);
   const shouldAutoPlayRef = useRef(false);
   const isManuallyPausedRef = useRef(false);
   const shotListRef = useRef<HTMLDivElement>(null);
   const shotRefs = useRef<Map<number, HTMLDivElement>>(new Map());
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Update selected scene if initial scene changes and current selection is invalid
   const effectiveSelectedScene = useMemo(() => {
@@ -174,6 +179,51 @@ export default function ShotImages({
     }
   };
 
+  const handleUploadClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleFileChange = async (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    const file = event.target.files?.[0];
+    if (!file || !selectedShotData) {
+      return;
+    }
+
+    // Validate file type
+    if (!file.type.startsWith("image/")) {
+      toast.error("Please select an image file");
+      return;
+    }
+
+    setIsUploading(true);
+    try {
+      const imageUrl = await uploadImage({
+        file,
+      });
+
+      await editPanel({
+        orchestrator_result_task_id: selectedShotData.id,
+        orchestrator_task_id: selectedShotData.orchestrator_task_id,
+        panel_data: selectedShotData.panel_data,
+        user_start_frame_url: imageUrl,
+      });
+
+      toast.success("Image uploaded successfully");
+      onRefetch?.();
+    } catch (error) {
+      console.error("Upload error:", error);
+      toast.error("Failed to upload image. Please try again.");
+    } finally {
+      setIsUploading(false);
+      // Reset file input
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
+    }
+  };
+
   return (
     <div>
       <Heading
@@ -294,6 +344,23 @@ export default function ShotImages({
                         className="object-contain rounded-2xl "
                         unoptimized
                       />
+                      <input
+                        ref={fileInputRef}
+                        type="file"
+                        accept="image/*"
+                        onChange={handleFileChange}
+                        className="hidden"
+                      />
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="absolute top-2 right-20"
+                        onClick={handleUploadClick}
+                        disabled={isUploading || !selectedShotData}
+                      >
+                        {" "}
+                        <UploadIcon className="size-5" />
+                      </Button>
                       <Button
                         variant="outline"
                         size="sm"

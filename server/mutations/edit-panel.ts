@@ -7,6 +7,7 @@ interface EditPanelParams {
   orchestrator_result_task_id: number;
   panel_data?: unknown;
   type?: "image" | "video";
+  user_start_frame_url?:string
 }
 
 export async function editPanel({
@@ -15,6 +16,7 @@ export async function editPanel({
   orchestrator_result_task_id,
   panel_data,
   type,
+  user_start_frame_url
 }: EditPanelParams): Promise<string> {
   const editTypeBody =
     type === "image"
@@ -34,6 +36,7 @@ export async function editPanel({
       orchestrator_task_id,
       orchestrator_result_task_id,
       panel_data,
+      user_start_frame_url,
       ...editTypeBody,
     }),
   });

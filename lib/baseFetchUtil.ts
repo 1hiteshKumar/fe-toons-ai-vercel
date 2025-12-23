@@ -3,6 +3,8 @@ const BASE_URL: string = process.env.NEXT_PUBLIC_BACKEND_URL!;
 const COMMON_HEADERS: Record<string, string> = {
   Authorization:
     "pfm_hDX9AdJTwCMiKNogocNn2D6axYJtDVZ3qcbrS37wPlkWBS59ZKVBkGc4YT4f",
+  "access-token": "c7eb5f9a-e958-4a47-85fe-0b2674a946eb",
+  uid: "7",
 };
 interface FetchOptions extends RequestInit {
   headers?: Record<string, string>;
