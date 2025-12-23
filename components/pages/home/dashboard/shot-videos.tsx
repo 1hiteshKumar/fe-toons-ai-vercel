@@ -1,7 +1,7 @@
 "use client";
 
 import { GeneratingStatus, ShotAssets } from "@/lib/types";
-import { convertGoogleDriveUrl, getGroupedShots } from "@/lib/helpers";
+import { convertGoogleDriveUrl, getGroupedShots, generateShotVideosCSV, downloadCSV } from "@/lib/helpers";
 import Loading from "@/components/loading";
 import { useMemo, useState, useRef, useEffect } from "react";
 import { Button } from "@/aural/components/ui/button";
@@ -10,6 +10,7 @@ import { EditBigIcon } from "@/aural/icons/edit-big-icon";
 import ShotHeader from "@/components/shot-header";
 import Image from "next/image";
 import ArrowRightIcon from "@/aural/icons/arrow-right-icon";
+import { DownloadIcon } from "@/aural/icons/download-icon";
 import { cn } from "@/aural/lib/utils";
 import EditVideoModal from "./edit-video-modal";
 import { editPanel } from "@/server/mutations/edit-panel";
@@ -131,6 +132,12 @@ export default function ShotVideos({
     }
   }, [selectedShot, effectiveSelectedScene]);
 
+  // Check if all shots have the required data (single_image_video_url)
+  const allShotsHaveSingleImageVideo_url = useMemo(() => {
+    if (!data?.results.length) return false;
+    return data.results.every((shot) => shot.single_image_video_url);
+  }, [data]);
+
   if (
     !data?.results.length &&
     (generatingStatus === "IN_PROGRESS" || generatingStatus === "PENDING")
@@ -156,24 +163,55 @@ export default function ShotVideos({
     ? getVideoUrl(selectedShotData.single_image_video_url || "")
     : "";
 
+  const handleDownloadCSV = () => {
+    if (!data || !allShotsHaveSingleImageVideo_url) return;
+
+    try {
+      const csvContent = generateShotVideosCSV(data);
+      downloadCSV(csvContent, "shot-videos.csv");
+    } catch (error) {
+      console.error("Error downloading CSV:", error);
+    }
+  };
+
   return (
     <div>
       <Heading
         heading="Shot Videos"
         subHeading="Review your generated shot videos and export your final production."
         rightElement={
-          onNext && (
+          <div className="flex items-center gap-3">
             <Button
-              onClick={onNext}
+              onClick={handleDownloadCSV}
               variant="outline"
-              rightIcon={<ArrowRightIcon className="text-white" />}
+              leftIcon={<DownloadIcon className="text-white size-5" />}
               noise="none"
               className="font-fm-poppins rounded-lg"
               innerClassName="rounded-lg"
+              isDisabled={!allShotsHaveSingleImageVideo_url}
+              tooltip={
+                <p className="font-poppins">{`Download as CSV ${
+                  !allShotsHaveSingleImageVideo_url
+                    ? "will be available once all shots have videos"
+                    : ""
+                }`}</p>
+              }
             >
-              Continue
+              {""}
             </Button>
-          )
+            {onNext && (
+              <Button
+                onClick={onNext}
+                variant="outline"
+                rightIcon={<ArrowRightIcon className="text-white" />}
+                noise="none"
+                className="font-fm-poppins rounded-lg"
+                innerClassName="rounded-lg"
+              >
+                Continue
+              </Button>
+            )}
+          </div>
         }
       />
       <div className="flex gap-6 w-full min-h-0 h-full">

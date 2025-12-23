@@ -30,26 +30,35 @@ export default function Story({
   const [updatedScriptText, setUpdatedScriptText] = useState("");
   const [taskData, setTaskData] = useState<Story>();
 
+  async function fetchAndSetStoryData() {
+    const data = await fetchStoryData(taskId);
+    setUpdatedScriptText(data.scriptText || "");
+    setTaskData(data);
+  }
+
   useEffect(() => {
     async function getStory() {
       let storedTasksData = localStorage.getItem("stories");
+
       if (storedTasksData) {
         storedTasksData = JSON.parse(storedTasksData);
         //@ts-expect-error for now
         const taskData = storedTasksData?.filter(
           (f: Story) => Number(f.finalShowId) === Number(taskId)
         )[0];
-        if (!taskData) {
-          const data = await fetchStoryData(taskId);
-          setUpdatedScriptText(data.scriptText || "");
-          setTaskData(data);
-        } else {
+        if (taskData) {
           setTaskData(taskData);
           setUpdatedScriptText(taskData.scriptText || "");
+        } else {
+          fetchAndSetStoryData();
         }
+      } else {
+        fetchAndSetStoryData();
       }
     }
     getStory();
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [taskId]);
 
   const onRegenerate = async () => {
