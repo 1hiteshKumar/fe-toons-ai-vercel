@@ -114,5 +114,13 @@ export type ShotGrouped = {
   scene_beat_id: string;
   shots: PanelItem[];
 };
+export type StoryFormat =
+  | "Novel/Audio Script"
+  | "Panel Wise Screenplay"
+  | "Unified JSON";
 
-export type GeneratingStatus="COMPLETED" | "FAILED" | "PENDING" | "IN_PROGRESS"
+export type GeneratingStatus =
+  | "COMPLETED"
+  | "FAILED"
+  | "PENDING"
+  | "IN_PROGRESS";
