@@ -7,7 +7,7 @@ import { API_URLS, PROMPT } from "@/server/constants";
 import { toast } from "sonner";
 import { addTask } from "@/server/mutations/add-task";
 import fetchShotAssets from "@/server/queries/fetch-shot-assets";
-import { ShotAssets } from "@/lib/types";
+import { ShotAssets, StoryFormat } from "@/lib/types";
 
 export type ValidationResponse = {
   validation_task_id: string;
@@ -41,6 +41,8 @@ export default function useUserUploads() {
   const [loading, setLoading] = useState(false);
   const [styleId, setStyleId] = useState<number | null>(87);
   const [showName, setShowName] = useState("");
+  const [storyFormat, setStoryFormat] =
+    useState<StoryFormat>("Novel/Audio Script");
 
   const { poll, stopPolling } = usePolling();
 
@@ -264,5 +266,7 @@ export default function useUserUploads() {
     setShowName,
     pollStatus,
     setCharacterSheetUrl,
+    storyFormat,
+    setStoryFormat
   };
 }

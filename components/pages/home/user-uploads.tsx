@@ -16,7 +16,6 @@ import { useState, useRef, useEffect } from "react";
 import ChevronRightIcon from "@/aural/icons/chevron-right-icon";
 import { PlusIcon } from "@/lib/icons";
 import { toast } from "sonner";
-import { StoryFormat } from "@/lib/types";
 
 function UserUploadsContent() {
   const {
@@ -35,6 +34,8 @@ function UserUploadsContent() {
     showName,
     setShowName,
     setCharacterSheetUrl,
+    storyFormat,
+    setStoryFormat
   } = useUserUploads();
 
   const {
@@ -58,8 +59,7 @@ function UserUploadsContent() {
   const dropdownRef = useRef<HTMLDivElement>(null);
   const triggerRef = useRef<HTMLButtonElement>(null);
   const optionRefs = useRef<(HTMLButtonElement | null)[]>([]);
-  const [storyFormat, setStoryFormat] =
-    useState<StoryFormat>("Novel/Audio Script");
+  
   const [isStoryFormatDropdownOpen, setStoryFormatDropdownOpen] =
     useState(false);
   const [googleDocLink, setGoogleDocLink] = useState("");
