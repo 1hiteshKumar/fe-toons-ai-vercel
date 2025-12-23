@@ -2,7 +2,12 @@
 
 import { GeneratingStatus, ShotAssets } from "@/lib/types";
 import Image from "next/image";
-import { convertGoogleDriveUrl, getGroupedShots } from "@/lib/helpers";
+import {
+  convertGoogleDriveUrl,
+  getGroupedShots,
+  generateShotImagesCSV,
+  downloadCSV,
+} from "@/lib/helpers";
 import Loading from "@/components/loading";
 import { useMemo, useState, useRef, useEffect } from "react";
 import { Button } from "@/aural/components/ui/button";
@@ -11,6 +16,7 @@ import { EditBigIcon } from "@/aural/icons/edit-big-icon";
 import ShotHeader from "@/components/shot-header";
 import ArrowRightIcon from "@/aural/icons/arrow-right-icon";
 import { PlayPauseIcon } from "@/aural/icons/play-pause-icon";
+import { DownloadIcon } from "@/aural/icons/download-icon";
 import { cn } from "@/aural/lib/utils";
 import EditImageModal from "./edit-image-modal";
 import { editPanel } from "@/server/mutations/edit-panel";
@@ -114,6 +120,12 @@ export default function ShotImages({
       });
     }
   }, [selectedShot, effectiveSelectedScene]);
+
+  // Check if all shots have the required data (start_frame_url)
+  const allShotsHaveStartFrameUrl = useMemo(() => {
+    if (!data?.results.length) return false;
+    return data.results.every((shot) => shot.start_frame_url);
+  }, [data]);
 
   if (
     !data?.results.length &&
@@ -221,6 +233,15 @@ export default function ShotImages({
       if (fileInputRef.current) {
         fileInputRef.current.value = "";
       }
+
+  const handleDownloadCSV = () => {
+    if (!data || !allShotsHaveStartFrameUrl) return;
+
+    try {
+      const csvContent = generateShotImagesCSV(data);
+      downloadCSV(csvContent, "shot-images.csv");
+    } catch (error) {
+      console.error("Error downloading CSV:", error);
     }
   };
 
@@ -230,23 +251,43 @@ export default function ShotImages({
         heading="Shot Images"
         subHeading="View and edit your shot images, dialogue, actions, and narration."
         rightElement={
-          onNext && (
+          <div className="flex items-center gap-3">
             <Button
-              onClick={async () => {
-                onNext();
-                await triggerVideoGeneration({
-                  taskId: selectedShotData.orchestrator_task_id,
-                });
-              }}
+              onClick={handleDownloadCSV}
               variant="outline"
-              rightIcon={<ArrowRightIcon className="text-white" />}
+              leftIcon={<DownloadIcon className="text-white size-5" />}
               noise="none"
               className="font-fm-poppins rounded-lg"
               innerClassName="rounded-lg"
+              isDisabled={!allShotsHaveStartFrameUrl}
+              tooltip={
+                <p className="font-poppins">{`Download as CSV ${
+                  !allShotsHaveStartFrameUrl
+                    ? "will be available once all shots have images"
+                    : ""
+                }`}</p>
+              }
             >
-              Continue
+              {""}
             </Button>
-          )
+            {onNext && (
+              <Button
+                onClick={async () => {
+                  onNext();
+                  await triggerVideoGeneration({
+                    taskId: selectedShotData.orchestrator_task_id,
+                  });
+                }}
+                variant="outline"
+                rightIcon={<ArrowRightIcon className="text-white" />}
+                noise="none"
+                className="font-fm-poppins rounded-lg"
+                innerClassName="rounded-lg"
+              >
+                Continue
+              </Button>
+            )}
+          </div>
         }
       />
       <div className="flex gap-6 w-full min-h-0 h-full">
