@@ -18,6 +18,7 @@ export const API_URLS = {
   EDIT_PANEL: "/api/workers/orchestrator/experimental_panel/",
   TRIGGER_VIDEO_GENERATION:
     "/api/workers/orchestrator/experimental_trigger_video_generation/",
+  UPLOAD_IMAGE: "/api/generations/upload_image/",
 };
 
 export const TABS = [
