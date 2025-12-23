@@ -197,6 +197,7 @@ export default function ShotVideos({
                 }`}</p>
               }
             >
+              {""}
             </Button>
             {onNext && (
               <Button
