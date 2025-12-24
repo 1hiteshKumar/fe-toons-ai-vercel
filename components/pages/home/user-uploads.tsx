@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/set-state-in-effect */
 "use client";
 
 import { Button } from "@/aural/components/ui/button";
@@ -33,6 +34,10 @@ function UserUploadsContent() {
     showName,
     setShowName,
     setCharacterSheetUrl,
+    storyFormat,
+    setStoryFormat,
+    googleDocLink,
+    setGoogleDocLink
   } = useUserUploads();
 
   const {
@@ -51,10 +56,16 @@ function UserUploadsContent() {
   const [isCreateCharacterModalOpen, setIsCreateCharacterModalOpen] =
     useState(false);
   const [pendingStyleId, setPendingStyleId] = useState<number | null>(null);
-  const [shouldSelectFirstAfterRefetch, setShouldSelectFirstAfterRefetch] = useState(false);
+  const [shouldSelectFirstAfterRefetch, setShouldSelectFirstAfterRefetch] =
+    useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const triggerRef = useRef<HTMLButtonElement>(null);
   const optionRefs = useRef<(HTMLButtonElement | null)[]>([]);
+  
+  const [isStoryFormatDropdownOpen, setStoryFormatDropdownOpen] =
+    useState(false);
+  const storyFormatDropdownRef = useRef<HTMLDivElement>(null);
+  const storyFormatTriggerRef = useRef<HTMLButtonElement>(null);
 
   const selectedStyle = styleOptions.find((style) => style.id === styleId);
 
@@ -67,7 +78,9 @@ function UserUploadsContent() {
   // Set the styleId when the pending style appears in the options after refetch
   useEffect(() => {
     if (pendingStyleId && styleOptions.length > 0) {
-      const styleExists = styleOptions.some((style) => style.id === pendingStyleId);
+      const styleExists = styleOptions.some(
+        (style) => style.id === pendingStyleId
+      );
       if (styleExists) {
         setStyleId(pendingStyleId);
         setShouldSelectFirstAfterRefetch(false);
@@ -190,8 +203,32 @@ function UserUploadsContent() {
     };
   }, [isStyleDropdownOpen]);
 
+  // Handle click outside to close story format dropdown
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        storyFormatDropdownRef.current &&
+        storyFormatTriggerRef.current &&
+        !storyFormatDropdownRef.current.contains(event.target as Node) &&
+        !storyFormatTriggerRef.current.contains(event.target as Node)
+      ) {
+        setStoryFormatDropdownOpen(false);
+      }
+    };
+
+    if (isStoryFormatDropdownOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [isStoryFormatDropdownOpen]);
+
   const disableGenerateAnime =
-    !(scriptText && selectedFile && showName && styleId) || loading;
+    !(storyFormat === "Novel/Audio Script"
+      ? scriptText
+      : googleDocLink && selectedFile && showName && styleId) || loading;
 
   // console.log({styleOptions})
   // console.log(styleOptions[highlightedIndex])
@@ -329,23 +366,106 @@ function UserUploadsContent() {
                 )}
               </div>
             </div>
-            <div className="bg-fm-neutral-0! font-fm-poppins p-4! rounded-xl">
-              <TextArea
-                id="script-text"
-                showCharCount
-                minHeight={196}
-                maxHeight={196}
-                maxLength={10000}
-                placeholder="Once upon a time, in a world where..."
-                value={scriptText}
-                autoGrow
-                onChange={(e) => setScriptText(e.target.value)}
+            <div className="space-y-2">
+              <div className="w-full mb-4.5 relative">
+                <p className="font-fm-poppins text-fm-sm text-white mb-2">
+                  Story Format
+                </p>
+                <button
+                  ref={storyFormatTriggerRef}
+                  type="button"
+                  onClick={() => {
+                    setStoryFormatDropdownOpen(!isStoryFormatDropdownOpen);
+                  }}
+                  className={cn(
+                    "w-full h-12 px-3 py-4 rounded-xl",
+                    "text-white font-fm-text leading-fm-md text-fm-md",
+                    "bg-black",
+                    "focus:outline-none transition-all duration-200",
+                    "flex items-center justify-between"
+                  )}
+                >
+                  <span className="text-white">{storyFormat}</span>
+                  <ChevronRightIcon
+                    className={cn(
+                      "size-5 text-fm-icon-active transition-transform border rounded-full",
+                      isStoryFormatDropdownOpen ? "-rotate-90" : "rotate-90"
+                    )}
+                  />
+                </button>
+                {isStoryFormatDropdownOpen && (
+                  <div
+                    ref={storyFormatDropdownRef}
+                    className="absolute z-50 w-full mt-1 bg-black border border-fm-divider-primary rounded-xl shadow-lg max-h-[240px] overflow-y-auto"
+                  >
+                    {[
+                      "Novel/Audio Script",
+                      "Panel Wise Screenplay",
+                      "Unified JSON",
+                    ].map((format) => (
+                      <button
+                        key={format}
+                        type="button"
+                        onClick={() => {
+                          //@ts-expect-error 123
+                          setStoryFormat(format);
+                          setStoryFormatDropdownOpen(false);
+                        }}
+                        className={cn(
+                          "w-full px-3 py-3 text-left text-white text-fm-md",
+                          "hover:bg-[#141414] transition-colors",
+                          "first:rounded-t-xl last:rounded-b-xl",
+                          storyFormat === format && "bg-[#141414]"
+                        )}
+                      >
+                        {format}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+            {storyFormat === "Novel/Audio Script" ? (
+              <>
+                {" "}
+                <p className="font-fm-poppins text-fm-sm text-white">
+                  Script text
+                </p>
+                <div className="bg-fm-neutral-0! font-fm-poppins p-4! rounded-xl">
+                  <TextArea
+                    id="script-text"
+                    showCharCount
+                    minHeight={196}
+                    maxHeight={196}
+                    maxLength={10000}
+                    placeholder="Once upon a time, in a world where..."
+                    value={scriptText}
+                    autoGrow
+                    onChange={(e) => setScriptText(e.target.value)}
+                    classes={{
+                      textarea:
+                        "border-0 bg-fm-neutral-0! p-0! font-fm-poppins",
+                      charCount: "font-fm-poppins text-fm-primary/50",
+                    }}
+                  />
+                </div>
+              </>
+            ) : (
+              <Input
+                id="google-doc-link"
+                label="Google Doc Link: (Make sure the link is valid and have ideal share permission.)"
+                type="url"
+                placeholder="Paste the Google Doc link here..."
+                value={googleDocLink}
+                onChange={(e) => setGoogleDocLink(e.target.value)}
+                decoration="outline"
+                fullWidth
                 classes={{
-                  textarea: "border-0 bg-fm-neutral-0! p-0! font-fm-poppins",
-                  charCount: "font-fm-poppins text-fm-primary/50",
+                  label: "font-poppins mb-2 text-fm-neutral-1100/80",
+                  input: "bg-black text-fm-md rounded-xl border-0",
                 }}
               />
-            </div>
+            )}
 
             <div className="mt-3">
               <div className="flex items-center justify-between mb-2">

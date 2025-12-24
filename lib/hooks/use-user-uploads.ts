@@ -1,13 +1,13 @@
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import { useDropzone } from "react-dropzone";
 import { validateUploads } from "@/server/mutations/validate-uploads";
 import { uploadCSV } from "@/server/mutations/upload-csv";
 import usePolling from "./use-polling";
-import { API_URLS, PROMPT } from "@/server/constants";
+import { API_URLS } from "@/server/constants";
 import { toast } from "sonner";
 import { addTask } from "@/server/mutations/add-task";
 import fetchShotAssets from "@/server/queries/fetch-shot-assets";
-import { ShotAssets } from "@/lib/types";
+import { ShotAssets, StoryFormat } from "@/lib/types";
 
 export type ValidationResponse = {
   validation_task_id: string;
@@ -31,6 +31,8 @@ export type Story = {
   finalShowId?: string;
   csvUrl?: string;
   styleId?: number;
+  storyFormat?: StoryFormat;
+  googleDocLink?: string;
 };
 
 export default function useUserUploads() {
@@ -41,6 +43,11 @@ export default function useUserUploads() {
   const [loading, setLoading] = useState(false);
   const [styleId, setStyleId] = useState<number | null>(87);
   const [showName, setShowName] = useState("");
+  const [googleDocLink, setGoogleDocLink] = useState("");
+  const triggerOnceRef = useRef(false);
+
+  const [storyFormat, setStoryFormat] =
+    useState<StoryFormat>("Novel/Audio Script");
 
   const { poll, stopPolling } = usePolling();
 
@@ -79,6 +86,7 @@ export default function useUserUploads() {
                 showName,
                 //@ts-expect-error for now
                 styleId,
+                taskType: storyFormat,
               });
               setStories((prev) =>
                 prev.map((story) =>
@@ -96,7 +104,7 @@ export default function useUserUploads() {
         },
       });
     },
-    [poll, scriptText, showName, stopPolling, styleId]
+    [poll, scriptText, showName, stopPolling, styleId, storyFormat]
   );
 
   useEffect(() => {
@@ -153,11 +161,12 @@ export default function useUserUploads() {
   }, []);
 
   useEffect(() => {
-    if (stories) {
+    if (stories && triggerOnceRef.current != true) {
       stories.forEach((story) => {
         if (!story.finalShowId) {
           pollStatus(story.validation_task_id);
         }
+        triggerOnceRef.current = true;
       });
     }
   }, [pollStatus, stories]);
@@ -177,7 +186,6 @@ export default function useUserUploads() {
         const uploadCSVurl = await uploadCSV({ file });
         setCSVurl(uploadCSVurl);
         toast.success("CSV uploaded successfully");
-        console.log(uploadCSVurl);
       } catch {
         toast.error(
           "Something went wrong while uploading to S3, please try again."
@@ -193,35 +201,45 @@ export default function useUserUploads() {
   };
 
   const onGenerate = async () => {
-    if (!csvUrl || !scriptText || !styleId) return;
+    if (!csvUrl || !(scriptText || googleDocLink) || !styleId) return;
+    try {
+      const validation_task_id = await validateUploads({
+        script_file_url: googleDocLink,
+        script_text: scriptText,
+        character_description_file_url: csvUrl,
+        style_id: styleId,
+        show_name: showName,
+      });
 
-    const validation_task_id = await validateUploads({
-      script_text: scriptText,
-      character_description_file_url: csvUrl,
-      style_id: styleId,
-      show_name: showName,
-    });
+      setStories((prev) => [
+        {
+          validation_task_id,
+          status: "PENDING",
+          scriptText: scriptText,
+          createdAt: new Date().toISOString(),
+          showName,
+          styleId,
+          csvUrl,
+          storyFormat,
+          googleDocLink,
+        },
+        ...prev,
+      ]);
+      pollStatus(validation_task_id);
 
-    setStories((prev) => [
-      {
-        validation_task_id,
-        status: "PENDING",
-        scriptText: scriptText,
-        createdAt: new Date().toISOString(),
-        showName,
-        styleId,
-        csvUrl,
-      },
-      ...prev,
-    ]);
-    pollStatus(validation_task_id);
-
-    // Clear the form after submission
-    setScriptText("");
-    setSelectedFile(null);
-    setCSVurl(undefined);
-    setStyleId(null);
-    setShowName("");
+      // Clear the form after submission
+      setScriptText("");
+      setSelectedFile(null);
+      setCSVurl(undefined);
+      setStyleId(null);
+      setShowName("");
+      setStoryFormat("Novel/Audio Script");
+      setGoogleDocLink("");
+    } catch (error) {
+      console.log(error);
+      //@ts-expect-error for now
+      toast.error(error.data[Object.keys(error.data)[0]][0]);
+    }
   };
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
@@ -264,5 +282,9 @@ export default function useUserUploads() {
     setShowName,
     pollStatus,
     setCharacterSheetUrl,
+    storyFormat,
+    setStoryFormat,
+    googleDocLink,
+    setGoogleDocLink,
   };
 }
