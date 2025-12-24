@@ -102,7 +102,7 @@ export default function useUserUploads() {
         },
       });
     },
-    [poll, scriptText, showName, stopPolling, styleId]
+    [poll, scriptText, showName, stopPolling, styleId,storyFormat]
   );
 
   useEffect(() => {
