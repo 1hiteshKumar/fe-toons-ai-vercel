@@ -228,8 +228,9 @@ export default function useUserUploads() {
       setCSVurl(undefined);
       setStyleId(null);
       setShowName("");
+      setStoryFormat("Novel/Audio Script");
     } catch (error) {
-      console.log(error)
+      console.log(error);
       //@ts-expect-error for now
       toast.error(error.data[Object.keys(error.data)[0]][0]);
     }
