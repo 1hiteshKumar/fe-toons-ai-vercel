@@ -14,6 +14,7 @@ export interface ValidateUploadsResponse {
 }
 
 export async function validateUploads({
+  script_file_url,
   script_text,
   character_description_file_url,
   style_id,
@@ -24,6 +25,7 @@ export async function validateUploads({
     body: JSON.stringify({
       script_text,
       character_description_file_url,
+      ...(script_file_url && { script_file_url }),
       ...(style_id && { style_id }),
       ...(show_name && { show_name }),
     }),

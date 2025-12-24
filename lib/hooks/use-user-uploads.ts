@@ -43,7 +43,6 @@ export default function useUserUploads() {
   const [showName, setShowName] = useState("");
   const [googleDocLink, setGoogleDocLink] = useState("");
 
-
   const [storyFormat, setStoryFormat] =
     useState<StoryFormat>("Novel/Audio Script");
 
@@ -102,7 +101,7 @@ export default function useUserUploads() {
         },
       });
     },
-    [poll, scriptText, showName, stopPolling, styleId,storyFormat]
+    [poll, scriptText, showName, stopPolling, styleId, storyFormat]
   );
 
   useEffect(() => {
@@ -200,35 +199,40 @@ export default function useUserUploads() {
 
   const onGenerate = async () => {
     if (!csvUrl || !(scriptText || googleDocLink) || !styleId) return;
+    try {
+      const validation_task_id = await validateUploads({
+        script_file_url: googleDocLink,
+        script_text: scriptText,
+        character_description_file_url: csvUrl,
+        style_id: styleId,
+        show_name: showName,
+      });
 
-    const validation_task_id = await validateUploads({
-      script_file_url: googleDocLink,
-      script_text: scriptText,
-      character_description_file_url: csvUrl,
-      style_id: styleId,
-      show_name: showName,
-    });
+      setStories((prev) => [
+        {
+          validation_task_id,
+          status: "PENDING",
+          scriptText: scriptText,
+          createdAt: new Date().toISOString(),
+          showName,
+          styleId,
+          csvUrl,
+        },
+        ...prev,
+      ]);
+      pollStatus(validation_task_id);
 
-    setStories((prev) => [
-      {
-        validation_task_id,
-        status: "PENDING",
-        scriptText: scriptText,
-        createdAt: new Date().toISOString(),
-        showName,
-        styleId,
-        csvUrl,
-      },
-      ...prev,
-    ]);
-    pollStatus(validation_task_id);
-
-    // Clear the form after submission
-    setScriptText("");
-    setSelectedFile(null);
-    setCSVurl(undefined);
-    setStyleId(null);
-    setShowName("");
+      // Clear the form after submission
+      setScriptText("");
+      setSelectedFile(null);
+      setCSVurl(undefined);
+      setStyleId(null);
+      setShowName("");
+    } catch (error) {
+      console.log(error)
+      //@ts-expect-error for now
+      toast.error(error.data[Object.keys(error.data)[0]][0]);
+    }
   };
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({

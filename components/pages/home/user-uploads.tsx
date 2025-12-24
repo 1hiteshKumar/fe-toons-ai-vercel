@@ -454,6 +454,7 @@ function UserUploadsContent() {
               <Input
                 id="google-doc-link"
                 label="Google Doc Link:"
+                type="url"
                 placeholder="Paste the Google Doc link here..."
                 value={googleDocLink}
                 onChange={(e) => setGoogleDocLink(e.target.value)}
