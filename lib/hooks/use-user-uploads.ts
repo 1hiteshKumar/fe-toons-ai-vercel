@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import { useDropzone } from "react-dropzone";
 import { validateUploads } from "@/server/mutations/validate-uploads";
 import { uploadCSV } from "@/server/mutations/upload-csv";
@@ -42,6 +42,7 @@ export default function useUserUploads() {
   const [styleId, setStyleId] = useState<number | null>(87);
   const [showName, setShowName] = useState("");
   const [googleDocLink, setGoogleDocLink] = useState("");
+  const triggerOnceRef = useRef(false);
 
   const [storyFormat, setStoryFormat] =
     useState<StoryFormat>("Novel/Audio Script");
@@ -157,15 +158,16 @@ export default function useUserUploads() {
     }
   }, []);
 
-  // useEffect(() => {
-  //   if (stories) {
-  //     stories.forEach((story) => {
-  //       if (!story.finalShowId) {
-  //         pollStatus(story.validation_task_id);
-  //       }
-  //     });
-  //   }
-  // }, [pollStatus, stories]);
+  useEffect(() => {
+    if (stories && triggerOnceRef.current != true) {
+      stories.forEach((story) => {
+        if (!story.finalShowId) {
+          pollStatus(story.validation_task_id);
+        }
+        triggerOnceRef.current = true;
+      });
+    }
+  }, [pollStatus, stories]);
 
   useEffect(() => {
     if (stories.length > 0)
@@ -182,7 +184,6 @@ export default function useUserUploads() {
         const uploadCSVurl = await uploadCSV({ file });
         setCSVurl(uploadCSVurl);
         toast.success("CSV uploaded successfully");
-        console.log(uploadCSVurl);
       } catch {
         toast.error(
           "Something went wrong while uploading to S3, please try again."
@@ -229,6 +230,7 @@ export default function useUserUploads() {
       setStyleId(null);
       setShowName("");
       setStoryFormat("Novel/Audio Script");
+      setGoogleDocLink("")
     } catch (error) {
       console.log(error);
       //@ts-expect-error for now
