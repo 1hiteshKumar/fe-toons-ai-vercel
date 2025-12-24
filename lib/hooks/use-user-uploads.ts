@@ -31,6 +31,8 @@ export type Story = {
   finalShowId?: string;
   csvUrl?: string;
   styleId?: number;
+  storyFormat?: StoryFormat;
+  googleDocLink?: string;
 };
 
 export default function useUserUploads() {
@@ -218,6 +220,8 @@ export default function useUserUploads() {
           showName,
           styleId,
           csvUrl,
+          storyFormat,
+          googleDocLink,
         },
         ...prev,
       ]);
@@ -230,7 +234,7 @@ export default function useUserUploads() {
       setStyleId(null);
       setShowName("");
       setStoryFormat("Novel/Audio Script");
-      setGoogleDocLink("")
+      setGoogleDocLink("");
     } catch (error) {
       console.log(error);
       //@ts-expect-error for now

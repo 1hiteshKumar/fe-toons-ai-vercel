@@ -54,6 +54,8 @@ export default function UserStories({ stories }: { stories: Story[] }) {
             status,
             createdAt,
             finalShowId,
+            storyFormat,
+            googleDocLink,
           }) => {
             const StoryCard = (
               <div
@@ -71,8 +73,24 @@ export default function UserStories({ stories }: { stories: Story[] }) {
                   <div className="flex items-start justify-between gap-3">
                     <div className="flex-1 min-w-0">
                       <p className="font-medium text-fm-base">{showName}</p>
-                      <p className="text-sm text-fm-secondary-800 line-clamp-2 leading-relaxed mt-1">
-                        {scriptText || "No script text available"}
+                      <p className="text-xs font-bold w-84 text-fm-secondary-800 line-clamp-2 leading-relaxed mt-1">
+                        {storyFormat || "No story format"}
+                      </p>
+                      <p className="text-xs text-fm-secondary-800 line-clamp-2 leading-relaxed mt-1">
+                        {storyFormat === "Novel/Audio Script" ? (
+                          scriptText || "No script text available"
+                        ) : googleDocLink ? (
+                          <a
+                            href={googleDocLink}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className=" underline break-all"
+                          >
+                            {googleDocLink}
+                          </a>
+                        ) : (
+                          "No Google Doc link available"
+                        )}
                       </p>
                     </div>
                     <div className="shrink-0">

@@ -453,7 +453,7 @@ function UserUploadsContent() {
             ) : (
               <Input
                 id="google-doc-link"
-                label="Google Doc Link: (Make sure the link is valid and shareable.)"
+                label="Google Doc Link: (Make sure the link is valid and have ideal share permission.)"
                 type="url"
                 placeholder="Paste the Google Doc link here..."
                 value={googleDocLink}
