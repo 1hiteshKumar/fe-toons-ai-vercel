@@ -3,7 +3,7 @@ import { useDropzone } from "react-dropzone";
 import { validateUploads } from "@/server/mutations/validate-uploads";
 import { uploadCSV } from "@/server/mutations/upload-csv";
 import usePolling from "./use-polling";
-import { API_URLS, PROMPT } from "@/server/constants";
+import { API_URLS } from "@/server/constants";
 import { toast } from "sonner";
 import { addTask } from "@/server/mutations/add-task";
 import fetchShotAssets from "@/server/queries/fetch-shot-assets";
@@ -41,6 +41,9 @@ export default function useUserUploads() {
   const [loading, setLoading] = useState(false);
   const [styleId, setStyleId] = useState<number | null>(87);
   const [showName, setShowName] = useState("");
+  const [googleDocLink, setGoogleDocLink] = useState("");
+
+
   const [storyFormat, setStoryFormat] =
     useState<StoryFormat>("Novel/Audio Script");
 
@@ -81,6 +84,7 @@ export default function useUserUploads() {
                 showName,
                 //@ts-expect-error for now
                 styleId,
+                taskType: storyFormat,
               });
               setStories((prev) =>
                 prev.map((story) =>
@@ -154,15 +158,15 @@ export default function useUserUploads() {
     }
   }, []);
 
-  useEffect(() => {
-    if (stories) {
-      stories.forEach((story) => {
-        if (!story.finalShowId) {
-          pollStatus(story.validation_task_id);
-        }
-      });
-    }
-  }, [pollStatus, stories]);
+  // useEffect(() => {
+  //   if (stories) {
+  //     stories.forEach((story) => {
+  //       if (!story.finalShowId) {
+  //         pollStatus(story.validation_task_id);
+  //       }
+  //     });
+  //   }
+  // }, [pollStatus, stories]);
 
   useEffect(() => {
     if (stories.length > 0)
@@ -195,9 +199,10 @@ export default function useUserUploads() {
   };
 
   const onGenerate = async () => {
-    if (!csvUrl || !scriptText || !styleId) return;
+    if (!csvUrl || !(scriptText || googleDocLink) || !styleId) return;
 
     const validation_task_id = await validateUploads({
+      script_file_url: googleDocLink,
       script_text: scriptText,
       character_description_file_url: csvUrl,
       style_id: styleId,
@@ -267,6 +272,8 @@ export default function useUserUploads() {
     pollStatus,
     setCharacterSheetUrl,
     storyFormat,
-    setStoryFormat
+    setStoryFormat,
+    googleDocLink,
+    setGoogleDocLink,
   };
 }

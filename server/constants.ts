@@ -15,6 +15,7 @@ export const API_URLS = {
   FETCH_SHOT_ASSETS: ({ taskId = "" } = {}) =>
     `/api/workers/orchestrator/${taskId}/get_results/`,
   ADD_TASK: "/api/workers/orchestrator/",
+  ADD_TASK_EXPERIMENTATION: "/api/workers/orchestrator/experimentation/",
   EDIT_PANEL: "/api/workers/orchestrator/experimental_panel/",
   TRIGGER_VIDEO_GENERATION:
     "/api/workers/orchestrator/experimental_trigger_video_generation/",
@@ -30,6 +31,7 @@ export const TABS = [
   { id: "editor", label: "Editor" },
   { id: "publish", label: "Publish" },
 ] as const;
+
 
 export const PROMPT = `Ep 2 - Contract Marriage, Pt. 2
 

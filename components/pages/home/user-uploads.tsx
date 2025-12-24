@@ -35,7 +35,9 @@ function UserUploadsContent() {
     setShowName,
     setCharacterSheetUrl,
     storyFormat,
-    setStoryFormat
+    setStoryFormat,
+    googleDocLink,
+    setGoogleDocLink
   } = useUserUploads();
 
   const {
@@ -62,7 +64,6 @@ function UserUploadsContent() {
   
   const [isStoryFormatDropdownOpen, setStoryFormatDropdownOpen] =
     useState(false);
-  const [googleDocLink, setGoogleDocLink] = useState("");
   const storyFormatDropdownRef = useRef<HTMLDivElement>(null);
   const storyFormatTriggerRef = useRef<HTMLButtonElement>(null);
 

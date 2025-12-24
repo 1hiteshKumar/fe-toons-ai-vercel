@@ -114,10 +114,15 @@ export type ShotGrouped = {
   scene_beat_id: string;
   shots: PanelItem[];
 };
-export type StoryFormat =
-  | "Novel/Audio Script"
-  | "Panel Wise Screenplay"
-  | "Unified JSON";
+
+export const STORY_FORMAT_KEY_MAP = {
+  "Novel/Audio Script": "script",
+  "Panel Wise Screenplay": "screenplay",
+  "Unified JSON": "unified_json",
+} as const;
+
+export type StoryFormat = keyof typeof STORY_FORMAT_KEY_MAP;
+export type StoryFormatKey = (typeof STORY_FORMAT_KEY_MAP)[StoryFormat];
 
 export type GeneratingStatus =
   | "COMPLETED"

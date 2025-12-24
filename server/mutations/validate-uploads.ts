@@ -6,6 +6,7 @@ interface UploadCSVParams {
   character_description_file_url: string;
   style_id?: number | null;
   show_name?: string;
+  script_file_url?: string;
 }
 export interface ValidateUploadsResponse {
   validation_task_id: string;
